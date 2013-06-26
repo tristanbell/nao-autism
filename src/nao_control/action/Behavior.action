@@ -1,7 +1,0 @@
-# taken from: https://github.com/barcuk/nao/blob/master/nao_components/action/Behavior.action
-# goal: the name of a behaviour installed on the nao via Choreographe
-string behavior_name
----
-# no result currently
----
-# no feedback currently 

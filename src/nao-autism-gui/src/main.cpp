@@ -2,7 +2,9 @@
 
 #include <QApplication>
 #include <QPlastiqueStyle>
-#include <nao_control/include/NaoControl.h>
+
+#include <nao_control/NaoControl.h>
+
 #include <ros/ros.h>
 
 int main(int argc, char** argv)

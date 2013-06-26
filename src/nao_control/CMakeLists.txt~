@@ -25,5 +25,5 @@ include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 add_library(nao_control ${nao-control_SRCS} ${nao-control_HDRS})
 target_link_libraries(nao_control ${catkin_LIBRARIES})
 
-install(DIRECTORY include/${PROJECT_NAME}/
+install(DIRECTORY include
         DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

@@ -1,0 +1,11 @@
+## Build/devel/install folders
+
+build
+devel
+install
+
+## C++ stuff
+bin
+
+## Linked CMakeLists.txt file
+src/CMakeLists.txt

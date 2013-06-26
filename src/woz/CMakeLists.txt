@@ -1,0 +1,31 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(woz)
+
+find_package(catkin REQUIRED COMPONENTS roscpp roslib rostime std_msgs rosbag)
+find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
+include(${QT_USE_FILE})
+#find_package(Boost REQUIRED COMPONENTS thread)
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${QT_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
+
+catkin_package(
+   INCLUDE_DIRS include
+)
+
+set(woz_SRCS
+	src/main_window.cpp
+	src/main.cpp
+)
+set(woz_HDRS
+	include/main_window.h
+)
+
+qt4_wrap_cpp(woz_MOCS ${woz_HDRS})
+
+include_directories(include
+  ${catkin_INCLUDE_DIRS}
+)
+
+add_executable(woz ${woz_SRCS} ${woz_MOCS})
+target_link_libraries(woz ${QT_LIBRARIES} ${catkin_LIBRARIES})

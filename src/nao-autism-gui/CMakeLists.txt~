@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(nao-autism-gui)
+
+find_package(nao_control)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
+find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
+include(${QT_USE_FILE})
+
+include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${QT_INCLUDE_DIRS})
+link_directories(${catkin_LIBRARY_DIRS})
+
+set(nao-autism_SRCS
+	src/main.cpp
+	src/NaoBehavior.cpp
+	src/NaoSpeech.cpp
+	src/NaoAutismWindow.cpp
+	src/NaoGuessBox.cpp)
+
+set(nao-autism_HDRS
+	include/NaoBehavior.h
+	include/NaoSpeech.h
+	include/NaoAutismWindow.h
+	include/NaoGuessBox.h)
+
+qt4_wrap_cpp(nao-autism_MOCS ${nao-autism_HDRS})
+
+catkin_package(
+   INCLUDE_DIRS include
+)
+
+include_directories(include
+  ${catkin_INCLUDE_DIRS}
+)
+
+add_executable(nao-autism-gui ${nao-autism_SRCS} ${nao-autism_MOCS})
+target_link_libraries(nao-autism-gui ${QT_LIBRARIES} ${catkin_LIBRARIES})

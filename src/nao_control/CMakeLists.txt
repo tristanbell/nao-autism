@@ -13,10 +13,17 @@ set(nao-control_SRCS src/NaoControl.cpp)
 set(nao-control_HDRS include/NaoControl.h)
 
 ## Declare a catkin package
-catkin_package(CATKIN_DEPENDS actionlib_msgs)
+catkin_package(
+	INCLUDE_DIRS include
+	LIBRARIES ${PROJECT_NAME}
+	CATKIN_DEPENDS  actionlib_msgs
+)
 
 ## Build NaoControl
 include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
-add_executable(nao-control ${nao-control_SRCS} ${nao-control_HDRS})
-target_link_libraries(nao-control ${catkin_LIBRARIES})
+add_library(nao_control ${nao-control_SRCS} ${nao-control_HDRS})
+target_link_libraries(nao_control ${catkin_LIBRARIES})
+
+install(DIRECTORY include
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})

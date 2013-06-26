@@ -2,7 +2,7 @@
 
 #include <QApplication>
 #include <QPlastiqueStyle>
-
+#include <nao_control/include/NaoControl.h>
 #include <ros/ros.h>
 
 int main(int argc, char** argv)
@@ -22,6 +22,8 @@ int main(int argc, char** argv)
 
 	//Init ros and create relevant objects
 	ros::init(argc, argv, "nao_cntrl");
+
+	NaoControl ctr;
 
 	NaoAutismWindow window(behaviorList, speechList);
 

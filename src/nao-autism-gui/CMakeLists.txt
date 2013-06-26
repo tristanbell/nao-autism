@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(nao-autism-gui)
 
-find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs nao_control)
 find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 

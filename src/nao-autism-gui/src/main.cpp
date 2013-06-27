@@ -1,4 +1,4 @@
-#include <NaoAutismWindow.h>
+#include <nao_gui/NaoAutismWindow.h>
 
 #include <QApplication>
 #include <QPlastiqueStyle>
@@ -7,27 +7,44 @@
 
 #include <ros/ros.h>
 
+#include <vector>
+
+using namespace std;
+
 int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
 	app.setStyle(new QPlastiqueStyle);
 
-	//Create behavior objects
-	QList<NaoBehavior>* behaviorList = new QList<NaoBehavior>;
+	vector<NaoBehavior> behaviors;
 
-	behaviorList->insert(0, NaoBehavior("Sit down", "sit_down"));
+	vector<NaoSpeech> happySpeeches;
 
-	//Create speech objects
-	QList<NaoSpeech>* speechList = new QList<NaoSpeech>;
+	happySpeeches.push_back(NaoSpeech("Correct - Generic", "Well done! You guessed correctly."));
+	happySpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was happy!"));
 
-	speechList->insert(0, NaoSpeech("Well done", "Well done you are correct!"));
+	NaoBehavior happy("Happy", "stand_up", happySpeeches);
+
+	vector<NaoSpeech> sadSpeeches;
+
+	sadSpeeches.push_back(NaoSpeech("Correct - Generic", "Well done! You guessed correctly."));
+	sadSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was sad!"));
+
+	NaoBehavior sad("Sad", "sit_down", sadSpeeches);
+
+	behaviors.push_back(happy);
+	behaviors.push_back(sad);
 
 	//Init ros and create relevant objects
 	ros::init(argc, argv, "nao_cntrl");
 
-	NaoControl ctr;
+	nao_control::NaoControl cntr;
 
-	NaoAutismWindow window(behaviorList, speechList);
+	cntr.say("Hello!");
+
+	ROS_INFO("Initialisng NaoControl.");
+
+	nao_gui::NaoAutismWindow window(behaviors);
 
 	return app.exec();
 }

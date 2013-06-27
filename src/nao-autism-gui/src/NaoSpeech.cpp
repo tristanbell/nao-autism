@@ -1,5 +1,7 @@
 #include <NaoSpeech.h>
 
+#include <ros/ros.h>
+
 NaoSpeech::NaoSpeech(QString name, QString speech)
 {
 	qName = name;

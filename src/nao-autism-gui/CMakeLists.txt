@@ -18,8 +18,8 @@ set(nao-autism_SRCS
 set(nao-autism_HDRS
 	include/NaoBehavior.h
 	include/NaoSpeech.h
-	include/NaoAutismWindow.h
-	include/NaoGuessBox.h)
+	include/nao_gui/NaoAutismWindow.h
+	include/nao_gui/NaoGuessBox.h)
 
 qt4_wrap_cpp(nao-autism_MOCS ${nao-autism_HDRS})
 

@@ -30,5 +30,4 @@ private:
 
 };
 
-
 #endif /* NAOSPEECH_H_ */

@@ -9,8 +9,8 @@ find_package(Boost REQUIRED COMPONENTS system)
 add_action_files(DIRECTORY action FILES Behavior.action)
 generate_messages(DEPENDENCIES actionlib_msgs std_msgs)
 
-set(nao-control_SRCS src/NaoControl.cpp)
-set(nao-control_HDRS include/NaoControl.h)
+set(nao-control_SRCS src/nao_control/NaoControl.cpp)
+set(nao-control_HDRS include/nao_control/NaoControl.h)
 
 ## Declare a catkin package
 catkin_package(

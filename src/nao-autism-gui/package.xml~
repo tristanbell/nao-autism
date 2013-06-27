@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package>
+  <name>nao-autism-gui</name>
+  <version>0.0.0</version>
+  <description>The nao-autism-gui package</description>
+
+  <maintainer email="alex@todo.todo">alex</maintainer>
+
+  <license>	</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>libqt4-dev</build_depend>
+  <build_depend>qt4-qmake</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>nao_control</build_depend>
+
+  <run_depend>libqt4</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+
+  <export>
+
+  </export>
+</package>

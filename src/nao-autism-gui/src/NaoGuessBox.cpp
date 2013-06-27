@@ -130,8 +130,6 @@ void nao_gui::NaoGuessBox::setSpeechInfoLabel(NaoSpeech speech)
 
 void nao_gui::NaoGuessBox::behaviorComboBoxChanged(QString string)
 {
-	ROS_INFO("Behavior changed.");
-
 	//Search for behavior object
 	for (int i=0;i<behaviors.size();i++){
 		NaoBehavior current = behaviors[0];
@@ -173,16 +171,12 @@ void nao_gui::NaoGuessBox::speechComboBoxChanged(QString string)
 
 void nao_gui::NaoGuessBox::behaviorButtonClicked()
 {
-	ROS_INFO("Clicked behavior button.\n");
-
 	if (currentBehavior != NULL)
 		naoControl->perform(currentBehavior->getBehaviorName());
 }
 
 void nao_gui::NaoGuessBox::speechButtonClicked()
 {
-	ROS_INFO("Clicked speech button.\n");
-
 	if (currentSpeech != NULL)
 		naoControl->say(currentSpeech->getSpeech());
 }

@@ -48,8 +48,8 @@ private:
 
 	std::vector<NaoBehavior> behaviors;
 
-	NaoBehavior* currentBehavior;
-	NaoSpeech* currentSpeech;
+	const NaoBehavior* currentBehavior;
+	const NaoSpeech* currentSpeech;
 
 	QComboBox* behaviorBox;
 	QLabel* behaviorInfoLabel;

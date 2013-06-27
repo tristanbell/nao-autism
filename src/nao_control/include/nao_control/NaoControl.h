@@ -18,8 +18,8 @@ class NaoControl{
 public:
 	NaoControl();
 
-	void say(std::string);
-	bool perform(std::string);
+	void say(const std::string);
+	bool perform(const std::string);
 
 private:
 	ros::NodeHandle nodeHandle;

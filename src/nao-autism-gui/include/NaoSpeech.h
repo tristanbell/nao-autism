@@ -17,10 +17,10 @@ class NaoSpeech
 public:
 	NaoSpeech(QString name, QString speech);
 
-	QString getQName();
-	QString getQSpeech();
+	QString getQName() const;
+	QString getQSpeech() const;
 
-	std::string getSpeech();
+	std::string getSpeech() const;
 
 private:
 	QString qName;

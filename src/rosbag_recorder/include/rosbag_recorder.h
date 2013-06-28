@@ -9,12 +9,15 @@
 
 class RosbagRecorder {
 	public:
-		RosbagRecorder();
+		RosbagRecorder(void);
+		RosbagRecorder(std::string emotion);
+		~RosbagRecorder(void);
 		void record(void);
 		//void stop(void);
 		
 	private:
 		const std::string currentDateTime(void);
+		void init(std::string foldername);
 		void recordRaw(void);
 		void recordRotations(void);
 		void recordCallback(const tf::tfMessage::ConstPtr& msg);

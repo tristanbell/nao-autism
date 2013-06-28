@@ -9,9 +9,11 @@
 
 class RosbagRecorder {
 	public:
-		RosbagRecorder();
+		RosbagRecorder(void);
+		RosbagRecorder(std::string emotion);
+		~RosbagRecorder(void);
 		void record(void);
-		void stop(void);
+		//void stop(void);
 		
 	private:
 		const std::string currentDateTime(void);

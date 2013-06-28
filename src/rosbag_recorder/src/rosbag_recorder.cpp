@@ -15,14 +15,36 @@
 RosbagRecorder::RosbagRecorder(void) : n(), listener(), rate(10.0)
 {
 	// Create folder to put bagfiles in
-	std::string foldername = currentDateTime();
+	std::string foldername = "recordings/" + currentDateTime();
+	init(foldername);
+}
+
+/**
+  * Constructor.
+  */
+RosbagRecorder::RosbagRecorder(std::string emotion) : n(), listener(), rate(10.0)
+{
+	// Create folder to put bagfiles in
+	//std::string emote(*emotion);
+	std::string foldername = "recordings/" + emotion + "-" + currentDateTime();
+	init(foldername);
+}
+
+void RosbagRecorder::init(std::string foldername)
+{
 	boost::filesystem::path dir(foldername);
-	boost::filesystem::create_directory(dir);	
+	boost::filesystem::create_directories(dir);	
 	
 	raw_bag = new rosbag::Bag(foldername + "/raw.bag", rosbag::bagmode::Write);
 	rotations_bag = new rosbag::Bag(foldername + "/rotations.bag", rosbag::bagmode::Write);
 	
 	ros::Time::init();
+}
+
+RosbagRecorder::~RosbagRecorder(void)
+{
+	delete raw_bag;
+	delete rotations_bag;
 }
 
 /**
@@ -141,10 +163,17 @@ const std::string RosbagRecorder::currentDateTime(void) {
 }
 
 
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
 	ros::init(argc, argv, "rosbag_recorder");
 	
-	RosbagRecorder recorder;
+	RosbagRecorder *recorder;
+	
+	if (argc > 1)
+		recorder = new RosbagRecorder(argv[1]);
+	else
+		recorder = new RosbagRecorder();
+	
+	recorder->record();
 
 	return 0;
 }

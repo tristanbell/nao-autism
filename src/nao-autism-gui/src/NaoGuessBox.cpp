@@ -73,10 +73,10 @@ void nao_gui::NaoGuessBox::addBehaviorsToComboBox()
 	if (behaviors.size() > 0){
 		QStringList list;
 
-		currentBehavior = &behaviors[0];
-
-		NaoBehavior current = *currentBehavior;
+		NaoBehavior current = behaviors[0];
 		setBehaviorInfoLabel(current);
+
+		currentBehavior = new NaoBehavior(current);
 
 		list.push_back(current.getQName());
 		addSpeechToComboBox(current);
@@ -104,11 +104,12 @@ void nao_gui::NaoGuessBox::addSpeechToComboBox(NaoBehavior behavior)
 	if (speeches.size() > 0){
 		QStringList list;
 
-		currentSpeech = &speeches[0];
-
 		//Do something with first speech
-		NaoSpeech current = *currentSpeech;
+		NaoSpeech current = speeches[0];
 		setSpeechInfoLabel(current);
+
+		delete currentSpeech;
+		currentSpeech = new NaoSpeech(current);
 
 		list.push_back(current.getQName());
 
@@ -129,21 +130,19 @@ void nao_gui::NaoGuessBox::setSpeechInfoLabel(NaoSpeech speech)
 
 void nao_gui::NaoGuessBox::behaviorComboBoxChanged(QString string)
 {
-	ROS_INFO("Behavior changed.");
-
 	//Search for behavior object
 	for (int i=0;i<behaviors.size();i++){
-		NaoBehavior* current = &behaviors[i];
+		NaoBehavior current = behaviors[0];
 
-		if (current->getQName() == string){
-			currentBehavior = current;
-			setBehaviorInfoLabel(*current);
+		if (current.getQName() == string){
+			delete currentBehavior;
+			currentBehavior = new NaoBehavior(current);
 
 			QAbstractItemModel* oldModel = speechBox->model();
 
-			addSpeechToComboBox(*current);
+			addSpeechToComboBox(current);
 
-			oldModel->~QAbstractItemModel();
+			delete oldModel;
 
 			break;
 		}
@@ -154,15 +153,15 @@ void nao_gui::NaoGuessBox::speechComboBoxChanged(QString string)
 {
 	//Search for speech object
 	if (currentBehavior != NULL){
-		std::vector<NaoSpeech> speeches = currentBehavior->getSpeeches();
+		const std::vector<NaoSpeech> speeches = currentBehavior->getSpeeches();
 
 		for (int i=0;i<speeches.size();i++){
-			NaoSpeech* current = &speeches[i];
+			const NaoSpeech current = speeches[0];
 
-			if (current->getQName() == string){
-				currentSpeech = current;
+			if (current.getQName() == string){
+				setSpeechInfoLabel(current);
 
-				setSpeechInfoLabel(*currentSpeech);
+				currentSpeech = new NaoSpeech(current);
 
 				break;
 			}
@@ -172,16 +171,12 @@ void nao_gui::NaoGuessBox::speechComboBoxChanged(QString string)
 
 void nao_gui::NaoGuessBox::behaviorButtonClicked()
 {
-	ROS_INFO("Clicked behavior button.\n");
-
 	if (currentBehavior != NULL)
 		naoControl->perform(currentBehavior->getBehaviorName());
 }
 
 void nao_gui::NaoGuessBox::speechButtonClicked()
 {
-	ROS_INFO("Clicked speech button.\n");
-
 	if (currentSpeech != NULL)
 		naoControl->say(currentSpeech->getSpeech());
 }

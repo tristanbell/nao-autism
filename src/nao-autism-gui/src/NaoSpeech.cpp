@@ -10,17 +10,17 @@ NaoSpeech::NaoSpeech(QString name, QString speech)
 	this->speech = speech.toStdString();
 }
 
-QString NaoSpeech::getQName()
+QString NaoSpeech::getQName() const
 {
 	return qName;
 }
 
-QString NaoSpeech::getQSpeech()
+QString NaoSpeech::getQSpeech() const
 {
 	return qSpeech;
 }
 
-std::string NaoSpeech::getSpeech()
+std::string NaoSpeech::getSpeech() const
 {
 	return speech;
 }

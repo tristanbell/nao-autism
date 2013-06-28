@@ -9,3 +9,6 @@ bin
 
 ## Linked CMakeLists.txt file
 src/CMakeLists.txt
+
+## Temp files created by gedit
+*.*~

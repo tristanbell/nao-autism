@@ -33,7 +33,7 @@ nao_control::NaoControl::NaoControl() :
 /*
  * Speaks the following message defined by the string argument.
  */
-void nao_control::NaoControl::say(std::string message)
+void nao_control::NaoControl::say(const std::string message)
 {
 	std_msgs::String msg;
 	msg.data = message;
@@ -47,7 +47,7 @@ void nao_control::NaoControl::say(std::string message)
  *
  * Returns whether the action has suceeded or not.
  */
-bool nao_control::NaoControl::perform(std::string behavior)
+bool nao_control::NaoControl::perform(const std::string behavior)
 {
 	nao_control::BehaviorGoal goal;
 

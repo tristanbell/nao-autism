@@ -21,12 +21,12 @@ class NaoBehavior
 public:
 	NaoBehavior(QString name, QString behaviorName, std::vector<NaoSpeech> naoSpeech);
 
-	QString getQName();
+	QString getQName() const;
 
-	QString getQBehaviorName();
-	std::string getBehaviorName();
+	QString getQBehaviorName() const;
+	std::string getBehaviorName() const;
 
-	std::vector<NaoSpeech> getSpeeches();
+	const std::vector<NaoSpeech>& getSpeeches() const;
 
 private:
 	QString qName;

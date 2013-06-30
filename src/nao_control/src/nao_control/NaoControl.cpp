@@ -16,6 +16,9 @@ nao_control::NaoControl::NaoControl() :
 		behaviorTimeout(20.0),
 		behaviorActionClient(BEHAVIOR_MANAGER_SERVER, true)
 {
+	previousSpeech = NULL;
+	previousBehavior = NULL;
+
 	speechPublisher = nodeHandle.advertise<std_msgs::String>(SPEECH_TOPIC_NAME, 1000);
 
 	ROS_INFO("Waiting until speech publisher is ready...");
@@ -33,12 +36,23 @@ nao_control::NaoControl::NaoControl() :
 /*
  * Speaks the following message defined by the string argument.
  */
-void nao_control::NaoControl::say(const std::string message)
+void nao_control::NaoControl::say(const std::string& message)
 {
 	std_msgs::String msg;
 	msg.data = message;
 
 	speechPublisher.publish(msg);
+
+	if (previousSpeech != NULL)
+		delete previousSpeech;
+
+	previousSpeech = new std::string(message);
+}
+
+void nao_control::NaoControl::sayPreviosSpeech()
+{
+	if (previousSpeech != NULL)
+		this->say(*previousSpeech);
 }
 
 /*
@@ -47,7 +61,7 @@ void nao_control::NaoControl::say(const std::string message)
  *
  * Returns whether the action has suceeded or not.
  */
-bool nao_control::NaoControl::perform(const std::string behavior)
+bool nao_control::NaoControl::perform(const std::string& behavior)
 {
 	nao_control::BehaviorGoal goal;
 
@@ -55,7 +69,20 @@ bool nao_control::NaoControl::perform(const std::string behavior)
 	actionlib::SimpleClientGoalState state
 			= behaviorActionClient.sendGoalAndWait(goal, behaviorTimeout);
 
+	if (previousBehavior != NULL)
+		delete previousBehavior;
+
+	previousBehavior = new std::string(behavior);
+
 	return state == state.SUCCEEDED;
+}
+
+bool nao_control::NaoControl::performPreviosBehavior()
+{
+	if (previousBehavior == NULL)
+		return false;
+
+	return this->perform(*previousBehavior);
 }
 
 //TESTING PURPOSES ONLY!

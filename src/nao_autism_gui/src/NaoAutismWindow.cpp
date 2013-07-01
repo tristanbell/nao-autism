@@ -1,5 +1,7 @@
 #include <nao_gui/NaoAutismWindow.h>
 #include <nao_gui/NaoGuessBox.h>
+#include <nao_gui/NaoMimicBox.h>
+#include <nao_gui/GenericControlBox.h>
 
 #include <QApplication>
 #include <QWidget>
@@ -16,9 +18,13 @@ void nao_gui::NaoAutismWindow::init(std::vector<NaoBehavior>& behaviors)
 	//Init qt-based things
 	QGridLayout* layout = new QGridLayout;
 
-	NaoGuessBox* box = new NaoGuessBox(&naoControl, behaviors);
+	NaoGuessBox* guessBox = new NaoGuessBox(&naoControl, behaviors);
+	NaoMimicBox* mimicBox = new NaoMimicBox(&naoControl);
+	GenericControlBox* controlBox = new GenericControlBox(&naoControl);
 
-	layout->addWidget(box);
+	layout->addWidget(guessBox, 0, 0);
+	layout->addWidget(mimicBox, 0, 1);
+	layout->addItem(controlBox, 1, 0);
 
 	setLayout(layout);
 

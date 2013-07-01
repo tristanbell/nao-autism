@@ -19,10 +19,12 @@ public:
 	NaoControl();
 
 	void say(const std::string&);
-	void sayPreviosSpeech();
+	void sayPreviousSpeech();
 
 	bool perform(const std::string&);
-	bool performPreviosBehavior();
+	bool performPreviousBehavior();
+
+	~NaoControl();
 
 private:
 	ros::NodeHandle nodeHandle;

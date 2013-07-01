@@ -24,12 +24,27 @@ nao_control::NaoControl::NaoControl() :
 	ROS_INFO("Waiting until speech publisher is ready...");
 	ros::Rate loopRate(5);
 	while (speechPublisher.getNumSubscribers() == 0){
+		if (!nodeHandle.ok()){
+			this->~NaoControl();
+
+			return;
+		}
+
 		loopRate.sleep();
 	}
 	ROS_INFO("Speech publisher is ready.");
 
 	ROS_INFO("Waiting for behavior manager to start.");
-	behaviorActionClient.waitForServer();
+	while (!behaviorActionClient.isServerConnected()){
+		if (!nodeHandle.ok()){
+			this->~NaoControl();
+
+			return;
+		}
+
+		loopRate.sleep();
+	}
+
 	ROS_INFO("Connection made to behavior manager.");
 }
 
@@ -49,10 +64,13 @@ void nao_control::NaoControl::say(const std::string& message)
 	previousSpeech = new std::string(message);
 }
 
-void nao_control::NaoControl::sayPreviosSpeech()
+void nao_control::NaoControl::sayPreviousSpeech()
 {
-	if (previousSpeech != NULL)
-		this->say(*previousSpeech);
+	if (previousSpeech != NULL){
+		std::string speech(*previousSpeech);
+
+		this->say(speech);
+	}
 }
 
 /*
@@ -77,12 +95,19 @@ bool nao_control::NaoControl::perform(const std::string& behavior)
 	return state == state.SUCCEEDED;
 }
 
-bool nao_control::NaoControl::performPreviosBehavior()
+bool nao_control::NaoControl::performPreviousBehavior()
 {
 	if (previousBehavior == NULL)
 		return false;
 
-	return this->perform(*previousBehavior);
+	std::string behavior(*previousBehavior);
+
+	return this->perform(behavior);
+}
+
+nao_control::NaoControl::~NaoControl()
+{
+	ros::shutdown();
 }
 
 //TESTING PURPOSES ONLY!

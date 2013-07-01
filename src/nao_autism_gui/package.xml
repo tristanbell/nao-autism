@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>nao-autism-gui</name>
+  <name>nao_autism_gui</name>
   <version>0.0.0</version>
   <description>The nao-autism-gui package</description>
 

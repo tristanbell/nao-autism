@@ -9,6 +9,8 @@
 #include <boost/filesystem.hpp>
 #include <vector>
 
+bool recordingRaw, recordingRgb;
+
 /**
   * Constructor.
   */
@@ -35,7 +37,7 @@ void RosbagRecorder::init(std::string foldername)
 	boost::filesystem::create_directories(dir);	
 	
 	raw_bag = new rosbag::Bag(foldername + "/raw.bag", rosbag::bagmode::Write);
-	rotations_bag = new rosbag::Bag(foldername + "/rotations.bag", rosbag::bagmode::Write);
+	//rotations_bag = new rosbag::Bag(foldername + "/rotations.bag", rosbag::bagmode::Write);
 	
 	ros::Time::init();
 }
@@ -44,7 +46,7 @@ RosbagRecorder::~RosbagRecorder(void)
 {
 	std::cout << "Dying!" << std::endl;
 	delete raw_bag;
-	delete rotations_bag;
+	//delete rotations_bag;
 }
 
 RosbagRecorder *RosbagRecorder::createRecorder(std::string emotionName)
@@ -65,9 +67,7 @@ RosbagRecorder *RosbagRecorder::record(std::string emotionName)
 	RosbagRecorder *recorder = RosbagRecorder::createRecorder(emotionName);
 	
 	boost::thread t1(&RosbagRecorder::recordRaw, recorder);
-	//boost::thread t2(&RosbagRecorder::recordRotations, this);
-	//t1.join();
-	//t2.join();
+	boost::thread t2(&RosbagRecorder::recordRgb, recorder);
 	
 	return recorder;
 }
@@ -83,6 +83,7 @@ void RosbagRecorder::stop(void)
 void RosbagRecorder::recordRaw(void)
 {
 	ros::Subscriber sub = node.subscribe("/tf", 1000, &RosbagRecorder::recordCallback, this);
+	recordingRaw = true;
 	
 	ros::Rate rate(10.0);
 	while (!stopped) {
@@ -90,10 +91,29 @@ void RosbagRecorder::recordRaw(void)
 		rate.sleep();
 	}
 	
+	recordingRaw = false;
 	//ros::MultiThreadedSpinner spinner;
 	//spinner.spin();
 	
-	raw_bag->close();
+	if (!recordingRgb)
+		raw_bag->close();
+}
+
+void RosbagRecorder::recordRgb(void)
+{
+	ros::Subscriber sub = node.subscribe("camera/rgb/image_color", 1000, &RosbagRecorder::rgbCallback, this);
+	recordingRgb = true;
+
+	ros::Rate rate(2.5);
+	while (!stopped) {
+		ros::spinOnce();
+		rate.sleep();
+	}
+
+	recordingRgb = false;
+
+	if (!recordingRaw)
+		raw_bag->close();
 }
 
 /**
@@ -101,7 +121,7 @@ void RosbagRecorder::recordRaw(void)
   * hand-elbow, hand-shoulder, hand-head, hand-torso, elbow-shoulder, elbow-head,
   * elbow-torso. Currently unused.
   */
-void RosbagRecorder::recordRotations(void)
+/*void RosbagRecorder::recordRotations(void)
 {
 	while (node.ok()) {
 		std::vector<tf::StampedTransform> transforms(14);
@@ -147,7 +167,7 @@ void RosbagRecorder::recordRotations(void)
 	}
         
 	rotations_bag->close();
-}
+}*/
 
 /**
   * Called by RosbagRecorder::recordRaw(). Gets a tf::tfMessage (generated
@@ -161,6 +181,11 @@ void RosbagRecorder::recordCallback(const tf::tfMessage::ConstPtr& msg)
 	if (fullTransform.child_frame_id.find("camera") == std::string::npos) {
         raw_bag->write("/tf", ros::Time::now(), *msg);
 	}
+}
+
+void RosbagRecorder::rgbCallback(const sensor_msgs::Image::ConstPtr& msg)
+{
+	raw_bag->write("camera/rgb/image_raw", ros::Time::now(), *msg);
 }
 
 /**
@@ -188,11 +213,8 @@ int main(int argc, char *argv[]) {
 		
 	
 	RosbagRecorder *recorder = RosbagRecorder::record("happy");
-	sleep(5);
+	sleep(30);
 	recorder->stop();
-	RosbagRecorder *recorder2 = RosbagRecorder::record("sad");
-	sleep(5);
-	recorder2->stop();
 	
 	std::cout << "Program finished." << std::endl;
 

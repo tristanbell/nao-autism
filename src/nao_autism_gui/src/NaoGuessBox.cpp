@@ -108,7 +108,9 @@ void nao_gui::NaoGuessBox::addSpeechToComboBox(NaoBehavior behavior)
 		NaoSpeech current = speeches[0];
 		setSpeechInfoLabel(current);
 
-		delete currentSpeech;
+		if (currentSpeech != NULL)
+			delete currentSpeech;
+
 		currentSpeech = new NaoSpeech(current);
 
 		list.push_back(current.getQName());
@@ -132,7 +134,7 @@ void nao_gui::NaoGuessBox::behaviorComboBoxChanged(QString string)
 {
 	//Search for behavior object
 	for (int i=0;i<behaviors.size();i++){
-		NaoBehavior current = behaviors[0];
+		NaoBehavior current = behaviors[i];
 
 		if (current.getQName() == string){
 			delete currentBehavior;
@@ -156,11 +158,12 @@ void nao_gui::NaoGuessBox::speechComboBoxChanged(QString string)
 		const std::vector<NaoSpeech> speeches = currentBehavior->getSpeeches();
 
 		for (int i=0;i<speeches.size();i++){
-			const NaoSpeech current = speeches[0];
+			const NaoSpeech current = speeches[i];
 
-			if (current.getQName() == string){
+			if (current.getQName().compare(string) == 0){
 				setSpeechInfoLabel(current);
 
+				delete currentSpeech;
 				currentSpeech = new NaoSpeech(current);
 
 				break;

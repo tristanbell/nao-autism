@@ -30,19 +30,13 @@ int main(int argc, char** argv)
 	sadSpeeches.push_back(NaoSpeech("Correct - Generic", "Well done! You guessed correctly."));
 	sadSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was sad!"));
 
-	NaoBehavior sad("Sad", "sit_down", sadSpeeches);
+	NaoBehavior sad("Sad", "wipe_brow", sadSpeeches);
 
 	behaviors.push_back(happy);
 	behaviors.push_back(sad);
 
 	//Init ros and create relevant objects
 	ros::init(argc, argv, "nao_cntrl");
-
-	nao_control::NaoControl cntr;
-
-	cntr.say("Hello!");
-
-	ROS_INFO("Initialisng NaoControl.");
 
 	nao_gui::NaoAutismWindow window(behaviors);
 

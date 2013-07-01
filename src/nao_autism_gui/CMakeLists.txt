@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(nao-autism-gui)
+project(nao_autism_gui)
 
 find_package(catkin REQUIRED COMPONENTS roscpp std_msgs nao_control)
 find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
@@ -13,13 +13,17 @@ set(nao-autism_SRCS
 	src/NaoBehavior.cpp
 	src/NaoSpeech.cpp
 	src/NaoAutismWindow.cpp
-	src/NaoGuessBox.cpp)
+	src/NaoGuessBox.cpp
+	src/NaoMimicBox.cpp
+	src/GenericControlBox.cpp)
 
 set(nao-autism_HDRS
 	include/NaoBehavior.h
 	include/NaoSpeech.h
 	include/nao_gui/NaoAutismWindow.h
-	include/nao_gui/NaoGuessBox.h)
+	include/nao_gui/NaoGuessBox.h
+	include/nao_gui/NaoMimicBox.h
+	include/nao_gui/GenericControlBox.h)
 
 qt4_wrap_cpp(nao-autism_MOCS ${nao-autism_HDRS})
 

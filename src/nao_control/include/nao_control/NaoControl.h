@@ -18,8 +18,13 @@ class NaoControl{
 public:
 	NaoControl();
 
-	void say(const std::string);
-	bool perform(const std::string);
+	void say(const std::string&);
+	void sayPreviousSpeech();
+
+	bool perform(const std::string&);
+	bool performPreviousBehavior();
+
+	~NaoControl();
 
 private:
 	ros::NodeHandle nodeHandle;
@@ -28,6 +33,9 @@ private:
 
 	ros::Duration behaviorTimeout;
 	actionlib::SimpleActionClient<nao_control::BehaviorAction> behaviorActionClient;
+
+	std::string* previousBehavior;
+	std::string* previousSpeech;
 };
 
 }

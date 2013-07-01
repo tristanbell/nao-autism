@@ -73,6 +73,14 @@ void nao_control::NaoControl::sayPreviousSpeech()
 	}
 }
 
+const std::string nao_control::NaoControl::getPreviousSpeech()
+{
+	if (previousSpeech == NULL)
+		return "";
+
+	return *previousSpeech;
+}
+
 /*
  * Performs the following behavior defined by the string argument. It will
  * wait until the behavior has been fully executed.
@@ -103,6 +111,14 @@ bool nao_control::NaoControl::performPreviousBehavior()
 	std::string behavior(*previousBehavior);
 
 	return this->perform(behavior);
+}
+
+const std::string nao_control::NaoControl::getPreviousBehavior()
+{
+	if (previousBehavior == NULL)
+		return "";
+
+	return *previousBehavior;
 }
 
 nao_control::NaoControl::~NaoControl()

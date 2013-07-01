@@ -20,9 +20,11 @@ public:
 
 	void say(const std::string&);
 	void sayPreviousSpeech();
+	const std::string getPreviousSpeech();
 
 	bool perform(const std::string&);
 	bool performPreviousBehavior();
+	const std::string getPreviousBehavior();
 
 	~NaoControl();
 

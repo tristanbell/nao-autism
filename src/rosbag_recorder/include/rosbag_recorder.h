@@ -9,24 +9,26 @@
 
 class RosbagRecorder {
 	public:
-		RosbagRecorder(void);
-		RosbagRecorder(std::string emotion);
+		static RosbagRecorder *createRecorder(std::string emotionName);
 		~RosbagRecorder(void);
-		void record(void);
-		//void stop(void);
+		static RosbagRecorder *record(std::string emotionName);
+		void stop(void);
 		
 	private:
+		RosbagRecorder(void);
+		RosbagRecorder(std::string emotion);
 		const std::string currentDateTime(void);
 		void init(std::string foldername);
 		void recordRaw(void);
 		void recordRotations(void);
 		void recordCallback(const tf::tfMessage::ConstPtr& msg);
 		
-		ros::NodeHandle n;
+		ros::NodeHandle node;
 		tf::TransformListener listener;
 		ros::Rate rate;
 		rosbag::Bag *raw_bag;
 		rosbag::Bag *rotations_bag;
+		bool stopped;
 };
 
 #endif

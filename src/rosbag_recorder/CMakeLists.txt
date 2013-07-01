@@ -112,11 +112,9 @@ include_directories(include
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
+ install(DIRECTORY include/
+   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+ )
 
 #############
 ## Testing ##
@@ -134,4 +132,7 @@ include_directories(include
 
 add_executable(rosbag_recorder src/rosbag_recorder.cpp)
 target_link_libraries(rosbag_recorder ${catkin_LIBRARIES})
+
+add_library(recorder_library src/rosbag_recorder.cpp)
+target_link_libraries(recorder_library ${catkin_LIBRARIES})
 

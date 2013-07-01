@@ -65,7 +65,7 @@ private:
 	void setBehaviorInfoLabel(NaoBehavior);
 	void setSpeechInfoLabel(NaoSpeech);
 
-public slots:
+public Q_SLOTS:
 	//Combobox slots
 	void behaviorComboBoxChanged(QString);
 	void speechComboBoxChanged(QString);

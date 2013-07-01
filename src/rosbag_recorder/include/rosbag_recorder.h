@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 #include <rosbag/bag.h>
-#include <tf/transform_listener.h>
+//#include <tf/transform_listener.h>
 #include <tf/tfMessage.h>
 #include <string>
 #include <sensor_msgs/Image.h>
@@ -27,7 +27,7 @@ class RosbagRecorder {
 		void rgbCallback(const sensor_msgs::Image::ConstPtr& msg);
 		
 		ros::NodeHandle node;
-		tf::TransformListener listener;
+		//tf::TransformListener listener;
 		ros::Rate rate;
 		rosbag::Bag *raw_bag;
 		//rosbag::Bag *rotations_bag;

@@ -49,7 +49,8 @@ find_package(Boost REQUIRED)
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
+	INCLUDE_DIRS include
+	LIBRARIES ${PROJECT_NAME}
 #  LIBRARIES learning_tf
 #  CATKIN_DEPENDS roscpp rospy tf turtlesim
 #  DEPENDS system_lib
@@ -112,9 +113,9 @@ include_directories(include
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
- install(DIRECTORY include/
-   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
- )
+# install(DIRECTORY include/
+#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+# )
 
 #############
 ## Testing ##
@@ -130,9 +131,12 @@ include_directories(include
 # catkin_add_nosetests(test)
 
 
-add_executable(rosbag_recorder src/rosbag_recorder.cpp)
+add_executable(run_rosbag_recorder src/rosbag_recorder.cpp)
+target_link_libraries(run_rosbag_recorder ${catkin_LIBRARIES})
+
+add_library(rosbag_recorder src/rosbag_recorder.cpp include/rosbag_recorder.h)
 target_link_libraries(rosbag_recorder ${catkin_LIBRARIES})
 
-add_library(recorder_library src/rosbag_recorder.cpp)
-target_link_libraries(recorder_library ${catkin_LIBRARIES})
+install(DIRECTORY include/
+        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
 

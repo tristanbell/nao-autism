@@ -42,7 +42,7 @@ private:
 
 	void init();
 
-private slots:
+private Q_SLOTS:
 	void promptButtonPressed();
 	void correctButtonPressed();
 	void incorrectButtonPressed();

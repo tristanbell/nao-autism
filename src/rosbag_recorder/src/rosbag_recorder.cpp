@@ -14,7 +14,7 @@ bool recordingRaw, recordingRgb;
 /**
   * Constructor.
   */
-RosbagRecorder::RosbagRecorder(void) : node(), listener(), rate(10.0)
+RosbagRecorder::RosbagRecorder(void) : node(), rate(10.0)
 {
 	// Create folder to put bagfiles in
 	std::string foldername = "recordings/" + currentDateTime();
@@ -24,7 +24,7 @@ RosbagRecorder::RosbagRecorder(void) : node(), listener(), rate(10.0)
 /**
   * Constructor.
   */
-RosbagRecorder::RosbagRecorder(std::string emotion) : node(), listener(), rate(10.0)
+RosbagRecorder::RosbagRecorder(std::string emotion) : node(), rate(10.0)
 {
 	// Create folder to put bagfiles in
 	std::string foldername = "recordings/" + emotion + "-" + currentDateTime();

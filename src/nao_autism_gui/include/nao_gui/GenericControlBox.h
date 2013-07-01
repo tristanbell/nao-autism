@@ -8,6 +8,8 @@
 #ifndef GENERICCONTROLBOX_H_
 #define GENERICCONTROLBOX_H_
 
+#include <rosbag_recorder/rosbag_recorder.h>
+
 #include <nao_control/NaoControl.h>
 
 #include <QGridLayout>
@@ -28,11 +30,16 @@ public:
 private:
 	nao_control::NaoControl* naoControl;
 
+	RosbagRecorder* currentRecorder;
+
 	void init();
 
-private slots:
+private Q_SLOTS:
 	void performPreviousSpeechClicked();
 	void performPreviousBehaviorClicked();
+
+	void startRecordingClicked();
+	void endRecordingClicked();
 
 };
 

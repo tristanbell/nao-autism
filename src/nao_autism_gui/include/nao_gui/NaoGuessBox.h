@@ -9,6 +9,7 @@
 #define NAOGUESSBOX_H_
 
 #include <nao_control/NaoControl.h>
+#include <nao_gui/NaoAutismWindow.h>
 #include <NaoBehavior.h>
 #include <NaoSpeech.h>
 
@@ -73,6 +74,10 @@ public Q_SLOTS:
 	//Button slots
 	void behaviorButtonClicked();
 	void speechButtonClicked();
+
+Q_SIGNALS:
+	void behaviorPerformed();
+	void speechPerformed();
 
 };
 

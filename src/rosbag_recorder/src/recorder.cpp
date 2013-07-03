@@ -44,8 +44,7 @@ void Recorder::record(std::string emotionName)
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "recorder");
 
-	Recorder *rec = Recorder::record("happy");
-	delete rec;
+	Recorder::record("happy");
 
 	return recorderResult;
 }

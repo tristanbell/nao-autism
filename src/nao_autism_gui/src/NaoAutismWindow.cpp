@@ -8,7 +8,6 @@
 #include <QGridLayout>
 
 nao_gui::NaoAutismWindow::NaoAutismWindow(std::vector<NaoBehavior>& behaviors)
-	: naoControl()
 {
 	init(behaviors);
 }
@@ -18,22 +17,24 @@ void nao_gui::NaoAutismWindow::init(std::vector<NaoBehavior>& behaviors)
 	//Init qt-based things
 	QGridLayout* layout = new QGridLayout;
 
-	NaoGuessBox* guessBox = new NaoGuessBox(&naoControl, behaviors);
-	NaoMimicBox* mimicBox = new NaoMimicBox(&naoControl);
-	GenericControlBox* controlBox = new GenericControlBox(&naoControl);
+	NaoGuessBox* guessBox = new NaoGuessBox(behaviors);
+	NaoMimicBox* mimicBox = new NaoMimicBox(behaviors);
+	//GenericControlBox* controlBox = new GenericControlBox(&naoControl);
 
 	//Hook up relevant slots and signals
+
+	/*
 	QObject::connect(guessBox, SIGNAL(behaviorPerformed()),
 			controlBox, SLOT(onBehaviorPerformed()));
 
 	QObject::connect(guessBox, SIGNAL(speechPerformed()),
 			controlBox, SLOT(onSpeechPerformed()));
 	QObject::connect(mimicBox, SIGNAL(speechPerformed()),
-			controlBox, SLOT(onSpeechPerformed()));
+			controlBox, SLOT(onSpeechPerformed()));*/
 
 	layout->addWidget(guessBox, 0, 0);
 	layout->addWidget(mimicBox, 0, 1);
-	layout->addItem(controlBox, 1, 0);
+	//layout->addItem(controlBox, 1, 0);
 
 	setLayout(layout);
 

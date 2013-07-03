@@ -17,6 +17,8 @@
 #include <QString>
 #include <QLabel>
 #include <QComboBox>
+#include <QTimer>
+#include <QPushButton>
 
 #include <vector>
 
@@ -35,9 +37,8 @@ class NaoGuessBox : public QGroupBox
 	Q_OBJECT
 
 public:
-	NaoGuessBox(nao_control::NaoControl* naoControl, std::vector<NaoBehavior>& behaviors)
+	NaoGuessBox(std::vector<NaoBehavior>& behaviors) : naoControl()
 	{
-		this->naoControl=naoControl;
 		this->behaviors=behaviors;
 
 		setTitle(TITLE);
@@ -45,7 +46,7 @@ public:
 	}
 
 private:
-	nao_control::NaoControl* naoControl;
+	nao_control::NaoControl naoControl;
 
 	std::vector<NaoBehavior> behaviors;
 
@@ -61,15 +62,15 @@ private:
 	void init();
 
 	void addBehaviorsToComboBox();
-	void addSpeechToComboBox(NaoBehavior);
+	void addSpeechToComboBox(const NaoBehavior&);
 
-	void setBehaviorInfoLabel(NaoBehavior);
-	void setSpeechInfoLabel(NaoSpeech);
+	void setBehaviorInfoLabel(const NaoBehavior&);
+	void setSpeechInfoLabel(const NaoSpeech&);
 
 public Q_SLOTS:
 	//Combobox slots
-	void behaviorComboBoxChanged(QString);
-	void speechComboBoxChanged(QString);
+	void behaviorComboBoxChanged(const QString&);
+	void speechComboBoxChanged(const QString&);
 
 	//Button slots
 	void behaviorButtonClicked();

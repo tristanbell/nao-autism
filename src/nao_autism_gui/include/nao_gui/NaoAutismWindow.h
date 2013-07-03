@@ -28,8 +28,6 @@ public:
 	NaoAutismWindow(std::vector<NaoBehavior>&);
 
 private:
-	nao_control::NaoControl naoControl;
-
 	void init(std::vector<NaoBehavior>&);
 
 };

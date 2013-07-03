@@ -14,6 +14,7 @@
 
 #include <QPushButton>
 #include <QGridLayout>
+#include <QTimer>
 
 namespace nao_gui{
 
@@ -37,7 +38,8 @@ private:
 	QPushButton* performPreviousSpeechBtn;
 
 	QPushButton* startRecordBtn;
-	QPushButton* endRecordBtn;
+
+	QTimer* recordingTimer;
 
 	void init();
 
@@ -49,7 +51,7 @@ private Q_SLOTS:
 	void onSpeechPerformed();
 
 	void startRecordingClicked();
-	void endRecordingClicked();
+	void onRecordingStopped();
 
 };
 

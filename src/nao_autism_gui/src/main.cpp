@@ -19,7 +19,7 @@ void tfCallback(const tf::tfMessage msg);
 
 bool ready = false;
 
-const string MIMIC_ME_1 = "Mimic me";
+const string MIMIC_ME_1 = "Hey copy me";
 const string WELL_DONE_SPEECH = "Well done";
 
 QString HAPPY_BEHAVIOR = "happy_1";
@@ -37,33 +37,59 @@ int main(int argc, char** argv)
 	//Init ros
 	ros::init(argc, argv, "nao_cntrl");
 
-	init();
+	//init();
 
 	QApplication app(argc, argv);
 	app.setStyle(new QPlastiqueStyle);
+
+	NaoSpeech correctGeneric("Correct - Generic", "Well done! You guessed correctly.");
+	NaoSpeech tryAgainGeneric("Try again - Generic", "Try again");
+	NaoSpeech incorrectGeneric("Incorrect - Generic", "Lets try another");
 
 	vector<NaoBehavior> behaviors;
 
 	vector<NaoSpeech> happySpeeches;
 
-	happySpeeches.push_back(NaoSpeech("Correct - Generic", "Well done! You guessed correctly."));
+	happySpeeches.push_back(correctGeneric);
 	happySpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was happy!"));
+	happySpeeches.push_back(tryAgainGeneric);
+	happySpeeches.push_back(incorrectGeneric);
 
 	NaoBehavior happy("Happy", HAPPY_BEHAVIOR, happySpeeches);
 
 	vector<NaoSpeech> sadSpeeches;
 
-	sadSpeeches.push_back(NaoSpeech("Correct - Generic", "Well done! You guessed correctly."));
+	sadSpeeches.push_back(correctGeneric);
 	sadSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was sad!"));
+	sadSpeeches.push_back(tryAgainGeneric);
+	sadSpeeches.push_back(incorrectGeneric);
 
 	NaoBehavior sad("Sad", SAD_BEHAVIOR, sadSpeeches);
 
+	vector<NaoSpeech> scaredSpeeches;
+
+	scaredSpeeches.push_back(correctGeneric);
+	scaredSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was scared!"));
+	scaredSpeeches.push_back(tryAgainGeneric);
+	scaredSpeeches.push_back(incorrectGeneric);
+
+	NaoBehavior scared("Scared", SCARED_BEHAVIOR, scaredSpeeches);
+
+	NaoBehavior util("Util", "stand_up", scaredSpeeches);
+
 	behaviors.push_back(happy);
 	behaviors.push_back(sad);
+	behaviors.push_back(scared);
+	behaviors.push_back(util);
 
 	nao_gui::NaoAutismWindow window(behaviors);
 
 	return app.exec();
+}
+
+vector<NaoSpeech>& generateBaseStruct(NaoBehavior behavior, int& tryAgainStart, int& incorrectStart)
+{
+
 }
 
 void init()

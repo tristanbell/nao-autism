@@ -68,15 +68,39 @@ private:
 	void init();
 
 private:
+	/**
+	 * This function will load the necessary NaoBehavior objects stored
+	 * inside the NaoBehavior vector into the behavior combobox. It also updates
+	 * the behavior information label by calling the setBehaviorInfoLabel(NaoBehavior&) function.
+	 */
 	void fillBehaviorComboBox();
+
+	/**
+	 * Updates the behavior information label to store the correct information about the currently
+	 * selected behavior (namely, it's name).
+	 */
 	void setBehaviorInfoLabel(NaoBehavior&);
 
+	/**
+	 * Re-enables the relevant buttons when either the correct or incorrect buttons are clicked.
+	 */
 	void handleAnswerGiven();
 
 private Q_SLOTS:
+	/*
+	 * This slot is called when the index in the behavior combobox is changed.
+	 * It will change the currentBehavior pointer to point to the currently selected
+	 * behavior and update the behavior information label (by calling the setBehaviorInfoLabel(NaoBehavior&)
+	 * function where the reference to the NaoBehavior is the currently selected behavior).
+	 */
 	void behaviorComboBoxChanged(const QString&);
-	void behaviorButtonClicked();
 
+	/*
+	 * The following slots are called when the relevant buttons are clicked.
+	 * Each one will enable/disable certain buttons to 'guide' the user
+	 * through the mimic process. This, hopefully, makes it much easier for the user.
+	 */
+	void behaviorButtonClicked();
 	void promptButtonPressed();
 	void correctButtonPressed();
 	void incorrectButtonPressed();

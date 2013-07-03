@@ -37,11 +37,13 @@ int main(int argc, char** argv)
 	//Init ros
 	ros::init(argc, argv, "nao_cntrl");
 
+	//Prompt child to strike certain pose to initialise openni_tracker
 	//init();
 
 	QApplication app(argc, argv);
 	app.setStyle(new QPlastiqueStyle);
 
+	//Create relevant NaoSpeech and NaoBehavior objects for application
 	NaoSpeech correctGeneric("Correct - Generic", "Well done! You guessed correctly.");
 	NaoSpeech tryAgainGeneric("Try again - Generic", "Try again");
 	NaoSpeech incorrectGeneric("Incorrect - Generic", "Lets try another");
@@ -82,14 +84,10 @@ int main(int argc, char** argv)
 	behaviors.push_back(scared);
 	behaviors.push_back(util);
 
+	//Init window and execute application
 	nao_gui::NaoAutismWindow window(behaviors);
 
 	return app.exec();
-}
-
-vector<NaoSpeech>& generateBaseStruct(NaoBehavior behavior, int& tryAgainStart, int& incorrectStart)
-{
-
 }
 
 void init()
@@ -100,13 +98,14 @@ void init()
 
 	NaoControl control;
 
+	//
 	control.perform(STAND_UP_BEHAVIOR);
 
-	//Prompt
+	//Prompt child to strike standard pose for calibrating openni_tracker
 	control.say(MIMIC_ME_1);
 	control.perform(ARMS_UP_BEHAVIOR);
 
-	//Check for tf messages
+	//Create subscriber to the tf topic
 	ros::NodeHandle handle;
 	ros::Subscriber subscriber = handle.subscribe("/tf", 1, tfCallback);
 
@@ -138,12 +137,14 @@ void init()
 
 	ROS_INFO("Initialising done.");
 
+	//Congratulate child and go back to standard pose
 	control.say(WELL_DONE_SPEECH);
 	control.perform(INIT_BEHAVIOR);
 }
 
 void tfCallback(const tf::tfMessage msg)
 {
+	//Allow for application to continue when message containing tf for head_1 is recieved.
 	geometry_msgs::TransformStamped transform = msg.transforms[0];
 	if (transform.child_frame_id.find("head_1") != std::string::npos){
 		ROS_INFO("/tf is now publishing, ready to go.");

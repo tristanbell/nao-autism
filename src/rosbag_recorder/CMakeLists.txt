@@ -131,10 +131,10 @@ include_directories(include
 # catkin_add_nosetests(test)
 
 
-add_executable(run_rosbag_recorder src/rosbag_recorder.cpp)
+add_executable(run_rosbag_recorder src/recorder.cpp)
 target_link_libraries(run_rosbag_recorder ${catkin_LIBRARIES})
 
-add_library(rosbag_recorder src/rosbag_recorder.cpp include/rosbag_recorder.h)
+add_library(rosbag_recorder src/recorder.cpp include/recorder.h)
 target_link_libraries(rosbag_recorder ${catkin_LIBRARIES})
 
 install(DIRECTORY include/

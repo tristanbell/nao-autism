@@ -22,9 +22,11 @@ class RosbagRecorder {
 		void init(std::string foldername);
 		void recordRaw(void);
 		void recordRgb(void);
+		void recordPointCloud(void);
 		//void recordRotations(void);
 		void recordCallback(const tf::tfMessage::ConstPtr& msg);
 		void rgbCallback(const sensor_msgs::Image::ConstPtr& msg);
+		void pointCloudCallback(const sensor_msgs::Image::ConstPtr& msg);
 		
 		ros::NodeHandle node;
 		//tf::TransformListener listener;

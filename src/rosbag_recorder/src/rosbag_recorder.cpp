@@ -9,7 +9,7 @@
 #include <boost/filesystem.hpp>
 #include <vector>
 
-bool recordingRaw, recordingRgb;
+bool recordingRaw, recordingRgb, bagClosed;
 
 /**
   * Constructor.
@@ -92,11 +92,11 @@ void RosbagRecorder::recordRaw(void)
 	}
 	
 	recordingRaw = false;
-	//ros::MultiThreadedSpinner spinner;
-	//spinner.spin();
 	
-	if (!recordingRgb)
+	if (!recordingRgb && !bagClosed) {
 		raw_bag->close();
+		bagClosed = true;
+	}
 }
 
 void RosbagRecorder::recordRgb(void)
@@ -104,7 +104,7 @@ void RosbagRecorder::recordRgb(void)
 	ros::Subscriber sub = node.subscribe("camera/rgb/image_color", 1000, &RosbagRecorder::rgbCallback, this);
 	recordingRgb = true;
 
-	ros::Rate rate(2.5);
+	ros::Rate rate(1);
 	while (!stopped) {
 		ros::spinOnce();
 		rate.sleep();
@@ -112,8 +112,30 @@ void RosbagRecorder::recordRgb(void)
 
 	recordingRgb = false;
 
-	if (!recordingRaw)
+	if (!recordingRaw && !bagClosed) {
 		raw_bag->close();
+		bagClosed = true;
+	}
+}
+
+void RosbagRecorder::recordPointCloud(void)
+{
+	ros::Subscriber sub = node.subscribe("camera/depth/image_raw", 1000,
+			&RosbagRecorder::pointCloudCallback, this);
+	recordingRgb = true;
+
+	ros::Rate rate(1);
+	while (!stopped) {
+		ros::spinOnce();
+		rate.sleep();
+	}
+
+	recordingRgb = false;
+
+	if (!recordingRaw && !bagClosed) {
+		raw_bag->close();
+		bagClosed = true;
+	}
 }
 
 /**
@@ -186,6 +208,11 @@ void RosbagRecorder::recordCallback(const tf::tfMessage::ConstPtr& msg)
 void RosbagRecorder::rgbCallback(const sensor_msgs::Image::ConstPtr& msg)
 {
 	raw_bag->write("camera/rgb/image_raw", ros::Time::now(), *msg);
+}
+
+void RosbagRecorder::pointCloudCallback(const sensor_msgs::Image::ConstPtr& msg)
+{
+
 }
 
 /**

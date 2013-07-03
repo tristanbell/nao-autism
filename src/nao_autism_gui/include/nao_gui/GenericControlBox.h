@@ -8,7 +8,6 @@
 #ifndef GENERICCONTROLBOX_H_
 #define GENERICCONTROLBOX_H_
 
-#include <rosbag_recorder/rosbag_recorder.h>
 #include <nao_gui/NaoAutismWindow.h>
 #include <nao_control/NaoControl.h>
 
@@ -31,8 +30,6 @@ public:
 
 private:
 	nao_control::NaoControl* naoControl;
-
-	RosbagRecorder* currentRecorder;
 
 	QPushButton* performPreviousBehaviorBtn;
 	QPushButton* performPreviousSpeechBtn;

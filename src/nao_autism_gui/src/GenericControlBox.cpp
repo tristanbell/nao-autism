@@ -29,8 +29,6 @@ void nao_gui::GenericControlBox::init()
 
 void nao_gui::GenericControlBox::onBehaviorPerformed()
 {
-	ROS_INFO("Behavior performed.");
-
 	//Allow previous behavior to be performed
 	performPreviousBehaviorBtn->setEnabled(true);
 

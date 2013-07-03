@@ -184,7 +184,5 @@ void nao_gui::NaoGuessBox::speechButtonClicked()
 {
 	if (currentSpeech != NULL){
 		naoControl.say(currentSpeech->getSpeech());
-
-		emit speechPerformed();
 	}
 }

@@ -76,10 +76,6 @@ public Q_SLOTS:
 	void behaviorButtonClicked();
 	void speechButtonClicked();
 
-Q_SIGNALS:
-	void behaviorPerformed();
-	void speechPerformed();
-
 };
 
 }

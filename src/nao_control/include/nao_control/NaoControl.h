@@ -42,6 +42,17 @@ private:
 
 	std::string* previousBehavior;
 	std::string* previousSpeech;
+
+	bool performBehaviorInternal(const std::string& behavior)
+	{
+		nao_control::BehaviorGoal goal;
+
+		goal.behavior_name = behavior;
+		actionlib::SimpleClientGoalState state
+				= behaviorActionClient.sendGoalAndWait(goal, behaviorTimeout);
+
+		return state == state.SUCCEEDED;
+	}
 };
 
 }

@@ -84,9 +84,6 @@ private Q_SLOTS:
 	void recordButtonPressed();
 	void onRecordStop();
 
-Q_SIGNALS:
-	void speechPerformed();
-
 };
 
 }

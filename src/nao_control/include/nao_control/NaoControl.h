@@ -13,6 +13,8 @@
 
 namespace nao_control{
 
+const std::string INIT_BEHAVIOR = "init";
+
 class NaoControl{
 
 public:
@@ -23,7 +25,9 @@ public:
 	const std::string getPreviousSpeech();
 
 	bool perform(const std::string&);
+	bool performWithInit(const std::string&);
 	bool performPreviousBehavior();
+	bool performPreviousBehaviorWithInit();
 	const std::string getPreviousBehavior();
 
 	~NaoControl();

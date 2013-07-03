@@ -95,12 +95,20 @@ bool nao_control::NaoControl::perform(const std::string& behavior)
 	actionlib::SimpleClientGoalState state
 			= behaviorActionClient.sendGoalAndWait(goal, behaviorTimeout);
 
-	if (previousBehavior != NULL)
-		delete previousBehavior;
+	if (behavior != INIT_BEHAVIOR){ //hacky
+		if (previousBehavior != NULL)
+			delete previousBehavior;
 
-	previousBehavior = new std::string(behavior);
+		previousBehavior = new std::string(behavior);
+	}
 
 	return state == state.SUCCEEDED;
+}
+
+bool nao_control::NaoControl::performWithInit(const std::string& behavior){
+	bool returnBool = perform(behavior);
+
+	return returnBool && perform(INIT_BEHAVIOR);
 }
 
 bool nao_control::NaoControl::performPreviousBehavior()
@@ -110,7 +118,14 @@ bool nao_control::NaoControl::performPreviousBehavior()
 
 	std::string behavior(*previousBehavior);
 
-	return this->perform(behavior);
+	return perform(behavior);
+}
+
+bool nao_control::NaoControl::performPreviousBehaviorWithInit()
+{
+	bool returnBool = performPreviousBehavior();
+
+	return returnBool && perform(INIT_BEHAVIOR);
 }
 
 const std::string nao_control::NaoControl::getPreviousBehavior()

@@ -28,7 +28,7 @@ void nao_gui::NaoGuessBox::init()
 	behaviorInfoLabel = new QLabel(BEHAVIOR_INFO_LABEL);
 
 	QPushButton* behaviorPerformButton = new QPushButton("Perform");
-	behaviorPerformButton->connect(behaviorPerformButton, SIGNAL(clicked()),
+	QObject::connect(behaviorPerformButton, SIGNAL(clicked()),
 			this, SLOT(behaviorButtonClicked()));
 
 	behaviorLayout->addWidget(behaviorLabel, 0, 0);
@@ -45,7 +45,7 @@ void nao_gui::NaoGuessBox::init()
 	speechInfoLabel = new QLabel(SPEECH_INFO_LABEL);
 
 	QPushButton* speechPerformButton = new QPushButton("Perform");
-	speechPerformButton->connect(speechPerformButton, SIGNAL(clicked()),
+	QObject::connect(speechPerformButton, SIGNAL(clicked()),
 			this, SLOT(speechButtonClicked()));
 
 	speechLayout->addWidget(speechLabel);
@@ -60,9 +60,9 @@ void nao_gui::NaoGuessBox::init()
 	addBehaviorsToComboBox();
 
 	//Connect behavior and speech box
-	behaviorBox->connect(behaviorBox, SIGNAL(currentIndexChanged(const QString&)),
+	QObject::connect(behaviorBox, SIGNAL(currentIndexChanged(const QString&)),
 			this, SLOT(behaviorComboBoxChanged(QString)));
-	speechBox->connect(speechBox, SIGNAL(currentIndexChanged(const QString&)),
+	QObject::connect(speechBox, SIGNAL(currentIndexChanged(const QString&)),
 			this, SLOT(speechComboBoxChanged(QString)));
 
 	setLayout(layout);
@@ -174,12 +174,18 @@ void nao_gui::NaoGuessBox::speechComboBoxChanged(QString string)
 
 void nao_gui::NaoGuessBox::behaviorButtonClicked()
 {
-	if (currentBehavior != NULL)
-		naoControl->perform(currentBehavior->getBehaviorName());
+	if (currentBehavior != NULL){
+		naoControl->performWithInit(currentBehavior->getBehaviorName());
+
+		emit behaviorPerformed();
+	}
 }
 
 void nao_gui::NaoGuessBox::speechButtonClicked()
 {
-	if (currentSpeech != NULL)
+	if (currentSpeech != NULL){
 		naoControl->say(currentSpeech->getSpeech());
+
+		emit speechPerformed();
+	}
 }

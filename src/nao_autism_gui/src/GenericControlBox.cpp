@@ -5,21 +5,25 @@
 
 void nao_gui::GenericControlBox::init()
 {
-	QPushButton* startRecordBtn = new QPushButton("Start recording");
-	startRecordBtn->connect(startRecordBtn, SIGNAL(clicked()),
+	startRecordBtn = new QPushButton("Start recording");
+	QObject::connect(startRecordBtn, SIGNAL(clicked()),
 			this, SLOT(startRecordingClicked()));
+	startRecordBtn->setEnabled(false);
 
-	QPushButton* endRecordBtn = new QPushButton("Stop recording");
-	endRecordBtn->connect(endRecordBtn, SIGNAL(clicked()),
+	endRecordBtn = new QPushButton("Stop recording");
+	QObject::connect(endRecordBtn, SIGNAL(clicked()),
 			this, SLOT(endRecordingClicked()));
+	endRecordBtn->setEnabled(false);
 
-	QPushButton* performPreviousBehaviorBtn = new QPushButton("Perform previous behavior");
-	performPreviousBehaviorBtn->connect(performPreviousBehaviorBtn, SIGNAL(clicked()),
+	performPreviousBehaviorBtn = new QPushButton("Perform previous behavior");
+	QObject::connect(performPreviousBehaviorBtn, SIGNAL(clicked()),
 			this, SLOT(performPreviousBehaviorClicked()));
+	performPreviousBehaviorBtn->setEnabled(false);
 
-	QPushButton* performPreviousSpeechBtn = new QPushButton("Perform previous speech");
-	performPreviousSpeechBtn->connect(performPreviousSpeechBtn, SIGNAL(clicked()),
+	performPreviousSpeechBtn = new QPushButton("Perform previous speech");
+	QObject::connect(performPreviousSpeechBtn, SIGNAL(clicked()),
 			this, SLOT(performPreviousSpeechClicked()));
+	performPreviousSpeechBtn->setEnabled(false);
 
 	addWidget(startRecordBtn, 0, 0);
 	addWidget(endRecordBtn, 0, 1);
@@ -27,11 +31,27 @@ void nao_gui::GenericControlBox::init()
 	addWidget(performPreviousSpeechBtn, 0, 4);
 }
 
+void nao_gui::GenericControlBox::onBehaviorPerformed()
+{
+	ROS_INFO("Behavior performed.");
+
+	//Allow previous behavior to be performed
+	performPreviousBehaviorBtn->setEnabled(true);
+
+	//Allow recording...
+	if (!startRecordBtn->isEnabled() && !endRecordBtn->isEnabled()){
+		startRecordBtn->setEnabled(true);
+	}
+}
+
+void nao_gui::GenericControlBox::onSpeechPerformed()
+{
+	performPreviousSpeechBtn->setEnabled(true);
+}
+
 void nao_gui::GenericControlBox::performPreviousBehaviorClicked()
 {
-	ROS_INFO("Test");
-	naoControl->performPreviousBehavior();
-	ROS_INFO("Hey!");
+	naoControl->performPreviousBehaviorWithInit();
 }
 
 void nao_gui::GenericControlBox::performPreviousSpeechClicked()
@@ -41,20 +61,24 @@ void nao_gui::GenericControlBox::performPreviousSpeechClicked()
 
 void nao_gui::GenericControlBox::startRecordingClicked()
 {
-	if (currentRecorder != NULL){
-		delete currentRecorder;
-	}
-
 	const std::string previousBehavior = naoControl->getPreviousBehavior();
 
 	if (previousBehavior != ""){
 		currentRecorder = RosbagRecorder::record(previousBehavior);
+
+		startRecordBtn->setEnabled(false);
+		endRecordBtn->setEnabled(true);
 	}
 }
 
 void nao_gui::GenericControlBox::endRecordingClicked()
 {
 	if (currentRecorder != NULL){
+		ROS_INFO("Stop.");
 		currentRecorder->stop();
+		ROS_INFO("Again, stop.");
+
+		startRecordBtn->setEnabled(true);
+		endRecordBtn->setEnabled(false);
 	}
 }

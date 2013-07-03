@@ -47,6 +47,9 @@ private Q_SLOTS:
 	void correctButtonPressed();
 	void incorrectButtonPressed();
 
+Q_SIGNALS:
+	void speechPerformed();
+
 };
 
 }

@@ -30,14 +30,20 @@ void nao_gui::NaoMimicBox::init()
 void nao_gui::NaoMimicBox::promptButtonPressed()
 {
 	naoControl->say(nao_gui::MIMIC_PROMPT);
+
+	emit speechPerformed();
 }
 
 void nao_gui::NaoMimicBox::correctButtonPressed()
 {
 	naoControl->say(nao_gui::MIMIC_CORRECT_ANSWER);
+
+	emit speechPerformed();
 }
 
 void nao_gui::NaoMimicBox::incorrectButtonPressed()
 {
 	naoControl->say(nao_gui::MIMIC_INCORRECT_ANSWER);
+
+	emit speechPerformed();
 }

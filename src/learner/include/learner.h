@@ -18,13 +18,30 @@
 class Learner
 {
 public:
-	Learner();
 	/**
 	 * Get the sum distance between two Quaternions for nearest-neighbour
 	 * calculations.
 	 */
 	static float getDistance(geometry_msgs::Quaternion rotation1,
 			geometry_msgs::Quaternion rotation2);
+
+	/**
+	 * Get the sum distance between two PoseDatas for nearest-neighbour
+	 * calculations. This only considers the distance between the Quaternion
+	 * rotation properties of each joint in a PoseData.
+	 */
+	static float getDistance(PoseData pose1, PoseData pose2);
+
+private:
+	/**
+	 * Get the Quaternion element out of a TransformStamped (just for cleaner code).
+	 */
+	static geometry_msgs::Quaternion extractRotation(geometry_msgs::TransformStamped joint);
+
+	/**
+	 * Extract all the joint rotations from a PoseData.
+	 */
+	static std::vector<geometry_msgs::Quaternion> Learner::getRotations(PoseData pose);
 
 };
 

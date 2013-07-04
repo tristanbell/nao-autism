@@ -67,6 +67,25 @@ private:
 
 	void init();
 
+	/*
+	 * The following writes to the timestamps.log file, the format for each entry is
+	 * the following:
+	 *
+	 * [TIMESTAMP] NAME PAREMETER_LIST
+	 *
+	 * The TIMESTAMP is of the following form: dd-mm.hh:mm:ss
+	 *
+	 * The PARAMETER_LIST is a space separated list of parameter(s) in the following
+	 * form:
+	 * 		NAME=VALUE
+	 *
+	 * The VALUE doesn't contain any type information, however, this will be hard coded into
+	 * the loading program as the 'format' isn't meant to be generic (just flexible and easy
+	 * to save and load)
+	 *
+	 * Each entry is separated by the new line character (\n)
+	 */
+
 	void writeToLogBehavior();
 	void writeToLogPrompt();
 	void writeToLogAnswer(const bool& ans);

@@ -10,6 +10,8 @@
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
 
+#include <recorder.h>
+
 #include <vector>
 
 using namespace std;
@@ -86,6 +88,10 @@ int main(int argc, char** argv)
 
 	//Init window and execute application
 	nao_gui::NaoAutismWindow window(behaviors);
+
+	//Everything is setup ok, start recording
+	ROS_INFO("Starting to record data.");
+	Recorder::record("data");
 
 	return app.exec();
 }

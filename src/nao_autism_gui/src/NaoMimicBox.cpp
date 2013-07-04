@@ -6,6 +6,8 @@
 
 #include <QGridLayout>
 
+const char* LOG_FILE_NAME = "timestamps.log";
+
 void nao_gui::NaoMimicBox::init()
 {
 	QGridLayout* layout = new QGridLayout;
@@ -39,13 +41,6 @@ void nao_gui::NaoMimicBox::init()
 			this, SLOT(incorrectButtonPressed()));
 	incorrectBtn->setEnabled(false);
 
-	recordTimer = new QTimer;
-
-	startRecordBtn = new QPushButton("Record data");
-	startRecordBtn->setEnabled(false);
-	QObject::connect(startRecordBtn, SIGNAL(clicked()),
-			this, SLOT(recordButtonPressed()));
-
 	layout->addWidget(behaviorLabel, 0, 0);
 	layout->addWidget(behaviorBox, 0, 1);
 	layout->addWidget(behaviorInfoLabel, 1, 0, 1, 2);
@@ -53,7 +48,6 @@ void nao_gui::NaoMimicBox::init()
 	layout->addWidget(promptBtn, 2, 1);
 	layout->addWidget(correctBtn, 3, 0);
 	layout->addWidget(incorrectBtn, 3, 1);
-	layout->addWidget(startRecordBtn, 4, 0);
 
 	setLayout(layout);
 }
@@ -86,12 +80,13 @@ void nao_gui::NaoMimicBox::setBehaviorInfoLabel(NaoBehavior& behavior)
 
 void nao_gui::NaoMimicBox::promptButtonPressed()
 {
+	//Write to log file
+	writeToLogPrompt();
+
 	naoControl.say(nao_gui::MIMIC_PROMPT + performedBehavior->getQName().toStdString());
 
 	promptBtn->setEnabled(false);
 	behaviorBtn->setEnabled(false);
-
-	startRecordBtn->setEnabled(true);
 
 	correctBtn->setEnabled(true);
 	incorrectBtn->setEnabled(true);
@@ -99,6 +94,9 @@ void nao_gui::NaoMimicBox::promptButtonPressed()
 
 void nao_gui::NaoMimicBox::correctButtonPressed()
 {
+	//Write to log file
+	writeToLogAnswer(true);
+
 	naoControl.say(nao_gui::MIMIC_CORRECT_ANSWER);
 
 	handleAnswerGiven();
@@ -106,6 +104,9 @@ void nao_gui::NaoMimicBox::correctButtonPressed()
 
 void nao_gui::NaoMimicBox::incorrectButtonPressed()
 {
+	//write to log file
+	writeToLogAnswer(false);
+
 	naoControl.say(nao_gui::MIMIC_INCORRECT_ANSWER);
 
 	handleAnswerGiven();
@@ -117,14 +118,15 @@ void nao_gui::NaoMimicBox::handleAnswerGiven()
 	incorrectBtn->setEnabled(false);
 
 	behaviorBtn->setEnabled(true);
-
-	startRecordBtn->setEnabled(false);
 }
 
 void nao_gui::NaoMimicBox::behaviorButtonClicked()
 {
 	naoControl.say(MIMIC_PERFORM + currentBehavior->getQName().toStdString());
 	naoControl.performWithInit(currentBehavior->getBehaviorName());
+
+	//Write to log file
+	writeToLogBehavior();
 
 	//Point to current behavior
 	performedBehavior = currentBehavior;
@@ -150,16 +152,73 @@ void nao_gui::NaoMimicBox::behaviorComboBoxChanged(const QString& string)
 	}
 }
 
-void nao_gui::NaoMimicBox::recordButtonPressed()
+void nao_gui::NaoMimicBox::writeToLogBehavior()
 {
-	recordTimer->start(20000);
+	std::ofstream stream;
 
-	startRecordBtn->setEnabled(false);
+	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
+
+	stream << "[" << getTimestamp() << "] ";
+
+	stream << "BEHAVIOR_BUTTON ";
+
+	stream << "BEHAVIOR_NAME=" << currentBehavior->getBehaviorName() << ' ';
+
+	stream << "PROMPT_ENABLED=";
+
+	if (promptBtn->isEnabled()){
+		stream << "TRUE";
+	}else{
+		stream << "FALSE";
+	}
+
+	stream << '\n';
+
+	stream.close();
 }
 
-void nao_gui::NaoMimicBox::onRecordStop()
+void nao_gui::NaoMimicBox::writeToLogPrompt()
 {
-	if (promptBtn->isEnabled() || correctBtn->isEnabled() || incorrectBtn->isEnabled()){
-		startRecordBtn->setEnabled(true);
+	std::ofstream stream;
+
+	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
+
+	stream << "[" << getTimestamp() << "] ";
+
+	stream << "PROMPT_BUTTON ";
+
+	stream << "BEHAVIOR_NAME=" << currentBehavior->getBehaviorName() << '\n';
+
+	stream.close();
+}
+
+void nao_gui::NaoMimicBox::writeToLogAnswer(const bool& ans)
+{
+	std::ofstream stream;
+
+	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
+
+	stream << "[" << getTimestamp() << "] ";
+
+	if (ans){
+		stream << "CORRECT_BUTTON ";
+	}else{
+		stream << "INCORRECT_BUTTON ";
 	}
+
+	stream << "BEHAVIOR_NAME=" << currentBehavior->getBehaviorName() << '\n';
+
+	stream.close();
+}
+
+const std::string nao_gui::NaoMimicBox::getTimestamp()
+{
+	time_t     now = time(0);
+	struct tm  tstruct;
+	char       buf[70];
+	tstruct = *localtime(&now);
+
+	strftime(buf, sizeof(buf), "%d-%m.%X", &tstruct);
+
+	return buf;
 }

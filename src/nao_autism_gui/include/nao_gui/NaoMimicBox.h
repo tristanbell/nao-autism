@@ -21,6 +21,9 @@
 #include <string>
 #include <vector>
 
+#include <iostream>
+#include <fstream>
+
 namespace nao_gui{
 
 const QString MIMIC_BOX_TITLE = "Mimic";
@@ -62,10 +65,13 @@ private:
 	QComboBox* behaviorBox;
 	QLabel* behaviorInfoLabel;
 
-	QTimer* recordTimer;
-	QPushButton* startRecordBtn;
-
 	void init();
+
+	void writeToLogBehavior();
+	void writeToLogPrompt();
+	void writeToLogAnswer(const bool& ans);
+
+	const std::string getTimestamp();
 
 private:
 	/**
@@ -104,9 +110,6 @@ private Q_SLOTS:
 	void promptButtonPressed();
 	void correctButtonPressed();
 	void incorrectButtonPressed();
-
-	void recordButtonPressed();
-	void onRecordStop();
 
 };
 

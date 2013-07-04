@@ -89,26 +89,19 @@ const std::string nao_control::NaoControl::getPreviousSpeech()
  */
 bool nao_control::NaoControl::perform(const std::string& behavior)
 {
-	nao_control::BehaviorGoal goal;
+	bool returnBool = performBehaviorInternal(behavior);
 
-	goal.behavior_name = behavior;
-	actionlib::SimpleClientGoalState state
-			= behaviorActionClient.sendGoalAndWait(goal, behaviorTimeout);
-
-	if (behavior != INIT_BEHAVIOR){ //hacky
-		if (previousBehavior != NULL)
-			delete previousBehavior;
+	if (previousBehavior != NULL){
+		delete previousBehavior;
 
 		previousBehavior = new std::string(behavior);
 	}
 
-	return state == state.SUCCEEDED;
+	return returnBool;
 }
 
 bool nao_control::NaoControl::performWithInit(const std::string& behavior){
-	bool returnBool = perform(behavior);
-
-	return returnBool && perform(INIT_BEHAVIOR);
+	return perform(behavior) && performBehaviorInternal(INIT_BEHAVIOR);
 }
 
 bool nao_control::NaoControl::performPreviousBehavior()

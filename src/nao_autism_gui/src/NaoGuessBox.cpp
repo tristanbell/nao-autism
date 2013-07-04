@@ -2,7 +2,6 @@
 
 #include <QGridLayout>
 #include <QComboBox>
-#include <QPushButton>
 
 #include <QStringList>
 #include <QStringListModel>
@@ -27,7 +26,7 @@ void nao_gui::NaoGuessBox::init()
 
 	behaviorInfoLabel = new QLabel(BEHAVIOR_INFO_LABEL);
 
-	QPushButton* behaviorPerformButton = new QPushButton("Perform");
+	QPushButton* behaviorPerformButton = new QPushButton("Perform behavior");
 	QObject::connect(behaviorPerformButton, SIGNAL(clicked()),
 			this, SLOT(behaviorButtonClicked()));
 
@@ -44,7 +43,7 @@ void nao_gui::NaoGuessBox::init()
 
 	speechInfoLabel = new QLabel(SPEECH_INFO_LABEL);
 
-	QPushButton* speechPerformButton = new QPushButton("Perform");
+	QPushButton* speechPerformButton = new QPushButton("Perform speech");
 	QObject::connect(speechPerformButton, SIGNAL(clicked()),
 			this, SLOT(speechButtonClicked()));
 
@@ -92,12 +91,12 @@ void nao_gui::NaoGuessBox::addBehaviorsToComboBox()
 	}
 }
 
-void nao_gui::NaoGuessBox::setBehaviorInfoLabel(NaoBehavior behavior)
+void nao_gui::NaoGuessBox::setBehaviorInfoLabel(const NaoBehavior& behavior)
 {
 	behaviorInfoLabel->setText(BEHAVIOR_INFO_LABEL + behavior.getQName());
 }
 
-void nao_gui::NaoGuessBox::addSpeechToComboBox(NaoBehavior behavior)
+void nao_gui::NaoGuessBox::addSpeechToComboBox(const NaoBehavior& behavior)
 {
 	std::vector<NaoSpeech> speeches = behavior.getSpeeches();
 
@@ -125,18 +124,20 @@ void nao_gui::NaoGuessBox::addSpeechToComboBox(NaoBehavior behavior)
 	}
 }
 
-void nao_gui::NaoGuessBox::setSpeechInfoLabel(NaoSpeech speech)
+void nao_gui::NaoGuessBox::setSpeechInfoLabel(const NaoSpeech& speech)
 {
 	speechInfoLabel->setText(SPEECH_INFO_LABEL + "\"" + speech.getQSpeech() + "\".");
 }
 
-void nao_gui::NaoGuessBox::behaviorComboBoxChanged(QString string)
+void nao_gui::NaoGuessBox::behaviorComboBoxChanged(const QString& string)
 {
 	//Search for behavior object
 	for (int i=0;i<behaviors.size();i++){
 		NaoBehavior current = behaviors[i];
 
 		if (current.getQName() == string){
+			setBehaviorInfoLabel(current);
+
 			delete currentBehavior;
 			currentBehavior = new NaoBehavior(current);
 
@@ -151,7 +152,7 @@ void nao_gui::NaoGuessBox::behaviorComboBoxChanged(QString string)
 	}
 }
 
-void nao_gui::NaoGuessBox::speechComboBoxChanged(QString string)
+void nao_gui::NaoGuessBox::speechComboBoxChanged(const QString& string)
 {
 	//Search for speech object
 	if (currentBehavior != NULL){
@@ -175,17 +176,13 @@ void nao_gui::NaoGuessBox::speechComboBoxChanged(QString string)
 void nao_gui::NaoGuessBox::behaviorButtonClicked()
 {
 	if (currentBehavior != NULL){
-		naoControl->performWithInit(currentBehavior->getBehaviorName());
-
-		emit behaviorPerformed();
+		naoControl.performWithInit(currentBehavior->getBehaviorName());
 	}
 }
 
 void nao_gui::NaoGuessBox::speechButtonClicked()
 {
 	if (currentSpeech != NULL){
-		naoControl->say(currentSpeech->getSpeech());
-
-		emit speechPerformed();
+		naoControl.say(currentSpeech->getSpeech());
 	}
 }

@@ -17,6 +17,8 @@
 #include <QString>
 #include <QLabel>
 #include <QComboBox>
+#include <QTimer>
+#include <QPushButton>
 
 #include <vector>
 
@@ -35,9 +37,8 @@ class NaoGuessBox : public QGroupBox
 	Q_OBJECT
 
 public:
-	NaoGuessBox(nao_control::NaoControl* naoControl, std::vector<NaoBehavior>& behaviors)
+	NaoGuessBox(std::vector<NaoBehavior>& behaviors) : naoControl()
 	{
-		this->naoControl=naoControl;
 		this->behaviors=behaviors;
 
 		setTitle(TITLE);
@@ -45,10 +46,15 @@ public:
 	}
 
 private:
-	nao_control::NaoControl* naoControl;
+	nao_control::NaoControl naoControl;
 
 	std::vector<NaoBehavior> behaviors;
 
+	/*
+	 * Storing pointers to the current behavior and speech means that
+	 * no 'search' is required each time the user clicks the button, the search
+	 * is done only when the combobox is changed.
+	 */
 	const NaoBehavior* currentBehavior;
 	const NaoSpeech* currentSpeech;
 
@@ -60,24 +66,53 @@ private:
 
 	void init();
 
+	/**
+	 * This adds the relevant NaoBehaviors inside the vector
+	 * into the combobox in the correct manor. It also initialises the
+	 * currentBehavior pointer to point to the first entry and
+	 * adds the relevant speeches to the combo box for the first NaoBehavior.
+	 */
 	void addBehaviorsToComboBox();
-	void addSpeechToComboBox(NaoBehavior);
 
-	void setBehaviorInfoLabel(NaoBehavior);
-	void setSpeechInfoLabel(NaoSpeech);
+	/**
+	 * Given some NaoBehavior, this function will remove the old speeches contained
+	 * in the combobox (if there is any) and insert the ones relating to the NaoBehavior reference
+	 * argument. It will also initialise the currentSpeech pointer to point to the first entry in
+	 * this list.
+	 */
+	void addSpeechToComboBox(const NaoBehavior&);
+
+	/**
+	 * Given some NaoBehavior, this function will display the relevant information in the
+	 * behavior label (namely, its name).
+	 */
+	void setBehaviorInfoLabel(const NaoBehavior&);
+
+	/**
+	 * Given some NaoSpeech, this function will display the relevant information in the
+	 * speech label (namely, what the nao will say).
+	 */
+	void setSpeechInfoLabel(const NaoSpeech&);
 
 public Q_SLOTS:
-	//Combobox slots
-	void behaviorComboBoxChanged(QString);
-	void speechComboBoxChanged(QString);
+	/*
+	 * Combobox slots that get called when the relevant combobox's index
+	 * has been changed. The behaviorComboBoxChanged(const QString&) slot will
+	 * load the relevant speeches in the speech combobox and update the behavior information
+	 * label whilst the speechComboBoxChanged(const QString&) slot will update just the
+	 * speech information label.
+	 */
+	void behaviorComboBoxChanged(const QString&);
+	void speechComboBoxChanged(const QString&);
 
-	//Button slots
+	/*
+	 * Button slots that get called when the relevant buttons are clicked, the
+	 * behaviorButtonClicked() slot will perform the current behavior that the
+	 * currentBehavior pointer points to whilst the speechButtonClicked() slot will
+	 * perform the current speech that the currentSpeech pointer points to.
+	 */
 	void behaviorButtonClicked();
 	void speechButtonClicked();
-
-Q_SIGNALS:
-	void behaviorPerformed();
-	void speechPerformed();
 
 };
 

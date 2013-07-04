@@ -8,12 +8,12 @@
 #ifndef GENERICCONTROLBOX_H_
 #define GENERICCONTROLBOX_H_
 
-#include <rosbag_recorder/rosbag_recorder.h>
 #include <nao_gui/NaoAutismWindow.h>
 #include <nao_control/NaoControl.h>
 
 #include <QPushButton>
 #include <QGridLayout>
+#include <QTimer>
 
 namespace nao_gui{
 
@@ -31,13 +31,12 @@ public:
 private:
 	nao_control::NaoControl* naoControl;
 
-	RosbagRecorder* currentRecorder;
-
 	QPushButton* performPreviousBehaviorBtn;
 	QPushButton* performPreviousSpeechBtn;
 
 	QPushButton* startRecordBtn;
-	QPushButton* endRecordBtn;
+
+	QTimer* recordingTimer;
 
 	void init();
 
@@ -49,7 +48,7 @@ private Q_SLOTS:
 	void onSpeechPerformed();
 
 	void startRecordingClicked();
-	void endRecordingClicked();
+	void onRecordingStopped();
 
 };
 

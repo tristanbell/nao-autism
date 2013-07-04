@@ -68,12 +68,14 @@ private:
 	void init();
 
 	/*
-	 * The following writes to the timestamps.log file, the format for each entry is
-	 * the following:
+	 * The following writes to the timestamps.log file (this file isn't
+	 * binary), the format for each entry is the following:
 	 *
 	 * [TIMESTAMP] NAME PAREMETER_LIST
 	 *
 	 * The TIMESTAMP is of the following form: dd-mm.hh:mm:ss
+	 *
+	 * The NAME is a standard C++ string.
 	 *
 	 * The PARAMETER_LIST is a space separated list of parameter(s) in the following
 	 * form:

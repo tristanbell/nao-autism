@@ -18,6 +18,7 @@ public:
 	static void record(std::string emotionName);
 	void stop(void);
 	static const float RECORDING_DURATION;
+	static const uint32_t RECORDING_SIZE;
 
 private:
 	Recorder(std::string emotion);

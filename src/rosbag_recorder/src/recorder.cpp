@@ -8,6 +8,7 @@
 #include <recorder.h>
 
 const float Recorder::RECORDING_DURATION = 25.0;
+const uint32_t Recorder::RECORDING_SIZE = 1073741824;
 int recorderResult;
 
 Recorder::Recorder(std::string emotionName)
@@ -23,9 +24,12 @@ Recorder::Recorder(std::string emotionName)
 
 	options.prefix = "recordings/" + emotionName;
 
-	// Set duration of recording
+	/*// Set duration of recording
 	ros::Duration dur(RECORDING_DURATION);
-	options.max_duration = dur;
+	options.max_duration = dur;*/
+
+	options.max_size = RECORDING_SIZE;
+	options.split = true;
 }
 
 void stop(void)

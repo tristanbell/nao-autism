@@ -41,7 +41,7 @@ const std::string MIMIC_PROMPT_BEHAVIOR = "prompt_1";
 const std::string MIMIC_CORRECT_BEHAVIOR = "right_1";
 const std::string MIMIC_INCORRECT_BEHAVIOR = "wrong_1";
 
-const int MAX_REWARDS = 2;
+const int MAX_REWARDS = 3;
 const std::string REWARD_BEHAVIOR_NAME = "reward_";
 
 class NaoMimicBox : public QGroupBox

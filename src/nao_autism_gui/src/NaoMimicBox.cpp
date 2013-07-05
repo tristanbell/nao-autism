@@ -18,6 +18,7 @@ void nao_gui::NaoMimicBox::init()
 	QObject::connect(startBtn, SIGNAL(clicked()), this, SLOT(startButtonPressed()));
 
 	endBtn = new QPushButton("End game");
+	endBtn->setEnabled(false);
 	QObject::connect(endBtn, SIGNAL(clicked()),
 			this, SLOT(endButtonPressed()));
 
@@ -97,7 +98,10 @@ void nao_gui::NaoMimicBox::startButtonPressed()
 	naoControl.say("Copy the robot!");
 	naoControl.perform("prompt_2");
 
+	emit mimicGameStarted();
+
 	startBtn->setEnabled(false);
+	endBtn->setEnabled(true);
 }
 
 void nao_gui::NaoMimicBox::endButtonPressed()

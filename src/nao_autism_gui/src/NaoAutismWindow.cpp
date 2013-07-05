@@ -22,6 +22,8 @@ void nao_gui::NaoAutismWindow::init(std::vector<NaoBehavior>& behaviors)
 	//GenericControlBox* controlBox = new GenericControlBox(&naoControl);
 
 	//Hook up relevant slots and signals
+	QObject::connect(mimicBox, SIGNAL(mimicGameStarted()),
+			guessBox, SLOT(onMimicGameStart()));
 
 	/*
 	QObject::connect(guessBox, SIGNAL(behaviorPerformed()),

@@ -178,6 +178,8 @@ void nao_gui::NaoGuessBox::behaviorButtonClicked()
 	if (currentBehavior != NULL){
 		if (behaviorPerformed){
 			naoControl.say(NEXT_EMOTION_SPEECH);
+		}else{
+			behaviorPerformed = true;
 		}
 
 		naoControl.performWithInit(currentBehavior->getBehaviorName());

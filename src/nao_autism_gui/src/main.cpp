@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "nao_cntrl");
 
 	//Prompt child to strike certain pose to initialise openni_tracker
-	//init();
+	init();
 
 	QApplication app(argc, argv);
 	app.setStyle(new QPlastiqueStyle);

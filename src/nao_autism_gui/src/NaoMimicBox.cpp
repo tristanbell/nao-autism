@@ -14,6 +14,9 @@ void nao_gui::NaoMimicBox::init()
 
 	QLabel* behaviorLabel = new QLabel(MIMIC_BEHAVIOR_DROPDOWN_LABEL);
 
+	startBtn = new QPushButton("Start");
+	QObject::connect(startBtn, SIGNAL(clicked()), this, SLOT(startButtonPressed()));
+
 	behaviorBox = new QComboBox;
 	QObject::connect(behaviorBox, SIGNAL(currentIndexChanged(QString)),
 			this, SLOT(behaviorComboBoxChanged(QString)));
@@ -41,13 +44,14 @@ void nao_gui::NaoMimicBox::init()
 			this, SLOT(incorrectButtonPressed()));
 	incorrectBtn->setEnabled(false);
 
-	layout->addWidget(behaviorLabel, 0, 0);
-	layout->addWidget(behaviorBox, 0, 1);
-	layout->addWidget(behaviorInfoLabel, 1, 0, 1, 2);
-	layout->addWidget(behaviorBtn, 2, 0);
-	layout->addWidget(promptBtn, 2, 1);
-	layout->addWidget(correctBtn, 3, 0);
-	layout->addWidget(incorrectBtn, 3, 1);
+	layout->addWidget(startBtn, 0, 0);
+	layout->addWidget(behaviorLabel, 1, 0);
+	layout->addWidget(behaviorBox, 1, 1);
+	layout->addWidget(behaviorInfoLabel, 2, 0, 1, 2);
+	layout->addWidget(behaviorBtn, 3, 0);
+	layout->addWidget(promptBtn, 3, 1);
+	layout->addWidget(correctBtn, 4, 0);
+	layout->addWidget(incorrectBtn, 4, 1);
 
 	setLayout(layout);
 }
@@ -76,6 +80,12 @@ void nao_gui::NaoMimicBox::fillBehaviorComboBox()
 void nao_gui::NaoMimicBox::setBehaviorInfoLabel(NaoBehavior& behavior)
 {
 	behaviorInfoLabel->setText(MIMIC_BEHAVIOR_INFO_LABEL + behavior.getQName());
+}
+
+void nao_gui::NaoMimicBox::startButtonPressed()
+{
+	naoControl.say("Copy the robot!");
+	naoControl.perform("prompt_2");
 }
 
 void nao_gui::NaoMimicBox::promptButtonPressed()

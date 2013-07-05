@@ -61,6 +61,7 @@ private:
 	NaoBehavior* currentBehavior;
 	NaoBehavior* performedBehavior;
 
+	QPushButton* startBtn;
 	QPushButton* behaviorBtn;
 	QPushButton* promptBtn;
 	QPushButton* correctBtn;
@@ -132,6 +133,7 @@ private Q_SLOTS:
 	 * through the mimic process. This, hopefully, makes it much easier for the user.
 	 */
 	void behaviorButtonClicked();
+	void startButtonPressed();
 	void promptButtonPressed();
 	void correctButtonPressed();
 	void incorrectButtonPressed();

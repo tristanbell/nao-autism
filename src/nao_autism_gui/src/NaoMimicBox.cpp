@@ -50,6 +50,7 @@ void nao_gui::NaoMimicBox::init()
 	incorrectBtn->setEnabled(false);
 
 	layout->addWidget(startBtn, 0, 0);
+	layout->addWidget(endBtn, 0, 1);
 	layout->addWidget(behaviorLabel, 1, 0);
 	layout->addWidget(behaviorBox, 1, 1);
 	layout->addWidget(behaviorInfoLabel, 2, 0, 1, 2);

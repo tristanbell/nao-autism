@@ -37,6 +37,10 @@ const std::string MIMIC_INCORRECT_ANSWER = "Better luck next time";
 const QString MIMIC_BEHAVIOR_DROPDOWN_LABEL = "Behavior:";
 const QString MIMIC_BEHAVIOR_INFO_LABEL = "The following behavior will be performed: ";
 
+const std::string MIMIC_PROMPT_BEHAVIOR = "prompt_1";
+const std::string MIMIC_CORRECT_BEHAVIOR = "right_1";
+const std::string MIMIC_INCORRECT_BEHAVIOR = "wrong_1";
+
 class NaoMimicBox : public QGroupBox
 {
 	Q_OBJECT

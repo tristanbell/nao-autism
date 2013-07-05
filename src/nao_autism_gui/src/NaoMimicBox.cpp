@@ -84,6 +84,7 @@ void nao_gui::NaoMimicBox::promptButtonPressed()
 	writeToLogPrompt();
 
 	naoControl.say(nao_gui::MIMIC_PROMPT + performedBehavior->getQName().toStdString());
+	naoControl.perform(nao_gui::MIMIC_PROMPT_BEHAVIOR);
 
 	promptBtn->setEnabled(false);
 	behaviorBtn->setEnabled(false);
@@ -98,6 +99,7 @@ void nao_gui::NaoMimicBox::correctButtonPressed()
 	writeToLogAnswer(true);
 
 	naoControl.say(nao_gui::MIMIC_CORRECT_ANSWER);
+	naoControl.perform(nao_gui::MIMIC_CORRECT_BEHAVIOR);
 
 	handleAnswerGiven();
 }
@@ -108,6 +110,7 @@ void nao_gui::NaoMimicBox::incorrectButtonPressed()
 	writeToLogAnswer(false);
 
 	naoControl.say(nao_gui::MIMIC_INCORRECT_ANSWER);
+	naoControl.perform(nao_gui::MIMIC_INCORRECT_BEHAVIOR);
 
 	handleAnswerGiven();
 }

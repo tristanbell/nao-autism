@@ -8,12 +8,12 @@
 #ifndef NAOBEHAVIOR_H_
 #define NAOBEHAVIOR_H_
 
-#include <NaoSpeech.h>
-
 #include <string>
 #include <QString>
 
 #include <vector>
+
+#include <NaoSpeech.h>
 
 class NaoBehavior
 {

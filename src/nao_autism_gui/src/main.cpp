@@ -46,52 +46,53 @@ int main(int argc, char** argv)
 	app.setStyle(new QPlastiqueStyle);
 
 	//Create relevant NaoSpeech and NaoBehavior objects for application
-	NaoSpeech correctGeneric("Correct - Generic", "Well done! You guessed correctly.");
-	NaoSpeech tryAgainGeneric("Try again - Generic", "Try again");
-	NaoSpeech incorrectGeneric("Incorrect - Generic", "Lets try another");
+	NaoSpeech correctGeneric("Correct - Generic", "Well done! You guessed correctly.", "right_1");
+	NaoSpeech tryAgainGeneric("Try again - Generic", "Try again", "wrong_1");
+	NaoSpeech incorrectGeneric("Incorrect - Generic", "Lets try another", "wrong_1");
 
 	vector<NaoBehavior> behaviors;
 
 	vector<NaoSpeech> happySpeeches;
 
 	happySpeeches.push_back(correctGeneric);
-	happySpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was happy!"));
+	happySpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was happy!", "right_1"));
 	happySpeeches.push_back(tryAgainGeneric);
 	happySpeeches.push_back(incorrectGeneric);
+	happySpeeches.push_back(NaoSpeech("Question", "Am I happy or sad?", "prompt_2"));
+	happySpeeches.push_back(NaoSpeech("Question", "Am I happy or scared?", "prompt_2"));
 
 	NaoBehavior happy("Happy", HAPPY_BEHAVIOR, happySpeeches);
 
 	vector<NaoSpeech> sadSpeeches;
 
 	sadSpeeches.push_back(correctGeneric);
-	sadSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was sad!"));
+	sadSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was sad!", "right_1"));
 	sadSpeeches.push_back(tryAgainGeneric);
 	sadSpeeches.push_back(incorrectGeneric);
+	sadSpeeches.push_back(NaoSpeech("Question", "Am I sad or happy?", "prompt_2"));
+	sadSpeeches.push_back(NaoSpeech("Question", "Am I sad or scared?", "prompt_2"));
 
 	NaoBehavior sad("Sad", SAD_BEHAVIOR, sadSpeeches);
 
 	vector<NaoSpeech> scaredSpeeches;
 
 	scaredSpeeches.push_back(correctGeneric);
-	scaredSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was scared!"));
+	scaredSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was scared!", "right_1"));
 	scaredSpeeches.push_back(tryAgainGeneric);
 	scaredSpeeches.push_back(incorrectGeneric);
 
 	NaoBehavior scared("Scared", SCARED_BEHAVIOR, scaredSpeeches);
 
-	NaoBehavior util("Util", "stand_up", scaredSpeeches);
-
 	behaviors.push_back(happy);
 	behaviors.push_back(sad);
 	behaviors.push_back(scared);
-	behaviors.push_back(util);
 
 	//Init window and execute application
 	nao_gui::NaoAutismWindow window(behaviors);
 
 	//Everything is setup ok, start recording
 	ROS_INFO("Starting to record data.");
-	Recorder::record("data");
+//	Recorder::record("data");
 
 	return app.exec();
 }

@@ -128,7 +128,7 @@ void nao_gui::NaoMimicBox::promptButtonPressed()
 	//Write to log file
 	writeToLogPrompt();
 
-	naoControl.say(nao_gui::MIMIC_PROMPT + performedBehavior->getQName().toStdString());
+	naoControl.say("Do the same");
 	naoControl.perform(nao_gui::MIMIC_PROMPT_BEHAVIOR);
 
 	promptBtn->setEnabled(false);

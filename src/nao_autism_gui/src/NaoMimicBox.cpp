@@ -112,6 +112,14 @@ void nao_gui::NaoMimicBox::endButtonPressed()
 	sleep(3);
 	rewardChild();
 
+	startBtn->setEnabled(true);
+	endBtn->setEnabled(false);
+
+	performBehaviorBtn->setEnabled(true);
+	promptBtn->setEnabled(false);
+	correctBtn->setEnabled(false);
+	incorrectBtn->setEnabled(false);
+
 	emit mimicGameEnded();
 }
 

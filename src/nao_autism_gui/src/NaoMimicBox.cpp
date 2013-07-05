@@ -115,7 +115,7 @@ void nao_gui::NaoMimicBox::endButtonPressed()
 	startBtn->setEnabled(true);
 	endBtn->setEnabled(false);
 
-	performBehaviorBtn->setEnabled(true);
+	behaviorBtn->setEnabled(true);
 	promptBtn->setEnabled(false);
 	correctBtn->setEnabled(false);
 	incorrectBtn->setEnabled(false);

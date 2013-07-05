@@ -61,8 +61,8 @@ int main(int argc, char** argv)
 	happySpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was happy!", "right_1"));
 	happySpeeches.push_back(tryAgainGeneric);
 	happySpeeches.push_back(incorrectGeneric);
-	happySpeeches.push_back(NaoSpeech("Question", "Am I happy or sad?", "prompt_2"));
-	happySpeeches.push_back(NaoSpeech("Question", "Am I happy or scared?", "prompt_2"));
+	happySpeeches.push_back(NaoSpeech("Question 1", "Am I happy or sad?", "prompt_2"));
+	happySpeeches.push_back(NaoSpeech("Question 2", "Am I happy or scared?", "prompt_2"));
 
 	NaoBehavior happy("Happy", HAPPY_BEHAVIOR, happySpeeches);
 
@@ -72,8 +72,8 @@ int main(int argc, char** argv)
 	sadSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was sad!", "right_1"));
 	sadSpeeches.push_back(tryAgainGeneric);
 	sadSpeeches.push_back(incorrectGeneric);
-	sadSpeeches.push_back(NaoSpeech("Question", "Am I sad or happy?", "prompt_2"));
-	sadSpeeches.push_back(NaoSpeech("Question", "Am I sad or scared?", "prompt_2"));
+	sadSpeeches.push_back(NaoSpeech("Question 1", "Am I sad or happy?", "prompt_2"));
+	sadSpeeches.push_back(NaoSpeech("Question 2", "Am I sad or scared?", "prompt_2"));
 
 	NaoBehavior sad("Sad", SAD_BEHAVIOR, sadSpeeches);
 
@@ -83,6 +83,8 @@ int main(int argc, char** argv)
 	scaredSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was scared!", "right_1"));
 	scaredSpeeches.push_back(tryAgainGeneric);
 	scaredSpeeches.push_back(incorrectGeneric);
+	scaredSpeeches.push_back(NaoSpeech("Question 1", "Am I scared or happy?", "prompt_2"));
+	scaredSpeeches.push_back(NaoSpeech("Question 2", "AM I sad or scared?", "prompt_2"));
 
 	NaoBehavior scared("Scared", SCARED_BEHAVIOR, scaredSpeeches);
 
@@ -154,6 +156,8 @@ void init()
 	//Say let's play
 	control.say(TIME_TO_PLAY_SPEECH);
 	control.perform("right_1");
+
+	sleep(3);
 
 	control.say(GUESS_THE_EMOTION_SPEECH);
 }

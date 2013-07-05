@@ -121,6 +121,7 @@ public Q_SLOTS:
 	void speechButtonClicked();
 
 	void onMimicGameStart();
+	void onMimicGameEnd();
 
 };
 

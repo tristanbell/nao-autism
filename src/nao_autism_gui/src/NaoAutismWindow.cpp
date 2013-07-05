@@ -25,6 +25,9 @@ void nao_gui::NaoAutismWindow::init(std::vector<NaoBehavior>& behaviors)
 	QObject::connect(mimicBox, SIGNAL(mimicGameStarted()),
 			guessBox, SLOT(onMimicGameStart()));
 
+	QObject::connect(mimicBox, SIGNAL(mimicGameEnded()),
+			guessBox, SLOT(onMimicGameEnd()));
+
 	/*
 	QObject::connect(guessBox, SIGNAL(behaviorPerformed()),
 			controlBox, SLOT(onBehaviorPerformed()));

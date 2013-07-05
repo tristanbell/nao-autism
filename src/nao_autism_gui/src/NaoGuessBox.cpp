@@ -201,3 +201,8 @@ void nao_gui::NaoGuessBox::onMimicGameStart()
 {
 	setEnabled(false);
 }
+
+void nao_gui::NaoGuessBox::onMimicGameEnd()
+{
+	setEnabled(true);
+}

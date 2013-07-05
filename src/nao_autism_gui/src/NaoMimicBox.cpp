@@ -111,6 +111,8 @@ void nao_gui::NaoMimicBox::endButtonPressed()
 
 	sleep(3);
 	rewardChild();
+
+	emit mimicGameEnded();
 }
 
 void nao_gui::NaoMimicBox::promptButtonPressed()

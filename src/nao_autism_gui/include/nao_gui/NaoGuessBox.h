@@ -43,6 +43,8 @@ public:
 	{
 		this->behaviors=behaviors;
 
+		behaviorPerformed = false;
+
 		setTitle(TITLE);
 		init();
 	}

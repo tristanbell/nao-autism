@@ -14,8 +14,12 @@ void nao_gui::NaoMimicBox::init()
 
 	QLabel* behaviorLabel = new QLabel(MIMIC_BEHAVIOR_DROPDOWN_LABEL);
 
-	startBtn = new QPushButton("Start");
+	startBtn = new QPushButton("Start game");
 	QObject::connect(startBtn, SIGNAL(clicked()), this, SLOT(startButtonPressed()));
+
+	endBtn = new QPushButton("End game");
+	QObject::connect(endBtn, SIGNAL(clicked()),
+			this, SLOT(endButtonPressed()));
 
 	behaviorBox = new QComboBox;
 	QObject::connect(behaviorBox, SIGNAL(currentIndexChanged(QString)),
@@ -84,8 +88,24 @@ void nao_gui::NaoMimicBox::setBehaviorInfoLabel(NaoBehavior& behavior)
 
 void nao_gui::NaoMimicBox::startButtonPressed()
 {
+	naoControl.say("Guess the emotion is finished.");
+
+	sleep(3);
+	rewardChild();
+
+	sleep(3);
 	naoControl.say("Copy the robot!");
 	naoControl.perform("prompt_2");
+
+	startBtn->setEnabled(false);
+}
+
+void nao_gui::NaoMimicBox::endButtonPressed()
+{
+	naoControl.say("Copy the robot is finished.");
+
+	sleep(3);
+	rewardChild();
 }
 
 void nao_gui::NaoMimicBox::promptButtonPressed()
@@ -234,4 +254,16 @@ const std::string nao_gui::NaoMimicBox::getTimestamp()
 	strftime(buf, sizeof(buf), "%d-%m.%X", &tstruct);
 
 	return buf;
+}
+
+void nao_gui::NaoMimicBox::rewardChild()
+{
+	naoControl.say("Lets dance");
+	long int rnd = static_cast<int>(((random() / static_cast<float>(RAND_MAX)) * MAX_REWARDS) + 1);
+
+	std::string rewardBehavior(REWARD_BEHAVIOR_NAME);
+	rewardBehavior += rnd;
+
+	naoControl.perform(rewardBehavior);
+	naoControl.say("You were great");
 }

@@ -34,6 +34,9 @@ QString ANGRY_BEHAVIOR = "angry_1";
 const string STAND_UP_BEHAVIOR = "stand_up";
 const string ARMS_UP_BEHAVIOR = "arms_up";
 
+const string TIME_TO_PLAY_SPEECH  = "Time to play";
+const string GUESS_THE_EMOTION_SPEECH = "Guess the emotion";
+
 int main(int argc, char** argv)
 {
 	//Init ros
@@ -147,6 +150,12 @@ void init()
 	//Congratulate child and go back to standard pose
 	control.say(WELL_DONE_SPEECH);
 	control.perform(INIT_BEHAVIOR);
+
+	//Say let's play
+	control.say(TIME_TO_PLAY_SPEECH);
+	control.perform("right_1");
+
+	control.say(GUESS_THE_EMOTION_SPEECH);
 }
 
 void tfCallback(const tf::tfMessage msg)

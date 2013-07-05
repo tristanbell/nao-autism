@@ -41,6 +41,9 @@ const std::string MIMIC_PROMPT_BEHAVIOR = "prompt_1";
 const std::string MIMIC_CORRECT_BEHAVIOR = "right_1";
 const std::string MIMIC_INCORRECT_BEHAVIOR = "wrong_1";
 
+const int MAX_REWARDS = 2;
+const std::string REWARD_BEHAVIOR_NAME = "reward_";
+
 class NaoMimicBox : public QGroupBox
 {
 	Q_OBJECT
@@ -62,6 +65,7 @@ private:
 	NaoBehavior* performedBehavior;
 
 	QPushButton* startBtn;
+	QPushButton* endBtn;
 	QPushButton* behaviorBtn;
 	QPushButton* promptBtn;
 	QPushButton* correctBtn;
@@ -99,6 +103,8 @@ private:
 
 	const std::string getTimestamp();
 
+	void rewardChild();
+
 private:
 	/**
 	 * This function will load the necessary NaoBehavior objects stored
@@ -134,9 +140,13 @@ private Q_SLOTS:
 	 */
 	void behaviorButtonClicked();
 	void startButtonPressed();
+	void endButtonPressed();
 	void promptButtonPressed();
 	void correctButtonPressed();
 	void incorrectButtonPressed();
+
+Q_SIGNALS:
+	void mimicGameStarted();
 
 };
 

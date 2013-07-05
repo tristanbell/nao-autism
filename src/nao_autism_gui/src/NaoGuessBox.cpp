@@ -176,6 +176,10 @@ void nao_gui::NaoGuessBox::speechComboBoxChanged(const QString& string)
 void nao_gui::NaoGuessBox::behaviorButtonClicked()
 {
 	if (currentBehavior != NULL){
+		if (behaviorPerformed){
+			naoControl.say(NEXT_EMOTION_SPEECH);
+		}
+
 		naoControl.performWithInit(currentBehavior->getBehaviorName());
 	}
 }
@@ -189,4 +193,9 @@ void nao_gui::NaoGuessBox::speechButtonClicked()
 			naoControl.perform(currentSpeech->getBehaviorName());
 		}
 	}
+}
+
+void nao_gui::NaoGuessBox::onMimicGameStart()
+{
+	setEnabled(false);
 }

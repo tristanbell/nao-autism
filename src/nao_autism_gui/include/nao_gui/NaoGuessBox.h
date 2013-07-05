@@ -32,6 +32,8 @@ const QString BEHAVIOR_INFO_LABEL = "The following behavior will be performed: "
 const QString SPEECH_DROPDOWN_LABEL = "Speech:";
 const QString SPEECH_INFO_LABEL = "Nao will say the following: ";
 
+const std::string NEXT_EMOTION_SPEECH = "Next emotion";
+
 class NaoGuessBox : public QGroupBox
 {
 	Q_OBJECT
@@ -63,6 +65,8 @@ private:
 
 	QComboBox* speechBox;
 	QLabel* speechInfoLabel;
+
+	bool behaviorPerformed;
 
 	void init();
 
@@ -113,6 +117,8 @@ public Q_SLOTS:
 	 */
 	void behaviorButtonClicked();
 	void speechButtonClicked();
+
+	void onMimicGameStart();
 
 };
 

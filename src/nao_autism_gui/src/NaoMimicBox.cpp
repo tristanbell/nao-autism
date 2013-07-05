@@ -266,8 +266,9 @@ void nao_gui::NaoMimicBox::rewardChild()
 	naoControl.say("Lets dance");
 	long int rnd = static_cast<int>(((random() / static_cast<float>(RAND_MAX)) * MAX_REWARDS) + 1);
 
-	std::string rewardBehavior(REWARD_BEHAVIOR_NAME);
-	rewardBehavior += rnd;
+	std::ostringstream sstream;
+	sstream << REWARD_BEHAVIOR_NAME << rnd;
+	std::string rewardBehavior = sstream.str();
 
 	naoControl.perform(rewardBehavior);
 	naoControl.say("You were great");

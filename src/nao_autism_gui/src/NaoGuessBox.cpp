@@ -14,46 +14,47 @@
 void nao_gui::NaoGuessBox::init()
 {
 	currentBehavior = NULL;
-	currentSpeech = NULL;
+	performedBehavior = NULL;
 
 	QGridLayout* layout = new QGridLayout;
 
 	//Add behavior-based widgets to layout
-	QGridLayout* behaviorLayout = new QGridLayout;
-
 	QLabel* behaviorLabel = new QLabel(BEHAVIOR_DROPDOWN_LABEL);
 	behaviorBox = new QComboBox;
 
 	behaviorInfoLabel = new QLabel(BEHAVIOR_INFO_LABEL);
 
-	QPushButton* behaviorPerformButton = new QPushButton("Perform behavior");
-	QObject::connect(behaviorPerformButton, SIGNAL(clicked()),
+	performBehaviorBtn = new QPushButton("Perform behavior");
+	QObject::connect(performBehaviorBtn, SIGNAL(clicked()),
 			this, SLOT(behaviorButtonClicked()));
 
-	behaviorLayout->addWidget(behaviorLabel, 0, 0);
-	behaviorLayout->addWidget(behaviorBox, 0, 1);
-	behaviorLayout->addWidget(behaviorInfoLabel, 1, 0, 1, 2);
-	behaviorLayout->addWidget(behaviorPerformButton, 2, 1);
+	askQuestionBtn = new QPushButton("Ask question");
+	askQuestionBtn->setEnabled(false);
+	QObject::connect(askQuestionBtn, SIGNAL(clicked()),
+			this, SLOT(askQuestionButtonClicked()));
 
-	//Add speech-based widgets to layout
-	QGridLayout* speechLayout = new QGridLayout;
+	correctBtn = new QPushButton("Correct answer");
+	correctBtn->setEnabled(false);
+	QObject::connect(correctBtn, SIGNAL(clicked()),
+			this, SLOT(correctButtonClicked()));
 
-	QLabel* speechLabel = new QLabel(SPEECH_DROPDOWN_LABEL);
-	speechBox = new QComboBox;
+	incorrectBtn = new QPushButton("Incorrect answer");
+	incorrectBtn->setEnabled(false);
+	QObject::connect(incorrectBtn, SIGNAL(clicked()),
+			this, SLOT(incorrectButtonClicked()));
 
-	speechInfoLabel = new QLabel(SPEECH_INFO_LABEL);
+	endGameBtn = new QPushButton("End game");
+	QObject::connect(endGameBtn, SIGNAL(clicked()),
+			this, SLOT(endButtonClicked()));
 
-	QPushButton* speechPerformButton = new QPushButton("Perform speech");
-	QObject::connect(speechPerformButton, SIGNAL(clicked()),
-			this, SLOT(speechButtonClicked()));
-
-	speechLayout->addWidget(speechLabel);
-	speechLayout->addWidget(speechBox, 0, 1);
-	speechLayout->addWidget(speechInfoLabel, 1, 0, 1, 2);
-	speechLayout->addWidget(speechPerformButton, 2, 1);
-
-	layout->addItem(behaviorLayout, 0, 0);
-	layout->addItem(speechLayout, 1, 0);
+	layout->addWidget(behaviorLabel, 0, 0);
+	layout->addWidget(behaviorBox, 0, 1);
+	layout->addWidget(behaviorInfoLabel, 1, 0, 1, 2);
+	layout->addWidget(performBehaviorBtn, 2, 0);
+	layout->addWidget(askQuestionBtn, 2, 1);
+	layout->addWidget(correctBtn, 3, 0);
+	layout->addWidget(incorrectBtn, 3, 1);
+	layout->addWidget(endGameBtn, 4, 1);
 
 	//Fill behavior and speech combobox
 	addBehaviorsToComboBox();
@@ -61,8 +62,6 @@ void nao_gui::NaoGuessBox::init()
 	//Connect behavior and speech box
 	QObject::connect(behaviorBox, SIGNAL(currentIndexChanged(const QString&)),
 			this, SLOT(behaviorComboBoxChanged(QString)));
-	QObject::connect(speechBox, SIGNAL(currentIndexChanged(const QString&)),
-			this, SLOT(speechComboBoxChanged(QString)));
 
 	setLayout(layout);
 }
@@ -78,7 +77,6 @@ void nao_gui::NaoGuessBox::addBehaviorsToComboBox()
 		currentBehavior = new NaoBehavior(current);
 
 		list.push_back(current.getQName());
-		addSpeechToComboBox(current);
 
 		for (int i=1;i<behaviors.size();i++){
 			current = behaviors[i];
@@ -96,39 +94,6 @@ void nao_gui::NaoGuessBox::setBehaviorInfoLabel(const NaoBehavior& behavior)
 	behaviorInfoLabel->setText(BEHAVIOR_INFO_LABEL + behavior.getQName());
 }
 
-void nao_gui::NaoGuessBox::addSpeechToComboBox(const NaoBehavior& behavior)
-{
-	std::vector<NaoSpeech> speeches = behavior.getSpeeches();
-
-	if (speeches.size() > 0){
-		QStringList list;
-
-		//Do something with first speech
-		NaoSpeech current = speeches[0];
-		setSpeechInfoLabel(current);
-
-		if (currentSpeech != NULL)
-			delete currentSpeech;
-
-		currentSpeech = new NaoSpeech(current);
-
-		list.push_back(current.getQName());
-
-		for (int i=1;i<speeches.size();i++){
-			current = speeches[i];
-			list.push_back(current.getQName());
-		}
-
-		QStringListModel* model = new QStringListModel(list);
-		speechBox->setModel(model);
-	}
-}
-
-void nao_gui::NaoGuessBox::setSpeechInfoLabel(const NaoSpeech& speech)
-{
-	speechInfoLabel->setText(SPEECH_INFO_LABEL + "\"" + speech.getQSpeech() + "\".");
-}
-
 void nao_gui::NaoGuessBox::behaviorComboBoxChanged(const QString& string)
 {
 	//Search for behavior object
@@ -141,68 +106,80 @@ void nao_gui::NaoGuessBox::behaviorComboBoxChanged(const QString& string)
 			delete currentBehavior;
 			currentBehavior = new NaoBehavior(current);
 
-			QAbstractItemModel* oldModel = speechBox->model();
-
-			addSpeechToComboBox(current);
-
-			delete oldModel;
-
 			break;
 		}
 	}
 }
 
-void nao_gui::NaoGuessBox::speechComboBoxChanged(const QString& string)
+void nao_gui::NaoGuessBox::endButtonClicked()
 {
-	//Search for speech object
-	if (currentBehavior != NULL){
-		const std::vector<NaoSpeech> speeches = currentBehavior->getSpeeches();
+	behaviorPerformed = false;
 
-		for (int i=0;i<speeches.size();i++){
-			const NaoSpeech current = speeches[i];
+	performBehaviorBtn->setEnabled(true);
+	askQuestionBtn->setEnabled(false);
+	correctBtn->setEnabled(false);
+	incorrectBtn->setEnabled(false);
 
-			if (current.getQName().compare(string) == 0){
-				setSpeechInfoLabel(current);
+	setEnabled(false);
 
-				delete currentSpeech;
-				currentSpeech = new NaoSpeech(current);
+	if (performedBehavior != NULL)
+		delete performedBehavior;
 
-				break;
-			}
-		}
-	}
+	//Do ending stuff here...
+	naoControl->say("Guess the emotion is finished.");
+
+	emit gameEnded();
 }
 
 void nao_gui::NaoGuessBox::behaviorButtonClicked()
 {
 	if (currentBehavior != NULL){
 		if (behaviorPerformed){
-			naoControl.say(NEXT_EMOTION_SPEECH);
+			naoControl->say(NEXT_EMOTION_SPEECH);
 		}else{
 			behaviorPerformed = true;
 		}
 
-		naoControl.performWithInit(currentBehavior->getBehaviorName());
-	}
-}
+		askQuestionBtn->setEnabled(true);
 
-void nao_gui::NaoGuessBox::speechButtonClicked()
-{
-	if (currentSpeech != NULL){
-		naoControl.say(currentSpeech->getSpeech());
-
-		if (currentSpeech->hasBehavior()){
-			naoControl.perform(currentSpeech->getBehaviorName());
+		if (performedBehavior == NULL){
+			performedBehavior = new NaoBehavior(*currentBehavior);
 		}
+
+		naoControl->perform(performedBehavior->getBehaviorName());
+
+		askQuestionBtn->setEnabled(true);
 	}
 }
 
-void nao_gui::NaoGuessBox::onMimicGameStart()
+void nao_gui::NaoGuessBox::askQuestionButtonClicked()
 {
-	setEnabled(false);
+	correctBtn->setEnabled(true);
+	incorrectBtn->setEnabled(true);
 }
 
-void nao_gui::NaoGuessBox::onMimicGameEnd()
+void nao_gui::NaoGuessBox::correctButtonClicked()
 {
+	handleAnswer();
+}
+
+void nao_gui::NaoGuessBox::incorrectButtonClicked()
+{
+	handleAnswer();
+}
+
+void nao_gui::NaoGuessBox::handleAnswer()
+{
+	askQuestionBtn->setEnabled(false);
+	correctBtn->setEnabled(false);
+	incorrectBtn->setEnabled(false);
+
+	delete performedBehavior;
+}
+
+void nao_gui::NaoGuessBox::onGameStart()
+{
+	naoControl->say("Guess the emotion");
+
 	setEnabled(true);
 }

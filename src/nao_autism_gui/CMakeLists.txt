@@ -12,6 +12,7 @@ set(nao-autism_SRCS
 	src/main.cpp
 	src/NaoBehavior.cpp
 	src/NaoSpeech.cpp
+	src/NaoSpeechData.cpp
 	src/NaoAutismWindow.cpp
 	src/NaoGuessBox.cpp
 	src/NaoMimicBox.cpp
@@ -20,6 +21,7 @@ set(nao-autism_SRCS
 set(nao-autism_HDRS
 	include/NaoBehavior.h
 	include/NaoSpeech.h
+	include/NaoSpeechData.h
 	include/nao_gui/NaoAutismWindow.h
 	include/nao_gui/NaoGuessBox.h
 	include/nao_gui/NaoMimicBox.h

@@ -100,10 +100,6 @@ bool nao_control::NaoControl::perform(const std::string& behavior)
 	return returnBool;
 }
 
-bool nao_control::NaoControl::performWithInit(const std::string& behavior){
-	return perform(behavior) && performBehaviorInternal(INIT_BEHAVIOR);
-}
-
 bool nao_control::NaoControl::performPreviousBehavior()
 {
 	if (previousBehavior == NULL)
@@ -112,13 +108,6 @@ bool nao_control::NaoControl::performPreviousBehavior()
 	std::string behavior(*previousBehavior);
 
 	return perform(behavior);
-}
-
-bool nao_control::NaoControl::performPreviousBehaviorWithInit()
-{
-	bool returnBool = performPreviousBehavior();
-
-	return returnBool && perform(INIT_BEHAVIOR);
 }
 
 const std::string nao_control::NaoControl::getPreviousBehavior()

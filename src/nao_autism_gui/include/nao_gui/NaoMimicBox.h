@@ -11,6 +11,7 @@
 #include <nao_control/NaoControl.h>
 #include <NaoBehavior.h>
 
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QString>
 #include <QComboBox>
@@ -49,8 +50,9 @@ class NaoMimicBox : public QGroupBox
 	Q_OBJECT
 
 public:
-	NaoMimicBox(std::vector<NaoBehavior>& behaviors) : naoControl()
+	NaoMimicBox(nao_control::NaoControl* control, std::vector<NaoBehavior>& behaviors)
 	{
+		this->naoControl=control;
 		this->behaviors = behaviors;
 
 		setTitle(MIMIC_BOX_TITLE);
@@ -58,13 +60,12 @@ public:
 	}
 
 private:
-	nao_control::NaoControl naoControl;
+	nao_control::NaoControl* naoControl;
 
 	std::vector<NaoBehavior> behaviors;
 	NaoBehavior* currentBehavior;
 	NaoBehavior* performedBehavior;
 
-	QPushButton* startBtn;
 	QPushButton* endBtn;
 	QPushButton* behaviorBtn;
 	QPushButton* promptBtn;
@@ -103,8 +104,6 @@ private:
 
 	const std::string getTimestamp();
 
-	void rewardChild();
-
 private:
 	/**
 	 * This function will load the necessary NaoBehavior objects stored
@@ -139,15 +138,16 @@ private Q_SLOTS:
 	 * through the mimic process. This, hopefully, makes it much easier for the user.
 	 */
 	void behaviorButtonClicked();
-	void startButtonPressed();
 	void endButtonPressed();
 	void promptButtonPressed();
 	void correctButtonPressed();
 	void incorrectButtonPressed();
 
+	void onGameStart();
+
 Q_SIGNALS:
-	void mimicGameStarted();
-	void mimicGameEnded();
+	void gameStarted();
+	void gameEnded();
 
 };
 

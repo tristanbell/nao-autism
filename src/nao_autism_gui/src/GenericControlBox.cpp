@@ -45,7 +45,7 @@ void nao_gui::GenericControlBox::onSpeechPerformed()
 
 void nao_gui::GenericControlBox::performPreviousBehaviorClicked()
 {
-	naoControl->performPreviousBehaviorWithInit();
+	naoControl->performPreviousBehavior();
 }
 
 void nao_gui::GenericControlBox::performPreviousSpeechClicked()

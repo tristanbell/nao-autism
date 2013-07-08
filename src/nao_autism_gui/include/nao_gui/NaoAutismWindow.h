@@ -11,6 +11,7 @@
 #include <nao_control/NaoControl.h>
 #include <NaoBehavior.h>
 #include <NaoSpeech.h>
+#include <NaoSpeechData.h>
 
 #include <QWidget>
 #include <QString>
@@ -28,16 +29,30 @@ const QString WINDOW_TITLE = "GUI";
 class NaoAutismWindow : public QWidget
 {
 
+	Q_OBJECT;
+
 public:
-	NaoAutismWindow(std::vector<NaoBehavior>&);
+	NaoAutismWindow(std::vector<NaoBehavior>&, NaoSpeechData& data);
 
 private:
+	nao_control::NaoControl control;
+
 	/**
 	 * Called after the constructor has dealt with setting up the correct size/title
 	 * of the window. This initialises the core widgets of the application and adds them to
 	 * the layout.
 	 */
-	void init(std::vector<NaoBehavior>&);
+	void init(std::vector<NaoBehavior>&, NaoSpeechData& data);
+
+	void rewardChild();
+
+private Q_SLOTS:
+	void onGuessGameEnd();
+	void onMimicGameEnd();
+
+Q_SIGNALS:
+	void guessGameStart();
+	void mimicGameStart();
 
 };
 

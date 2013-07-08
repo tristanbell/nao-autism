@@ -7,43 +7,68 @@
 #include <QWidget>
 #include <QGridLayout>
 
-nao_gui::NaoAutismWindow::NaoAutismWindow(std::vector<NaoBehavior>& behaviors)
+#include <iostream>
+
+nao_gui::NaoAutismWindow::NaoAutismWindow(std::vector<NaoBehavior>&behaviors, NaoSpeechData& data) : control()
 {
-	init(behaviors);
+	init(behaviors, data);
 }
 
-void nao_gui::NaoAutismWindow::init(std::vector<NaoBehavior>& behaviors)
+void nao_gui::NaoAutismWindow::init(std::vector<NaoBehavior>& behaviors, NaoSpeechData& data)
 {
 	//Init qt-based things
 	QGridLayout* layout = new QGridLayout;
 
-	NaoGuessBox* guessBox = new NaoGuessBox(behaviors);
-	NaoMimicBox* mimicBox = new NaoMimicBox(behaviors);
+	NaoGuessBox* guessBox = new NaoGuessBox(&control, behaviors, data);
+	NaoMimicBox* mimicBox = new NaoMimicBox(&control, behaviors);
 	//GenericControlBox* controlBox = new GenericControlBox(&naoControl);
 
 	//Hook up relevant slots and signals
-	QObject::connect(mimicBox, SIGNAL(mimicGameStarted()),
-			guessBox, SLOT(onMimicGameStart()));
+	QObject::connect(guessBox, SIGNAL(gameEnded()),
+			this, SLOT(onGuessGameEnd()));
 
-	QObject::connect(mimicBox, SIGNAL(mimicGameEnded()),
-			guessBox, SLOT(onMimicGameEnd()));
+	QObject::connect(mimicBox, SIGNAL(gameEnded()),
+			this, SLOT(onMimicGameEnd()));
 
-	/*
-	QObject::connect(guessBox, SIGNAL(behaviorPerformed()),
-			controlBox, SLOT(onBehaviorPerformed()));
+	QObject::connect(this, SIGNAL(guessGameStart()),
+			guessBox, SLOT(onGameStart()));
 
-	QObject::connect(guessBox, SIGNAL(speechPerformed()),
-			controlBox, SLOT(onSpeechPerformed()));
-	QObject::connect(mimicBox, SIGNAL(speechPerformed()),
-			controlBox, SLOT(onSpeechPerformed()));*/
+	QObject::connect(this, SIGNAL(mimicGameStart()),
+			mimicBox, SLOT(onGameStart()));
 
 	layout->addWidget(guessBox, 0, 0);
 	layout->addWidget(mimicBox, 0, 1);
-	//layout->addItem(controlBox, 1, 0);
 
 	setLayout(layout);
 
 	setWindowTitle(WINDOW_TITLE);
 	setBaseSize(100, 100);
 	setVisible(true);
+}
+
+void nao_gui::NaoAutismWindow::onGuessGameEnd()
+{
+	rewardChild();
+
+	emit mimicGameStart();
+}
+
+void nao_gui::NaoAutismWindow::onMimicGameEnd()
+{
+	rewardChild();
+
+	emit guessGameStart();
+}
+
+void nao_gui::NaoAutismWindow::rewardChild()
+{
+	control.say("Lets dance");
+	long int rnd = static_cast<int>(((random() / static_cast<float>(RAND_MAX)) * MAX_REWARDS) + 1);
+
+	std::ostringstream sstream;
+	sstream << REWARD_BEHAVIOR_NAME << rnd;
+	std::string rewardBehavior = sstream.str();
+
+	control.perform(rewardBehavior);
+	control.say("You were great");
 }

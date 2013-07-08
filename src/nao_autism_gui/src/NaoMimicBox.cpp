@@ -10,15 +10,13 @@ const char* LOG_FILE_NAME = "timestamps.log";
 
 void nao_gui::NaoMimicBox::init()
 {
+	performedBehavior = NULL;
+
 	QGridLayout* layout = new QGridLayout;
 
 	QLabel* behaviorLabel = new QLabel(MIMIC_BEHAVIOR_DROPDOWN_LABEL);
 
-	startBtn = new QPushButton("Start game");
-	QObject::connect(startBtn, SIGNAL(clicked()), this, SLOT(startButtonPressed()));
-
 	endBtn = new QPushButton("End game");
-	endBtn->setEnabled(false);
 	QObject::connect(endBtn, SIGNAL(clicked()),
 			this, SLOT(endButtonPressed()));
 
@@ -49,17 +47,17 @@ void nao_gui::NaoMimicBox::init()
 			this, SLOT(incorrectButtonPressed()));
 	incorrectBtn->setEnabled(false);
 
-	layout->addWidget(startBtn, 0, 0);
-	layout->addWidget(endBtn, 0, 1);
-	layout->addWidget(behaviorLabel, 1, 0);
-	layout->addWidget(behaviorBox, 1, 1);
-	layout->addWidget(behaviorInfoLabel, 2, 0, 1, 2);
-	layout->addWidget(behaviorBtn, 3, 0);
-	layout->addWidget(promptBtn, 3, 1);
-	layout->addWidget(correctBtn, 4, 0);
-	layout->addWidget(incorrectBtn, 4, 1);
+	layout->addWidget(behaviorLabel, 0, 0);
+	layout->addWidget(behaviorBox, 0, 1);
+	layout->addWidget(behaviorInfoLabel, 1, 0, 1, 2);
+	layout->addWidget(behaviorBtn, 2, 0);
+	layout->addWidget(promptBtn, 2, 1);
+	layout->addWidget(correctBtn, 3, 0);
+	layout->addWidget(incorrectBtn, 3, 1);
+	layout->addWidget(endBtn, 4, 0, 1, 2);
 
 	setLayout(layout);
+	setEnabled(false);
 }
 
 void nao_gui::NaoMimicBox::fillBehaviorComboBox()
@@ -88,9 +86,13 @@ void nao_gui::NaoMimicBox::setBehaviorInfoLabel(NaoBehavior& behavior)
 	behaviorInfoLabel->setText(MIMIC_BEHAVIOR_INFO_LABEL + behavior.getQName());
 }
 
+/*
 void nao_gui::NaoMimicBox::startButtonPressed()
 {
-	naoControl.say("Guess the emotion is finished.");
+	endBtn->setEnabled(true);
+	controlLayout->setEnabled(true);
+
+	emit mimicGameStarted();
 
 	sleep(3);
 	rewardChild();
@@ -98,29 +100,30 @@ void nao_gui::NaoMimicBox::startButtonPressed()
 	sleep(3);
 	naoControl.say("Copy the robot!");
 	naoControl.perform("prompt_2");
+}*/
 
-	emit mimicGameStarted();
-
-	startBtn->setEnabled(false);
-	endBtn->setEnabled(true);
+void nao_gui::NaoMimicBox::onGameStart()
+{
+	setEnabled(true);
 }
 
 void nao_gui::NaoMimicBox::endButtonPressed()
 {
-	naoControl.say("Copy the robot is finished.");
-
-	sleep(3);
-	rewardChild();
-
-	startBtn->setEnabled(true);
-	endBtn->setEnabled(false);
-
 	behaviorBtn->setEnabled(true);
 	promptBtn->setEnabled(false);
 	correctBtn->setEnabled(false);
 	incorrectBtn->setEnabled(false);
 
-	emit mimicGameEnded();
+	setEnabled(false);
+
+	if (performedBehavior != NULL){
+		delete performedBehavior;
+		performedBehavior = NULL;
+	}
+
+	naoControl->say("Copy the robot is finished.");
+
+	emit gameEnded();
 }
 
 void nao_gui::NaoMimicBox::promptButtonPressed()
@@ -128,8 +131,8 @@ void nao_gui::NaoMimicBox::promptButtonPressed()
 	//Write to log file
 	writeToLogPrompt();
 
-	naoControl.say("Do the same");
-	naoControl.perform(nao_gui::MIMIC_PROMPT_BEHAVIOR);
+	naoControl->say("Do the same");
+	naoControl->perform(nao_gui::MIMIC_PROMPT_BEHAVIOR);
 
 	promptBtn->setEnabled(false);
 	behaviorBtn->setEnabled(false);
@@ -143,8 +146,8 @@ void nao_gui::NaoMimicBox::correctButtonPressed()
 	//Write to log file
 	writeToLogAnswer(true);
 
-	naoControl.say(nao_gui::MIMIC_CORRECT_ANSWER);
-	naoControl.perform(nao_gui::MIMIC_CORRECT_BEHAVIOR);
+	naoControl->say(nao_gui::MIMIC_CORRECT_ANSWER);
+	naoControl->perform(nao_gui::MIMIC_CORRECT_BEHAVIOR);
 
 	handleAnswerGiven();
 }
@@ -154,8 +157,8 @@ void nao_gui::NaoMimicBox::incorrectButtonPressed()
 	//write to log file
 	writeToLogAnswer(false);
 
-	naoControl.say(nao_gui::MIMIC_INCORRECT_ANSWER);
-	naoControl.perform(nao_gui::MIMIC_INCORRECT_BEHAVIOR);
+	naoControl->say(nao_gui::MIMIC_INCORRECT_ANSWER);
+	naoControl->perform(nao_gui::MIMIC_INCORRECT_BEHAVIOR);
 
 	handleAnswerGiven();
 }
@@ -166,18 +169,23 @@ void nao_gui::NaoMimicBox::handleAnswerGiven()
 	incorrectBtn->setEnabled(false);
 
 	behaviorBtn->setEnabled(true);
+
+	delete performedBehavior;
+	performedBehavior = NULL;
 }
 
 void nao_gui::NaoMimicBox::behaviorButtonClicked()
 {
-	naoControl.say(MIMIC_PERFORM + currentBehavior->getQName().toStdString());
-	naoControl.performWithInit(currentBehavior->getBehaviorName());
-
 	//Write to log file
 	writeToLogBehavior();
 
-	//Point to current behavior
-	performedBehavior = currentBehavior;
+	if (performedBehavior == NULL){
+		//Point to current behavior
+		performedBehavior = new NaoBehavior(*currentBehavior);
+	}
+
+	naoControl->say(MIMIC_PERFORM + performedBehavior->getQName().toStdString());
+	naoControl->perform(performedBehavior->getBehaviorName());
 
 	promptBtn->setEnabled(true);
 }
@@ -269,17 +277,4 @@ const std::string nao_gui::NaoMimicBox::getTimestamp()
 	strftime(buf, sizeof(buf), "%d-%m.%X", &tstruct);
 
 	return buf;
-}
-
-void nao_gui::NaoMimicBox::rewardChild()
-{
-	naoControl.say("Lets dance");
-	long int rnd = static_cast<int>(((random() / static_cast<float>(RAND_MAX)) * MAX_REWARDS) + 1);
-
-	std::ostringstream sstream;
-	sstream << REWARD_BEHAVIOR_NAME << rnd;
-	std::string rewardBehavior = sstream.str();
-
-	naoControl.perform(rewardBehavior);
-	naoControl.say("You were great");
 }

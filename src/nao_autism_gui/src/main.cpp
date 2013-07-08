@@ -1,4 +1,5 @@
 #include <nao_gui/NaoAutismWindow.h>
+#include <NaoSpeechData.h>
 
 #include <QApplication>
 #include <QPlastiqueStyle>
@@ -16,7 +17,7 @@
 
 using namespace std;
 
-void init(void);
+void init(const NaoSpeechData& data);
 void tfCallback(const tf::tfMessage msg);
 
 bool ready = false;
@@ -37,63 +38,34 @@ const string ARMS_UP_BEHAVIOR = "arms_up";
 const string TIME_TO_PLAY_SPEECH  = "Time to play";
 const string GUESS_THE_EMOTION_SPEECH = "Guess the emotion";
 
+const string KEY = "hello";
+
 int main(int argc, char** argv)
 {
 	//Init ros
 	ros::init(argc, argv, "nao_cntrl");
 
+	ROS_INFO("Loading speech data");
+	NaoSpeechData data = NaoSpeechData::load("speechFile.data");
+
 	//Prompt child to strike certain pose to initialise openni_tracker
-	init();
+	//init(data);
 
 	QApplication app(argc, argv);
 	app.setStyle(new QPlastiqueStyle);
 
-	//Create relevant NaoSpeech and NaoBehavior objects for application
-	NaoSpeech correctGeneric("Correct - Generic", "Well done! You guessed correctly.", "right_1");
-	NaoSpeech tryAgainGeneric("Try again - Generic", "Try again", "wrong_1");
-	NaoSpeech incorrectGeneric("Incorrect - Generic", "Lets try another", "wrong_1");
-
 	vector<NaoBehavior> behaviors;
 
-	vector<NaoSpeech> happySpeeches;
-
-	happySpeeches.push_back(correctGeneric);
-	happySpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was happy!", "right_1"));
-	happySpeeches.push_back(tryAgainGeneric);
-	happySpeeches.push_back(incorrectGeneric);
-	happySpeeches.push_back(NaoSpeech("Question 1", "Was I happy or sad?", "prompt_2"));
-	happySpeeches.push_back(NaoSpeech("Question 2", "Was I happy or scared?", "prompt_2"));
-
-	NaoBehavior happy("Happy", HAPPY_BEHAVIOR, happySpeeches);
-
-	vector<NaoSpeech> sadSpeeches;
-
-	sadSpeeches.push_back(correctGeneric);
-	sadSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was sad!", "right_1"));
-	sadSpeeches.push_back(tryAgainGeneric);
-	sadSpeeches.push_back(incorrectGeneric);
-	sadSpeeches.push_back(NaoSpeech("Question 1", "Was I sad or happy?", "prompt_2"));
-	sadSpeeches.push_back(NaoSpeech("Question 2", "Was I sad or scared?", "prompt_2"));
-
-	NaoBehavior sad("Sad", SAD_BEHAVIOR, sadSpeeches);
-
-	vector<NaoSpeech> scaredSpeeches;
-
-	scaredSpeeches.push_back(correctGeneric);
-	scaredSpeeches.push_back(NaoSpeech("Correct", "Well done! You guessed I was scared!", "right_1"));
-	scaredSpeeches.push_back(tryAgainGeneric);
-	scaredSpeeches.push_back(incorrectGeneric);
-	scaredSpeeches.push_back(NaoSpeech("Question 1", "Was I scared or happy?", "prompt_2"));
-	scaredSpeeches.push_back(NaoSpeech("Question 2", "Was I sad or scared?", "prompt_2"));
-
-	NaoBehavior scared("Scared", SCARED_BEHAVIOR, scaredSpeeches);
+	NaoBehavior happy("Happy", HAPPY_BEHAVIOR);
+	NaoBehavior sad("Sad", SAD_BEHAVIOR);
+	NaoBehavior scared("Scared", SCARED_BEHAVIOR);
 
 	behaviors.push_back(happy);
 	behaviors.push_back(sad);
 	behaviors.push_back(scared);
 
 	//Init window and execute application
-	nao_gui::NaoAutismWindow window(behaviors);
+	nao_gui::NaoAutismWindow window(behaviors, data);
 
 	//Everything is setup ok, start recording
 	ROS_INFO("Starting to record data.");
@@ -102,7 +74,7 @@ int main(int argc, char** argv)
 	return app.exec();
 }
 
-void init()
+void init(const NaoSpeechData& data)
 {
 	ROS_INFO("Initialising");
 
@@ -114,7 +86,7 @@ void init()
 	control.perform(STAND_UP_BEHAVIOR);
 
 	//Prompt child to strike standard pose for calibrating openni_tracker
-	control.say(MIMIC_ME_1);
+	control.say(data.get("INIT_POSE_PROMPT"));
 	control.perform(ARMS_UP_BEHAVIOR);
 
 	//Create subscriber to the tf topic
@@ -151,16 +123,16 @@ void init()
 	ROS_INFO("Initialising done.");
 
 	//Congratulate child and go back to standard pose
-	control.say(WELL_DONE_SPEECH);
+	control.say(data.get("INIT_WELL_DONE"));
 	control.perform(INIT_BEHAVIOR);
 
 	//Say let's play
-	control.say(TIME_TO_PLAY_SPEECH);
+	control.say(data.get("INIT_PLAY"));
 	control.perform("right_1");
 
 	sleep(3);
 
-	control.say(GUESS_THE_EMOTION_SPEECH);
+	control.say(data.get("GUESS_THE_EMOTION_START"));
 }
 
 void tfCallback(const tf::tfMessage msg)

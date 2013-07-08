@@ -25,9 +25,7 @@ public:
 	const std::string getPreviousSpeech();
 
 	bool perform(const std::string&);
-	bool performWithInit(const std::string&);
 	bool performPreviousBehavior();
-	bool performPreviousBehaviorWithInit();
 	const std::string getPreviousBehavior();
 
 	~NaoControl();

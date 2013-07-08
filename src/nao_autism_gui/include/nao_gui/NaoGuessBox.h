@@ -39,9 +39,11 @@ class NaoGuessBox : public QGroupBox
 	Q_OBJECT
 
 public:
-	NaoGuessBox(std::vector<NaoBehavior>& behaviors) : naoControl()
+	NaoGuessBox(nao_control::NaoControl* control, std::vector<NaoBehavior>& behaviors, NaoSpeechData& speechData)
 	{
+		this->naoControl=control;
 		this->behaviors=behaviors;
+		this->data=speechData;
 
 		behaviorPerformed = false;
 
@@ -50,23 +52,28 @@ public:
 	}
 
 private:
-	nao_control::NaoControl naoControl;
+	nao_control::NaoControl* naoControl;
 
 	std::vector<NaoBehavior> behaviors;
+	NaoSpeechData data;
 
 	/*
 	 * Storing pointers to the current behavior and speech means that
 	 * no 'search' is required each time the user clicks the button, the search
 	 * is done only when the combobox is changed.
 	 */
-	const NaoBehavior* currentBehavior;
-	const NaoSpeech* currentSpeech;
+	NaoBehavior* currentBehavior;
+	NaoBehavior* performedBehavior;
 
 	QComboBox* behaviorBox;
 	QLabel* behaviorInfoLabel;
 
-	QComboBox* speechBox;
-	QLabel* speechInfoLabel;
+	QPushButton* performBehaviorBtn;
+	QPushButton* askQuestionBtn;
+	QPushButton* correctBtn;
+	QPushButton* incorrectBtn;
+
+	QPushButton* endGameBtn;
 
 	bool behaviorPerformed;
 
@@ -81,24 +88,12 @@ private:
 	void addBehaviorsToComboBox();
 
 	/**
-	 * Given some NaoBehavior, this function will remove the old speeches contained
-	 * in the combobox (if there is any) and insert the ones relating to the NaoBehavior reference
-	 * argument. It will also initialise the currentSpeech pointer to point to the first entry in
-	 * this list.
-	 */
-	void addSpeechToComboBox(const NaoBehavior&);
-
-	/**
 	 * Given some NaoBehavior, this function will display the relevant information in the
 	 * behavior label (namely, its name).
 	 */
 	void setBehaviorInfoLabel(const NaoBehavior&);
 
-	/**
-	 * Given some NaoSpeech, this function will display the relevant information in the
-	 * speech label (namely, what the nao will say).
-	 */
-	void setSpeechInfoLabel(const NaoSpeech&);
+	void handleAnswer();
 
 public Q_SLOTS:
 	/*
@@ -109,7 +104,6 @@ public Q_SLOTS:
 	 * speech information label.
 	 */
 	void behaviorComboBoxChanged(const QString&);
-	void speechComboBoxChanged(const QString&);
 
 	/*
 	 * Button slots that get called when the relevant buttons are clicked, the
@@ -118,10 +112,15 @@ public Q_SLOTS:
 	 * perform the current speech that the currentSpeech pointer points to.
 	 */
 	void behaviorButtonClicked();
-	void speechButtonClicked();
+	void endButtonClicked();
+	void askQuestionButtonClicked();
+	void correctButtonClicked();
+	void incorrectButtonClicked();
 
-	void onMimicGameStart();
-	void onMimicGameEnd();
+	void onGameStart();
+
+Q_SIGNALS:
+	void gameEnded();
 
 };
 

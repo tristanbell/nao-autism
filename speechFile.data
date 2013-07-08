@@ -1,0 +1,13 @@
+INIT_POSE_PROMPT Hey copy me
+INIT_PLAY Time to play
+INIT_WELL_DONE Well done
+REWARD_DANCE_START Lets dance
+REWARD_DANCE_END You were great
+GUESS_EMOTION_START Guess the emotion
+GUESS_EMOTION_END Guess the emotion is finished
+MIMIC_START Copy the robot
+MIMIC_END Copy the robot is finished
+MIMIC_BEHAVIOR I am %1
+MIMIC_CORRECT Well done
+MIMIC_INCORRECT Better luck next time
+GUESS_QUESTION Was I %1 or %2?

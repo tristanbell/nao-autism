@@ -1,13 +1,11 @@
 #include <NaoBehavior.h>
 
-NaoBehavior::NaoBehavior(QString name, QString behaviorName, std::vector<NaoSpeech> allSpeech)
+NaoBehavior::NaoBehavior(QString name, QString behaviorName)
 {
 	this->qName = name;
 	this->qBehaviorName = behaviorName;
 
 	this->behaviorName = behaviorName.toStdString();
-
-	this->allSpeech = allSpeech;
 }
 
 QString NaoBehavior::getQName() const
@@ -23,9 +21,4 @@ QString NaoBehavior::getQBehaviorName() const
 std::string NaoBehavior::getBehaviorName() const
 {
 	return behaviorName;
-}
-
-const std::vector<NaoSpeech>& NaoBehavior::getSpeeches() const
-{
-	return allSpeech;
 }

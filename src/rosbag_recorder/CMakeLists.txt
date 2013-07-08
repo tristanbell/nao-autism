@@ -4,7 +4,7 @@ project(rosbag_recorder)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf std_msgs message_generation)
 find_package(Boost REQUIRED)
 
 ## System dependencies are found with CMake's conventions
@@ -21,11 +21,10 @@ find_package(Boost REQUIRED)
 #######################################
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  Record.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -35,10 +34,10 @@ find_package(Boost REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ###################################
 ## catkin specific configuration ##
@@ -52,7 +51,7 @@ catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES ${PROJECT_NAME}
 #  LIBRARIES learning_tf
-#  CATKIN_DEPENDS roscpp rospy tf turtlesim
+   CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
@@ -133,6 +132,11 @@ include_directories(include
 
 add_executable(run_rosbag_recorder src/recorder.cpp)
 target_link_libraries(run_rosbag_recorder ${catkin_LIBRARIES})
+add_dependencies(run_rosbag_recorder rosbag_recorder_generate_message_cpp)
+
+add_executable(recorder_test src/recorder_tester.cpp)
+target_link_libraries(recorder_test ${catkin_LIBRARIES})
+add_dependencies(recorder_test rosbag_recorder_generate_message_cpp)
 
 add_library(rosbag_recorder src/recorder.cpp include/recorder.h)
 target_link_libraries(rosbag_recorder ${catkin_LIBRARIES})

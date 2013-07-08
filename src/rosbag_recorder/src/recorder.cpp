@@ -6,12 +6,14 @@
  */
 
 #include <recorder.h>
+#include <boost/thread.hpp>
 
-const float Recorder::RECORDING_DURATION = 25.0;
+const float Recorder::RECORDING_DURATION = 25.0; // Currently unused
 const uint32_t Recorder::RECORDING_SIZE = 1073741824;
-int recorderResult;
+int recorderResult; // Currently unused
+bool currentlyRecording;
 
-Recorder::Recorder(std::string emotionName)
+Recorder::Recorder(void)
 {
 	// Set topics to subscribe to
 	std::vector<std::string> topicsToRecord(5);
@@ -22,7 +24,7 @@ Recorder::Recorder(std::string emotionName)
 	topicsToRecord.push_back("camera/depth_registered/camera_info");
 	options.topics = topicsToRecord;
 
-	options.prefix = "recordings/" + emotionName;
+	options.prefix = "recordings/";
 
 	/*// Set duration of recording
 	ros::Duration dur(RECORDING_DURATION);
@@ -37,20 +39,32 @@ void stop(void)
 	// Unimplemented
 }
 
-void Recorder::record(std::string emotionName)
+void Recorder::record(void)
 {
-	Recorder rec(emotionName);
-
+	Recorder rec;
 	rosbag::Recorder recorder(rec.options);
 	recorderResult = recorder.run();
+}
+
+
+void Recorder::recordCallback(const rosbag_recorder::Record::ConstPtr& msg)
+{
+	if (msg->record && !currentlyRecording) {
+		ROS_INFO("Recording");
+		currentlyRecording = true;
+		Recorder::record();
+	}
 }
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "recorder");
 
-	Recorder::record("happy");
+	ros::NodeHandle node;
 
-	return recorderResult;
+	ros::Subscriber sub = node.subscribe("record", 10, Recorder::recordCallback);
+	ros::spin();
+
+	return 0;
 }
 
 

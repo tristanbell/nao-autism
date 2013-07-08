@@ -10,19 +10,20 @@
 
 #include <rosbag/recorder.h>
 #include <ros/ros.h>
+#include <rosbag_recorder/Record.h>
 #include <vector>
 #include <string>
 
 class Recorder {
 public:
-	static void record(std::string emotionName);
+	static void recordCallback(const rosbag_recorder::Record::ConstPtr& msg);
+	static void record(void);
 	void stop(void);
 	static const float RECORDING_DURATION;
 	static const uint32_t RECORDING_SIZE;
 
 private:
-	Recorder(std::string emotion);
-
+	Recorder(void);
 	rosbag::RecorderOptions options;
 };
 

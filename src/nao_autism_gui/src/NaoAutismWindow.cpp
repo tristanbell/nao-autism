@@ -20,7 +20,7 @@ void nao_gui::NaoAutismWindow::init(std::vector<NaoBehavior>& behaviors, NaoSpee
 	QGridLayout* layout = new QGridLayout;
 
 	NaoGuessBox* guessBox = new NaoGuessBox(&control, behaviors, data);
-	NaoMimicBox* mimicBox = new NaoMimicBox(&control, behaviors);
+	NaoMimicBox* mimicBox = new NaoMimicBox(&control, behaviors, data);
 	//GenericControlBox* controlBox = new GenericControlBox(&naoControl);
 
 	//Hook up relevant slots and signals
@@ -44,6 +44,8 @@ void nao_gui::NaoAutismWindow::init(std::vector<NaoBehavior>& behaviors, NaoSpee
 	setWindowTitle(WINDOW_TITLE);
 	setBaseSize(100, 100);
 	setVisible(true);
+
+	emit guessGameStart();
 }
 
 void nao_gui::NaoAutismWindow::onGuessGameEnd()
@@ -63,12 +65,14 @@ void nao_gui::NaoAutismWindow::onMimicGameEnd()
 void nao_gui::NaoAutismWindow::rewardChild()
 {
 	control.say("Lets dance");
-	long int rnd = static_cast<int>(((random() / static_cast<float>(RAND_MAX)) * MAX_REWARDS) + 1);
+	int rnd = 1 + (rand() % MAX_REWARDS);
 
 	std::ostringstream sstream;
 	sstream << REWARD_BEHAVIOR_NAME << rnd;
 	std::string rewardBehavior = sstream.str();
 
 	control.perform(rewardBehavior);
+
 	control.say("You were great");
+	control.perform("clap");
 }

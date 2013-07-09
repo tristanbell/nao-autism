@@ -18,6 +18,9 @@
 
 #include <vector>
 
+const int MAX_REWARDS = 3;
+const std::string REWARD_BEHAVIOR_NAME = "reward_";
+
 namespace nao_gui{
 
 const QString WINDOW_TITLE = "GUI";

@@ -86,24 +86,14 @@ void nao_gui::NaoMimicBox::setBehaviorInfoLabel(NaoBehavior& behavior)
 	behaviorInfoLabel->setText(MIMIC_BEHAVIOR_INFO_LABEL + behavior.getQName());
 }
 
-/*
-void nao_gui::NaoMimicBox::startButtonPressed()
-{
-	endBtn->setEnabled(true);
-	controlLayout->setEnabled(true);
-
-	emit mimicGameStarted();
-
-	sleep(3);
-	rewardChild();
-
-	sleep(3);
-	naoControl.say("Copy the robot!");
-	naoControl.perform("prompt_2");
-}*/
-
 void nao_gui::NaoMimicBox::onGameStart()
 {
+	naoControl->say(data.get("MIMIC_START"));
+	sleep(1);
+
+	naoControl->say(data.get("MIMIC_INTRO_1"));
+	naoControl->perform("intro_mimic");
+
 	setEnabled(true);
 }
 
@@ -121,7 +111,7 @@ void nao_gui::NaoMimicBox::endButtonPressed()
 		performedBehavior = NULL;
 	}
 
-	naoControl->say("Copy the robot is finished.");
+	naoControl->say(data.get("MIMIC_END"));
 
 	emit gameEnded();
 }
@@ -131,11 +121,8 @@ void nao_gui::NaoMimicBox::promptButtonPressed()
 	//Write to log file
 	writeToLogPrompt();
 
-	naoControl->say("Do the same");
+	naoControl->say(data.get("MIMIC_PROMPT"));
 	naoControl->perform(nao_gui::MIMIC_PROMPT_BEHAVIOR);
-
-	promptBtn->setEnabled(false);
-	behaviorBtn->setEnabled(false);
 
 	correctBtn->setEnabled(true);
 	incorrectBtn->setEnabled(true);
@@ -146,7 +133,7 @@ void nao_gui::NaoMimicBox::correctButtonPressed()
 	//Write to log file
 	writeToLogAnswer(true);
 
-	naoControl->say(nao_gui::MIMIC_CORRECT_ANSWER);
+	naoControl->say(data.get("MIMIC_CORRECT"));
 	naoControl->perform(nao_gui::MIMIC_CORRECT_BEHAVIOR);
 
 	handleAnswerGiven();
@@ -157,7 +144,7 @@ void nao_gui::NaoMimicBox::incorrectButtonPressed()
 	//write to log file
 	writeToLogAnswer(false);
 
-	naoControl->say(nao_gui::MIMIC_INCORRECT_ANSWER);
+	naoControl->say(data.get("MIMIC_INCORRECT"));
 	naoControl->perform(nao_gui::MIMIC_INCORRECT_BEHAVIOR);
 
 	handleAnswerGiven();
@@ -165,10 +152,9 @@ void nao_gui::NaoMimicBox::incorrectButtonPressed()
 
 void nao_gui::NaoMimicBox::handleAnswerGiven()
 {
+	promptBtn->setEnabled(false);
 	correctBtn->setEnabled(false);
 	incorrectBtn->setEnabled(false);
-
-	behaviorBtn->setEnabled(true);
 
 	delete performedBehavior;
 	performedBehavior = NULL;
@@ -184,7 +170,7 @@ void nao_gui::NaoMimicBox::behaviorButtonClicked()
 		performedBehavior = new NaoBehavior(*currentBehavior);
 	}
 
-	naoControl->say(MIMIC_PERFORM + performedBehavior->getQName().toStdString());
+	naoControl->say(swap(data.get("MIMIC_BEHAVIOR"), "%1", performedBehavior->getQName().toStdString()));
 	naoControl->perform(performedBehavior->getBehaviorName());
 
 	promptBtn->setEnabled(true);
@@ -200,7 +186,6 @@ void nao_gui::NaoMimicBox::behaviorComboBoxChanged(const QString& string)
 			setBehaviorInfoLabel(current);
 
 			delete currentBehavior;
-
 			currentBehavior = new NaoBehavior(current);
 
 			break;
@@ -277,4 +262,19 @@ const std::string nao_gui::NaoMimicBox::getTimestamp()
 	strftime(buf, sizeof(buf), "%d-%m.%X", &tstruct);
 
 	return buf;
+}
+
+std::string nao_gui::NaoMimicBox::swap(const std::string& base, const std::string& toSwap,
+		const std::string& other)
+{
+	int index = base.find(toSwap);
+
+	if (index == -1)
+		return base;
+
+	std::ostringstream ss;
+
+	ss << base.substr(0, index) << other << base.substr(index + toSwap.size());
+
+	return ss.str();
 }

@@ -10,6 +10,7 @@
 
 #include <nao_control/NaoControl.h>
 #include <NaoBehavior.h>
+#include <NaoSpeechData.h>
 
 #include <QGridLayout>
 #include <QGroupBox>
@@ -29,12 +30,6 @@ namespace nao_gui{
 
 const QString MIMIC_BOX_TITLE = "Mimic";
 
-const std::string MIMIC_PERFORM = "I am ";
-const std::string MIMIC_PROMPT = "Can you show me ";
-
-const std::string MIMIC_CORRECT_ANSWER = "Well done";
-const std::string MIMIC_INCORRECT_ANSWER = "Better luck next time";
-
 const QString MIMIC_BEHAVIOR_DROPDOWN_LABEL = "Behavior:";
 const QString MIMIC_BEHAVIOR_INFO_LABEL = "The following behavior will be performed: ";
 
@@ -42,18 +37,16 @@ const std::string MIMIC_PROMPT_BEHAVIOR = "prompt_1";
 const std::string MIMIC_CORRECT_BEHAVIOR = "right_1";
 const std::string MIMIC_INCORRECT_BEHAVIOR = "wrong_1";
 
-const int MAX_REWARDS = 3;
-const std::string REWARD_BEHAVIOR_NAME = "reward_";
-
 class NaoMimicBox : public QGroupBox
 {
 	Q_OBJECT
 
 public:
-	NaoMimicBox(nao_control::NaoControl* control, std::vector<NaoBehavior>& behaviors)
+	NaoMimicBox(nao_control::NaoControl* control, std::vector<NaoBehavior>& behaviors, NaoSpeechData& data)
 	{
 		this->naoControl=control;
 		this->behaviors = behaviors;
+		this->data=data;
 
 		setTitle(MIMIC_BOX_TITLE);
 		init();
@@ -63,6 +56,7 @@ private:
 	nao_control::NaoControl* naoControl;
 
 	std::vector<NaoBehavior> behaviors;
+	NaoSpeechData data;
 	NaoBehavior* currentBehavior;
 	NaoBehavior* performedBehavior;
 
@@ -122,6 +116,8 @@ private:
 	 * Re-enables the relevant buttons when either the correct or incorrect buttons are clicked.
 	 */
 	void handleAnswerGiven();
+
+	std::string swap(const std::string& base, const std::string& toSwap, const std::string& other);
 
 private Q_SLOTS:
 	/*

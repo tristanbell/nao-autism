@@ -10,6 +10,7 @@
 
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
+//#include <rosbag_recorder/Record.h>
 
 #include <recorder.h>
 
@@ -49,7 +50,7 @@ int main(int argc, char** argv)
 	NaoSpeechData data = NaoSpeechData::load("speechFile.data");
 
 	//Prompt child to strike certain pose to initialise openni_tracker
-	//init(data);
+	init(data);
 
 	QApplication app(argc, argv);
 	app.setStyle(new QPlastiqueStyle);
@@ -69,7 +70,16 @@ int main(int argc, char** argv)
 
 	//Everything is setup ok, start recording
 	ROS_INFO("Starting to record data.");
-//	Recorder::record("data");
+//	ros::NodeHandle nh;
+//	ros::Publisher pub = nh.advertise<rosbag_recorder::Record>("record", 10);
+
+//	while (pub.getNumSubscribers() == 0){
+//		sleep(1);
+//	}
+
+//	rosbag_recorder::Record msg;
+//	msg.record = true;
+//	pub.publish(msg);
 
 	return app.exec();
 }
@@ -107,7 +117,7 @@ void init(const NaoSpeechData& data)
 	}
 	ROS_INFO("/tf topic publisher active.");
 
-	/*
+	ROS_INFO("Waiting for a head tf to be published.");
 	while (!ready){
 		ros::spinOnce();
 
@@ -118,7 +128,7 @@ void init(const NaoSpeechData& data)
 		}
 
 		loopRate.sleep();
-	}*/
+	}
 
 	ROS_INFO("Initialising done.");
 
@@ -130,16 +140,14 @@ void init(const NaoSpeechData& data)
 	control.say(data.get("INIT_PLAY"));
 	control.perform("right_1");
 
-	sleep(3);
-
-	control.say(data.get("GUESS_THE_EMOTION_START"));
+	sleep(1);
 }
 
 void tfCallback(const tf::tfMessage msg)
 {
 	//Allow for application to continue when message containing tf for head_1 is recieved.
 	geometry_msgs::TransformStamped transform = msg.transforms[0];
-	if (transform.child_frame_id.find("head_1") != std::string::npos){
+	if (transform.child_frame_id.find("head_") != std::string::npos){
 		ROS_INFO("/tf is now publishing, ready to go.");
 
 		ready = true;

@@ -32,8 +32,6 @@ const QString BEHAVIOR_INFO_LABEL = "The following behavior will be performed: "
 const QString SPEECH_DROPDOWN_LABEL = "Speech:";
 const QString SPEECH_INFO_LABEL = "Nao will say the following: ";
 
-const std::string NEXT_EMOTION_SPEECH = "Next emotion";
-
 class NaoGuessBox : public QGroupBox
 {
 	Q_OBJECT
@@ -62,15 +60,18 @@ private:
 	 * no 'search' is required each time the user clicks the button, the search
 	 * is done only when the combobox is changed.
 	 */
+	int currentBehaviorIndex;
 	NaoBehavior* currentBehavior;
+
+	int performedBehaviorIndex;
 	NaoBehavior* performedBehavior;
 
 	QComboBox* behaviorBox;
 	QLabel* behaviorInfoLabel;
 
 	QPushButton* performBehaviorBtn;
-	QPushButton* askQuestionBtn;
 	QPushButton* correctBtn;
+	QPushButton* tryAgainBtn;
 	QPushButton* incorrectBtn;
 
 	QPushButton* endGameBtn;
@@ -95,6 +96,10 @@ private:
 
 	void handleAnswer();
 
+	void askQuestion();
+
+	std::string swap(const std::string& base, const std::string& toSwap, const std::string& other);
+
 public Q_SLOTS:
 	/*
 	 * Combobox slots that get called when the relevant combobox's index
@@ -113,8 +118,8 @@ public Q_SLOTS:
 	 */
 	void behaviorButtonClicked();
 	void endButtonClicked();
-	void askQuestionButtonClicked();
 	void correctButtonClicked();
+	void tryAgainButtonClicked();
 	void incorrectButtonClicked();
 
 	void onGameStart();

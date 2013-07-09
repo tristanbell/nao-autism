@@ -4,10 +4,17 @@ INIT_WELL_DONE Well done
 REWARD_DANCE_START Lets dance
 REWARD_DANCE_END You were great
 GUESS_EMOTION_START Guess the emotion
+GUESS_INTRO_1 The robot will do an emotion and you will have to guess what it is
+GUESS_NEXT Next emotion
+GUESS_CORRECT Well done, you guessed the robot was %1
+GUESS_TRY_AGAIN Try again
+GUESS_INCORRECT Lets try another emotion
 GUESS_EMOTION_END Guess the emotion is finished
 MIMIC_START Copy the robot
+MIMIC_INTRO_1 The robot will do an emotion and you will have to copy the emotion when the robot asks you to
+MIMIC_PROMPT Do the same
 MIMIC_END Copy the robot is finished
-MIMIC_BEHAVIOR I am %1
+MIMIC_BEHAVIOR The robot is %1
 MIMIC_CORRECT Well done
 MIMIC_INCORRECT Better luck next time
-GUESS_QUESTION Was I %1 or %2?
+GUESS_QUESTION Was the robot %1 or %2?

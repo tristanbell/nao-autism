@@ -10,7 +10,7 @@
 
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
-//#include <rosbag_recorder/Record.h>
+#include <rosbag_recorder/Record.h>
 
 #include <recorder.h>
 
@@ -52,6 +52,8 @@ int main(int argc, char** argv)
 	//Prompt child to strike certain pose to initialise openni_tracker
 	init(data);
 
+	ROS_INFO("Let's go");
+
 	QApplication app(argc, argv);
 	app.setStyle(new QPlastiqueStyle);
 
@@ -60,26 +62,30 @@ int main(int argc, char** argv)
 	NaoBehavior happy("Happy", HAPPY_BEHAVIOR);
 	NaoBehavior sad("Sad", SAD_BEHAVIOR);
 	NaoBehavior scared("Scared", SCARED_BEHAVIOR);
+	NaoBehavior angry("Angry", ANGRY_BEHAVIOR);
 
 	behaviors.push_back(happy);
 	behaviors.push_back(sad);
 	behaviors.push_back(scared);
+	behaviors.push_back(angry);
+
 
 	//Init window and execute application
 	nao_gui::NaoAutismWindow window(behaviors, data);
 
 	//Everything is setup ok, start recording
 	ROS_INFO("Starting to record data.");
-//	ros::NodeHandle nh;
-//	ros::Publisher pub = nh.advertise<rosbag_recorder::Record>("record", 10);
+	ros::NodeHandle nh;
+	ros::Publisher pub = nh.advertise<rosbag_recorder::Record>("record", 10);
 
-//	while (pub.getNumSubscribers() == 0){
-//		sleep(1);
-//	}
+	ros::Rate rate(10);
+	while (pub.getNumSubscribers() == 0){
+		rate.sleep();
+	}
 
-//	rosbag_recorder::Record msg;
-//	msg.record = true;
-//	pub.publish(msg);
+	rosbag_recorder::Record msg;
+	msg.record = true;
+	pub.publish(msg);
 
 	return app.exec();
 }

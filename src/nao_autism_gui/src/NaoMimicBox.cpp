@@ -162,13 +162,13 @@ void nao_gui::NaoMimicBox::handleAnswerGiven()
 
 void nao_gui::NaoMimicBox::behaviorButtonClicked()
 {
-	//Write to log file
-	writeToLogBehavior();
-
 	if (performedBehavior == NULL){
 		//Point to current behavior
 		performedBehavior = new NaoBehavior(*currentBehavior);
 	}
+
+	//Write to log file
+	writeToLogBehavior();
 
 	naoControl->say(swap(data.get("MIMIC_BEHAVIOR"), "%1", performedBehavior->getQName().toStdString()));
 	naoControl->perform(performedBehavior->getBehaviorName());
@@ -203,7 +203,7 @@ void nao_gui::NaoMimicBox::writeToLogBehavior()
 
 	stream << "BEHAVIOR_BUTTON ";
 
-	stream << "BEHAVIOR_NAME=" << currentBehavior->getBehaviorName() << ' ';
+	stream << "BEHAVIOR_NAME=" << performedBehavior->getBehaviorName() << ' ';
 
 	stream << "PROMPT_ENABLED=";
 
@@ -228,7 +228,7 @@ void nao_gui::NaoMimicBox::writeToLogPrompt()
 
 	stream << "PROMPT_BUTTON ";
 
-	stream << "BEHAVIOR_NAME=" << currentBehavior->getBehaviorName() << '\n';
+	stream << "BEHAVIOR_NAME=" << performedBehavior->getBehaviorName() << '\n';
 
 	stream.close();
 }
@@ -247,7 +247,7 @@ void nao_gui::NaoMimicBox::writeToLogAnswer(const bool& ans)
 		stream << "INCORRECT_BUTTON ";
 	}
 
-	stream << "BEHAVIOR_NAME=" << currentBehavior->getBehaviorName() << '\n';
+	stream << "BEHAVIOR_NAME=" << performedBehavior->getBehaviorName() << '\n';
 
 	stream.close();
 }

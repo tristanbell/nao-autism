@@ -14,7 +14,7 @@ const std::string NaoSpeechData::get(const std::string& key) const
 	try{
 		return speechMap.at(key);
 	}catch(std::out_of_range& rng){
-		return "";
+		return "Speech not found";
 	}
 }
 

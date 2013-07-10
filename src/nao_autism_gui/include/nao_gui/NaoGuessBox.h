@@ -70,6 +70,7 @@ private:
 	QLabel* behaviorInfoLabel;
 
 	QPushButton* performBehaviorBtn;
+	QPushButton* askAgainBtn;
 	QPushButton* correctBtn;
 	QPushButton* tryAgainBtn;
 	QPushButton* incorrectBtn;
@@ -117,6 +118,7 @@ public Q_SLOTS:
 	 * perform the current speech that the currentSpeech pointer points to.
 	 */
 	void behaviorButtonClicked();
+	void askAgainButtonClicked();
 	void endButtonClicked();
 	void correctButtonClicked();
 	void tryAgainButtonClicked();

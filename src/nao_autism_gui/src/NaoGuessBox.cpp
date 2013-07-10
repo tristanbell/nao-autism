@@ -30,6 +30,11 @@ void nao_gui::NaoGuessBox::init()
 	QObject::connect(performBehaviorBtn, SIGNAL(clicked()),
 			this, SLOT(behaviorButtonClicked()));
 
+	askAgainBtn = new QPushButton("Ask again");
+	askAgainBtn->setEnabled(false);
+	QObject::connect(askAgainBtn, SIGNAL(clicked()),
+				this, SLOT(askAgainButtonClicked()));
+
 	correctBtn = new QPushButton("Correct answer");
 	correctBtn->setEnabled(false);
 	QObject::connect(correctBtn, SIGNAL(clicked()),
@@ -53,6 +58,7 @@ void nao_gui::NaoGuessBox::init()
 	layout->addWidget(behaviorBox, 0, 1);
 	layout->addWidget(behaviorInfoLabel, 1, 0, 1, 2);
 	layout->addWidget(performBehaviorBtn, 2, 0);
+	layout->addWidget(askAgainBtn, 2, 1);
 	layout->addWidget(correctBtn, 3, 0);
 	layout->addWidget(tryAgainBtn, 3, 1);
 	layout->addWidget(incorrectBtn, 4, 0);
@@ -119,6 +125,7 @@ void nao_gui::NaoGuessBox::endButtonClicked()
 {
 	behaviorPerformed = false;
 
+	askAgainBtn->setEnabled(false);
 	performBehaviorBtn->setEnabled(true);
 	correctBtn->setEnabled(false);
 	tryAgainBtn->setEnabled(false);
@@ -158,8 +165,14 @@ void nao_gui::NaoGuessBox::behaviorButtonClicked()
 	}
 }
 
+void nao_gui::NaoGuessBox::askAgainButtonClicked()
+{
+	nao_gui::NaoGuessBox::askQuestion();
+}
+
 void nao_gui::NaoGuessBox::askQuestion()
 {
+	askAgainBtn->setEnabled(true);
 	correctBtn->setEnabled(true);
 	tryAgainBtn->setEnabled(true);
 	incorrectBtn->setEnabled(true);
@@ -237,6 +250,7 @@ void nao_gui::NaoGuessBox::handleAnswer()
 	correctBtn->setEnabled(false);
 	tryAgainBtn->setEnabled(false);
 	incorrectBtn->setEnabled(false);
+	askAgainBtn->setEnabled(false);
 
 	delete performedBehavior;
 	performedBehavior = NULL;

@@ -8,7 +8,7 @@
 #ifndef DATALOADER_H_
 #define DATALOADER_H_
 
-#include <poseData.h>
+#include <PoseData.h>
 #include <vector>
 #include <string>
 

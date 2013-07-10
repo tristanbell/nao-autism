@@ -6,7 +6,7 @@
  */
 
 #include "learner.h"
-#include <poseData.h>
+#include <PoseData.h>
 #include <cmath>
 
 #include <boost/foreach.hpp>

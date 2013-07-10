@@ -4,12 +4,46 @@ float PoseDataPoint::getDistance(const DataPoint& p) const
 {
 	const PoseDataPoint& otherPoint = dynamic_cast<const PoseDataPoint&>(p);
 
+	float sumDistance = 0.0;
 
+	std::vector<geometry_msgs::Quaternion> rotations1 = getRotations();
+	std::vector<geometry_msgs::Quaternion> rotations2 = otherPoint.getRotations();
 
-	return -1;
+	for (int i = 0; i < rotations1.size(); i++) {
+		sumDistance += PoseDataPoint::getDistance(rotations1[i], rotations2[i]);
+	}
+
+	return sumDistance;
 }
 
-std::vector<geometry_msgs::Quaternion> PoseDataPoint::getRotations()
+std::vector<float> PoseDataPoint::getPosition() const
+{
+	std::vector<float> pos;
+	std::vector<geometry_msgs::Quaternion> rotations = getRotations();
+
+	for (int i=0;i<rotations.size();i++){
+		geometry_msgs::Quaternion current = rotations[i];
+
+		pos.push_back(current.x);
+		pos.push_back(current.y);
+		pos.push_back(current.z);
+		pos.push_back(current.w);
+	}
+
+	return pos;
+}
+
+float PoseDataPoint::getDistance(geometry_msgs::Quaternion rotation1, geometry_msgs::Quaternion rotation2)
+{
+	float xDist = std::abs(rotation1.x - rotation2.x);
+	float yDist = std::abs(rotation1.y - rotation2.y);
+	float zDist = std::abs(rotation1.z - rotation2.z);
+	float wDist = std::abs(rotation1.w - rotation2.w);
+
+	return xDist + yDist + zDist + wDist;
+}
+
+std::vector<geometry_msgs::Quaternion> PoseDataPoint::getRotations() const
 {
 	std::vector<geometry_msgs::Quaternion> rotations(15);
 

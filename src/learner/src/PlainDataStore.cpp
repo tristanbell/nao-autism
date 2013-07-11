@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 {
 	TrainingData poses =
 			DataLoader::loadData(
-					"/home/tristan/nao-autism/recordings/_2013-07-10-11-38-34_1.bag");
+					"/home/tristan/nao-autism/recordings/_2013-07-10-11-53-47_1.bag");
 
 	PlainDataStore store(poses);
 
@@ -158,12 +158,30 @@ int main(int argc, char **argv)
 	DataPoint *point1 = &posePoint;
 	DataPoint *point2 = store.getDataPoint(point1);
 
-	std::vector<DataPoint*> allThePoints = store.getDataPoints(point1, 5);
+	TrainingData allThePoints = store.getDataPoints(point1, 5);
 
 //	PoseDataPoint *posey = dynamic_cast<PoseDataPoint*>(point2);
 	std::vector<PoseDataPoint*> posey = convertToPoses(allThePoints);
 
-	/*for (int i = 0; i < posey.size(); i++) {
+	std::string timestamp =
+			"[1373453545.520850339] BEHAVIOR_BUTTON BEHAVIOR_NAME=happy_1 PROMPT_ENABLED=FALSE\n[1373453575.833215096] PROMPT_BUTTON BEHAVIOR_NAME=happy_1\n[1373453581.945690118] CORRECT_BUTTON BEHAVIOR_NAME=happy_1";
+	std::string timestamp2 =
+			"[1373453706.369043172] BEHAVIOR_BUTTON BEHAVIOR_NAME=scared_1 PROMPT_ENABLED=FALSE\n[1373453714.641741474] PROMPT_BUTTON BEHAVIOR_NAME=scared_1\n[1373453719.298156493] CORRECT_BUTTON BEHAVIOR_NAME=scared_1";
+	ros::Time::init();
+	ros::Time start;
+	ros::Time end;
+	std::string behavior;
+
+	DataLoader::parseTimestamp(timestamp2, start, end, behavior);
+
+	std::cout << std::endl << "Start: " << start << ", End: " << end << std::endl;
+	std::cout << behavior << std::endl << std::endl;
+
+	TrainingData subset = DataLoader::getDataSubset(poses, start, end);
+	posey.clear();
+	posey = convertToPoses(subset);
+
+	for (int i = 0; i < subset.size(); i++) {
 		std::cout << posey[i]->poseData.head << std::endl;
 		std::cout << posey[i]->poseData.neck << std::endl;
 		std::cout << posey[i]->poseData.torso << std::endl;
@@ -179,6 +197,6 @@ int main(int argc, char **argv)
 		std::cout << posey[i]->poseData.right_hip << std::endl;
 		std::cout << posey[i]->poseData.right_knee << std::endl;
 		std::cout << posey[i]->poseData.right_foot << std::endl;
-	}*/
+	}
 }
 

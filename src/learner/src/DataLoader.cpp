@@ -7,12 +7,15 @@
 
 #include <DataLoader.h>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 #include <geometry_msgs/TransformStamped.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <tf/tfMessage.h>
 
 #include <iostream>
+#include <stdlib.h>
+#include <math.h>
 
 std::vector<DataPoint*> DataLoader::loadData(std::string filename)
 {
@@ -33,7 +36,8 @@ std::vector<DataPoint*> DataLoader::loadData(std::string filename)
 				geometry_msgs::TransformStamped fullTransform = (i->transforms)[0];
 
 				// Only deal with transforms from joints (not camera frame transforms)
-				if (fullTransform.child_frame_id.find("camera") == std::string::npos) {
+				if (fullTransform.child_frame_id.find("camera") == std::string::npos &&
+						fullTransform.header.frame_id == "/openni_depth_frame") {
 					// If 'transforms' is full of joint data, create a PoseDataPoint object
 					// from it, push it onto 'poses', then reset it.
 					if (transforms.size() == 15) {
@@ -81,6 +85,67 @@ PoseData *DataLoader::extractPose(
 	pose->right_foot = transforms[14];
 
 	return pose;
+}
+
+/*
+ * Takes a single timestamp (3 lines: behavior, prompt, correct/incorrect)
+ * and modifies start and end times accordingly.
+ */
+void DataLoader::parseTimestamp(std::string timestamp, ros::Time &start, ros::Time &end, std::string &behaviorName)
+{
+	using namespace std;
+	using namespace boost;
+
+	vector <string> fields;
+
+	// If you get an error here, it's just eclipse being a dick. Works if you compile from terminal.
+	split(fields, timestamp, is_any_of("\n"));
+
+//	for (int i = 0; i < fields.size(); i++) {
+//		cout << "Line " << i << ": " << fields[i] << endl;
+//	}
+
+	double startTime = atof((fields[1].substr(1, 20)).c_str()) - 1.5;
+	double endTime = atof((fields[2].substr(1, 20)).c_str());
+
+	ros::Time::init();
+	ros::Time s(startTime);
+	ros::Time e(endTime);
+
+	start = s;
+	end = e;
+
+	vector <string> behavior;
+	// Filter out everything but the behavior name (hacky, i know)
+	split(behavior, fields[0], is_any_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=[]. "), token_compress_on);
+
+	for (int i = 0; i < behavior.size(); i++) {
+		if (behavior[i].size() > 0) {
+			behaviorName = behavior[i];
+			break;
+		}
+	}
+}
+
+std::vector<DataPoint*> DataLoader::getDataSubset(std::vector<DataPoint*> &data, ros::Time start, ros::Time end)
+{
+	std::vector<DataPoint*> subset;
+
+	double startTime = floor(start.toSec());
+	double endTime = floor(end.toSec());
+
+	// Find and push all DataPoints between start and end times
+	BOOST_FOREACH(DataPoint *point, data) {
+		double time = floor(point->getTimestamp().toSec());
+
+		if (time >= startTime && time <= endTime) {
+			subset.push_back(point);
+		} else if (time > endTime) {
+			break;
+		}
+	}
+
+	return subset;
 }
 
 /*int main(int argc, char **argv) {

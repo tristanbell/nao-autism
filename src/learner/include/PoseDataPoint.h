@@ -47,6 +47,7 @@ public:
 
 	virtual std::vector<float> getPosition() const;
 	virtual float getDistance(const DataPoint&) const;
+	virtual ros::Time getTimestamp() const;
 
 	short getClassification() const
 	{

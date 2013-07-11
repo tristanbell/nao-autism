@@ -9,6 +9,7 @@
 #define DATAPOINT_H_
 
 #include <vector>
+#include <ros/ros.h>
 
 /**
  * This class acts as an interface that distance-based
@@ -18,6 +19,8 @@ class DataPoint
 {
 
 public:
+	virtual ~DataPoint() { }
+
 	/**
 	 * Given some other DataPoint, this function should calculate
 	 * the distance between them.
@@ -33,6 +36,12 @@ public:
 	 * Returns: A vector of floats defining its position in n-dimensional space.
 	 */
 	virtual std::vector<float> getPosition() const = 0;
+
+	/*
+	 * Returns the time this data point was originally created (ros::Time for
+	 * now, should be abstracted away from ros later).
+	 */
+	virtual ros::Time getTimestamp() const = 0;
 
 	/**
 	 * Checks whether the two DataPoints are equal.

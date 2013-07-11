@@ -65,3 +65,8 @@ std::vector<geometry_msgs::Quaternion> PoseDataPoint::getRotations() const
 
 	return rotations;
 }
+
+ros::Time PoseDataPoint::getTimestamp() const
+{
+	return poseData.head.header.stamp;
+}

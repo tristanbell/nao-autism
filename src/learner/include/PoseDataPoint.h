@@ -16,31 +16,31 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Quaternion.h>
 
-class PoseDataPoint : public DataPoint
+class PoseDataPoint: public DataPoint
 {
 
 public:
-	PoseDataPoint(PoseData data) : classification(-1)
+	PoseDataPoint(PoseData data) :
+			classification(-1), poseData(data)
 	{
-		poseData = data;
 	}
 
-	PoseDataPoint(const PoseData& data) : classification(-1),
-										  poseData(data)
+	/*PoseDataPoint(const PoseData& data) :
+			classification(-1), poseData(data)
 	{
 
-	}
+	}*/
 
-	PoseDataPoint(PoseData data, short classification)
+	PoseDataPoint(PoseData data, short classification) :
+			poseData(data)
 	{
-		poseData = data;
 		this->classification = classification;
 	}
 
-	PoseDataPoint(const PoseData& data, const short& classification)
+	PoseDataPoint(const PoseData& data, const short& classification) :
+		poseData(data)
 	{
 		this->classification = classification;
-		data=poseData;
 	}
 
 	virtual std::vector<float> getPosition() const;
@@ -50,15 +50,16 @@ public:
 	{
 		return classification;
 	}
-
-private:
 	const PoseData poseData;
+private:
+//	const PoseData poseData;
 	short classification;
 
 	/**
 	 * Get the Quaternion element out of a TransformStamped (just for cleaner code).
 	 */
-	geometry_msgs::Quaternion extractRotation(geometry_msgs::TransformStamped joint) const
+	geometry_msgs::Quaternion extractRotation(
+			geometry_msgs::TransformStamped joint) const
 	{
 		return joint.transform.rotation;
 	}
@@ -72,7 +73,8 @@ private:
 	 * Get the sum distance between two Quaternions for nearest-neighbour
 	 * calculations.
 	 */
-	static float getDistance(geometry_msgs::Quaternion rotation1, geometry_msgs::Quaternion rotation2);
+	static float getDistance(geometry_msgs::Quaternion rotation1,
+			geometry_msgs::Quaternion rotation2);
 
 	short setClassification(short int classification)
 	{

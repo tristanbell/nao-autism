@@ -129,15 +129,22 @@ include_directories(include
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-set(learner_SRCS src/dataLoader.cpp
-		 src/PoseDataPoint.cpp)
-set(learner_HDRS include/dataLoader.h
+set(learner_SRCS
+		 src/DataLoader.cpp
+		 src/PoseDataPoint.cpp
+		 src/PlainDataStore.cpp)
+set(learner_HDRS
+		 include/DataLoader.h
 		 include/DataPoint.h
-		 include/PoseDataPoint.h)
+		 include/PoseDataPoint.h
+		 include/PoseData.h
+		 include/DataStore.h)
 
-add_executable(dataLoader ${learner_SRCS} ${learner_HDRS})
-target_link_libraries(dataLoader ${catkin_LIBRARIES})
+#add_executable(dataLoader ${learner_SRCS} ${learner_HDRS})
+#target_link_libraries(dataLoader ${catkin_LIBRARIES})
 
+add_executable(PlainDataStoreTest ${learner_SRCS} ${learner_HDRS})
+target_link_libraries(PlainDataStoreTest ${catkin_LIBRARIES})
 
 
 

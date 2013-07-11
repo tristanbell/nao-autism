@@ -8,6 +8,7 @@
 #include <DataLoader.h>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <geometry_msgs/TransformStamped.h>
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
@@ -17,16 +18,18 @@
 #include <stdlib.h>
 #include <math.h>
 
-std::vector<DataPoint*> DataLoader::loadData(std::string filename)
+using namespace std;
+
+vector<DataPoint*> DataLoader::loadData(string filename)
 {
-	std::vector<DataPoint*> poses;
+	vector<DataPoint*> poses;
 
 	try {
 		rosbag::Bag bag(filename);
 		rosbag::View view(bag, rosbag::TopicQuery("/tf"));
 
 		// Vector for generating PoseData (re-used when each is created)
-		std::vector<geometry_msgs::TransformStamped> transforms;
+		vector<geometry_msgs::TransformStamped> transforms;
 
 		// Iterate over all messages published to this topic
 		BOOST_FOREACH(rosbag::MessageInstance const m, view) {
@@ -36,7 +39,7 @@ std::vector<DataPoint*> DataLoader::loadData(std::string filename)
 				geometry_msgs::TransformStamped fullTransform = (i->transforms)[0];
 
 				// Only deal with transforms from joints (not camera frame transforms)
-				if (fullTransform.child_frame_id.find("camera") == std::string::npos &&
+				if (fullTransform.child_frame_id.find("camera") == string::npos &&
 						fullTransform.header.frame_id == "/openni_depth_frame") {
 					// If 'transforms' is full of joint data, create a PoseDataPoint object
 					// from it, push it onto 'poses', then reset it.
@@ -62,7 +65,7 @@ std::vector<DataPoint*> DataLoader::loadData(std::string filename)
 }
 
 PoseData *DataLoader::extractPose(
-		const std::vector<geometry_msgs::TransformStamped> transforms)
+		const vector<geometry_msgs::TransformStamped> transforms)
 {
 	PoseData *pose = new PoseData;
 
@@ -87,13 +90,65 @@ PoseData *DataLoader::extractPose(
 	return pose;
 }
 
+string DataLoader::findFile(string directory, boost::posix_time::ptime timestamp)
+{
+	using namespace boost::filesystem;
+
+//	cout << timestamp.date() << " " << timestamp.time_of_day() << endl << endl;
+
+	path filepath(directory);
+	if (!exists(filepath)) {
+		// TODO: throw exception
+	}
+
+	vector<path> paths;
+	copy(directory_iterator(filepath), directory_iterator(),
+			back_inserter(paths));
+	sort(paths.begin(), paths.end());
+
+	vector<boost::posix_time::ptime> times;
+	/*for (vector<path>::const_iterator it(paths.begin()); it != paths.end(); ++it) {
+		cout << "   " << *it << '\n';
+	}*/
+
+	int latestIndex = 0;
+
+	for (int i = 0; i < paths.size(); i++) {
+		if (i == paths.size() - 1) break;
+
+		string fileTime = paths[i].filename().generic_string();
+		fileTime = fileTime.substr(1, 19);
+		fileTime[10] = ' ';
+		fileTime[13] = ':';
+		fileTime[16] = ':';
+
+//		cout << fileTime << endl;
+		boost::posix_time::ptime fTime(boost::posix_time::time_from_string(fileTime));
+//		cout << (timestamp < fTime ? "Too late" : "Too early") << endl;
+
+		if (timestamp < fTime) {
+			latestIndex = i;
+			break;
+		}
+	}
+
+	if (latestIndex == 0) {
+		// Earliest recording is later than the timestamp, so not found.
+		// Should probably throw an exception instead.
+		return "";
+	} else {
+		return paths[latestIndex-1].generic_string();
+	}
+
+
+}
+
 /*
  * Takes a single timestamp (3 lines: behavior, prompt, correct/incorrect)
  * and modifies start and end times accordingly.
  */
-void DataLoader::parseTimestamp(std::string timestamp, ros::Time &start, ros::Time &end, std::string &behaviorName)
+void DataLoader::parseTimestamp(string timestamp, ros::Time &start, ros::Time &end, string &behaviorName)
 {
-	using namespace std;
 	using namespace boost;
 
 	vector <string> fields;
@@ -127,9 +182,9 @@ void DataLoader::parseTimestamp(std::string timestamp, ros::Time &start, ros::Ti
 	}
 }
 
-std::vector<DataPoint*> DataLoader::getDataSubset(std::vector<DataPoint*> &data, ros::Time start, ros::Time end)
+vector<DataPoint*> DataLoader::getDataSubset(vector<DataPoint*> &data, ros::Time start, ros::Time end)
 {
-	std::vector<DataPoint*> subset;
+	vector<DataPoint*> subset;
 
 	double startTime = floor(start.toSec());
 	double endTime = floor(end.toSec());
@@ -153,26 +208,26 @@ std::vector<DataPoint*> DataLoader::getDataSubset(std::vector<DataPoint*> &data,
 
 	ROS_INFO("Starting...");
 
-	std::vector<DataPoint*> poses = DataLoader::loadData(
+	vector<DataPoint*> poses = DataLoader::loadData(
 			"/home/tristan/nao-autism/recordings/happy_2013-07-03-09-58-54.bag");
 
 	for (int i = 0; i < poses.size(); i++) {
-		std::cout << "	POSE " << i << ":" << std::endl;
-		std::cout << poses[i].head << std::endl;
-		std::cout << poses[i].neck << std::endl;
-		std::cout << poses[i].torso << std::endl;
-		std::cout << poses[i].left_shoulder << std::endl;
-		std::cout << poses[i].left_elbow << std::endl;
-		std::cout << poses[i].left_hand << std::endl;
-		std::cout << poses[i].right_shoulder << std::endl;
-		std::cout << poses[i].right_elbow << std::endl;
-		std::cout << poses[i].right_hand << std::endl;
-		std::cout << poses[i].left_hip << std::endl;
-		std::cout << poses[i].left_knee << std::endl;
-		std::cout << poses[i].left_foot << std::endl;
-		std::cout << poses[i].right_hip << std::endl;
-		std::cout << poses[i].right_knee << std::endl;
-		std::cout << poses[i].right_foot << std::endl;
+		cout << "	POSE " << i << ":" << endl;
+		cout << poses[i].head << endl;
+		cout << poses[i].neck << endl;
+		cout << poses[i].torso << endl;
+		cout << poses[i].left_shoulder << endl;
+		cout << poses[i].left_elbow << endl;
+		cout << poses[i].left_hand << endl;
+		cout << poses[i].right_shoulder << endl;
+		cout << poses[i].right_elbow << endl;
+		cout << poses[i].right_hand << endl;
+		cout << poses[i].left_hip << endl;
+		cout << poses[i].left_knee << endl;
+		cout << poses[i].left_foot << endl;
+		cout << poses[i].right_hip << endl;
+		cout << poses[i].right_knee << endl;
+		cout << poses[i].right_foot << endl;
 	}
 
 	ROS_INFO("Finished!");

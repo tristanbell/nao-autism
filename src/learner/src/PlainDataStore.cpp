@@ -130,12 +130,29 @@ std::vector<PoseDataPoint*> convertToPoses(std::vector<DataPoint*> points)
 
 int main(int argc, char **argv)
 {
+	// Test timestamp taken from log file
+	std::string timestamp =
+			"[1373453545.520850339] BEHAVIOR_BUTTON BEHAVIOR_NAME=happy_1 PROMPT_ENABLED=FALSE\n[1373453575.833215096] PROMPT_BUTTON BEHAVIOR_NAME=happy_1\n[1373453581.945690118] CORRECT_BUTTON BEHAVIOR_NAME=happy_1";
+
+	// Get the start and end times for the timestamp
+	ros::Time::init();
+	ros::Time start;
+	ros::Time end;
+	std::string behavior;
+	DataLoader::parseTimestamp(timestamp, start, end, behavior);
+
+	std::cout << std::endl << "Start: " << start << ", End: " << end << std::endl;
+	std::cout << behavior << std::endl << std::endl;
+
+	// Find the file that contains the timestamp
+	std::string filepath = DataLoader::findFile("/home/tristan/nao-autism/recordings/", start.toBoost() + boost::posix_time::hours(1));
+	std::cout << filepath << std::endl;
+
+	// Construct training data from that file
 	TrainingData poses =
-			DataLoader::loadData(
-					"/home/tristan/nao-autism/recordings/_2013-07-10-11-53-47_1.bag");
+			DataLoader::loadData(filepath);
 
-	PlainDataStore store(poses);
-
+	// Create a test PoseData object to compare against (all 0s)
 	PoseData test_pose;
 	geometry_msgs::TransformStamped transform;
 	test_pose.head = transform;
@@ -156,32 +173,19 @@ int main(int argc, char **argv)
 
 	PoseDataPoint posePoint(test_pose);
 	DataPoint *point1 = &posePoint;
-	DataPoint *point2 = store.getDataPoint(point1);
+//	DataPoint *point2 = store.getDataPoint(point1);
 
+	// Get the subset of data that corresponds to the timestamp
+	TrainingData subset = DataLoader::getDataSubset(poses, start, end);
+
+	// Create a PlainDataStore from that subset
+	PlainDataStore store(subset);
+	// Get the 5 nearest neighbours to the test point
 	TrainingData allThePoints = store.getDataPoints(point1, 5);
 
-//	PoseDataPoint *posey = dynamic_cast<PoseDataPoint*>(point2);
-	std::vector<PoseDataPoint*> posey = convertToPoses(allThePoints);
+//	std::vector<PoseDataPoint*> posey = convertToPoses(subset);
 
-	std::string timestamp =
-			"[1373453545.520850339] BEHAVIOR_BUTTON BEHAVIOR_NAME=happy_1 PROMPT_ENABLED=FALSE\n[1373453575.833215096] PROMPT_BUTTON BEHAVIOR_NAME=happy_1\n[1373453581.945690118] CORRECT_BUTTON BEHAVIOR_NAME=happy_1";
-	std::string timestamp2 =
-			"[1373453706.369043172] BEHAVIOR_BUTTON BEHAVIOR_NAME=scared_1 PROMPT_ENABLED=FALSE\n[1373453714.641741474] PROMPT_BUTTON BEHAVIOR_NAME=scared_1\n[1373453719.298156493] CORRECT_BUTTON BEHAVIOR_NAME=scared_1";
-	ros::Time::init();
-	ros::Time start;
-	ros::Time end;
-	std::string behavior;
-
-	DataLoader::parseTimestamp(timestamp2, start, end, behavior);
-
-	std::cout << std::endl << "Start: " << start << ", End: " << end << std::endl;
-	std::cout << behavior << std::endl << std::endl;
-
-	TrainingData subset = DataLoader::getDataSubset(poses, start, end);
-	posey.clear();
-	posey = convertToPoses(subset);
-
-	for (int i = 0; i < subset.size(); i++) {
+	/*for (int i = 0; i < subset.size(); i++) {
 		std::cout << posey[i]->poseData.head << std::endl;
 		std::cout << posey[i]->poseData.neck << std::endl;
 		std::cout << posey[i]->poseData.torso << std::endl;
@@ -197,6 +201,6 @@ int main(int argc, char **argv)
 		std::cout << posey[i]->poseData.right_hip << std::endl;
 		std::cout << posey[i]->poseData.right_knee << std::endl;
 		std::cout << posey[i]->poseData.right_foot << std::endl;
-	}
+	}*/
 }
 

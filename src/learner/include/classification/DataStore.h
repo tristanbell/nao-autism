@@ -12,7 +12,7 @@
 #ifndef DATASTORE_H_
 #define DATASTORE_H_
 
-#include <DataPoint.h>
+#include <classification/DataPoint.h>
 #include <vector>
 
 namespace classification{

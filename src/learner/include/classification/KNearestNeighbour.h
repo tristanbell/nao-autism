@@ -10,7 +10,7 @@
 
 #define DEFAULT_VALUE_K 5 //default value of k
 
-#include <Learner.h>
+#include <classification/Learner.h>
 
 namespace classification{
 

@@ -10,7 +10,7 @@
 
 #include <PoseData.h>
 
-#include <DataPoint.h>
+#include <classification/DataPoint.h>
 
 #include <tf/tfMessage.h>
 #include <geometry_msgs/Transform.h>

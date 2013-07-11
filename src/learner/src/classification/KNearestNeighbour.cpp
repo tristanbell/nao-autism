@@ -1,4 +1,4 @@
-#include <KNearestNeighbour.h>
+#include <classification/KNearestNeighbour.h>
 
 #include <map>
 #include <exception>
@@ -28,7 +28,7 @@ int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k
 		}
 	}
 
-	//Find class that has the highest vote
+	//Find class that has the highest vote by iterating through the map
 	std::map<int, int>::iterator it = classificationVote.begin();
 	std::pair<int, int> pair = *it;
 

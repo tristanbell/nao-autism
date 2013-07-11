@@ -5,7 +5,7 @@
  *      Author: tristan
  */
 
-#include <DataLoader.h>
+#include <classification/DataLoader.h>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>

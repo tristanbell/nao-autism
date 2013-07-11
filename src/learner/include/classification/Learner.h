@@ -8,8 +8,8 @@
 #ifndef LEARNER_H_
 #define LEARNER_H_
 
-#include <DataPoint.h>
-#include <DataStore.h>
+#include <classification/DataPoint.h>
+#include <classification/DataStore.h>
 
 namespace classification{
 

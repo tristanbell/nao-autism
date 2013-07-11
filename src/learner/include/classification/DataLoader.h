@@ -9,7 +9,7 @@
 #define DATALOADER_H_
 
 #include <PoseData.h>
-#include <PoseDataPoint.h>
+#include <classification/PoseDataPoint.h>
 #include <vector>
 #include <string>
 

@@ -1,4 +1,4 @@
-#include <PoseDataPoint.h>
+#include <classification/PoseDataPoint.h>
 
 float classification::PoseDataPoint::getDistance(const DataPoint& p) const
 {

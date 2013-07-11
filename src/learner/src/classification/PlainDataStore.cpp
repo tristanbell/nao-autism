@@ -7,11 +7,11 @@
  *      Author: tristan
  */
 
-#include <DataStore.h>
-#include <DataPoint.h>
+#include <classification/DataStore.h>
+#include <classification/DataPoint.h>
 #include <PoseData.h>
-#include <PoseDataPoint.h>
-#include <DataLoader.h>
+#include <classification/PoseDataPoint.h>
+#include <classification/DataLoader.h>
 #include <geometry_msgs/TransformStamped.h>
 
 #include <boost/foreach.hpp>

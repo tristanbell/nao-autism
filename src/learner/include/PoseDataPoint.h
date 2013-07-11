@@ -16,12 +16,14 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Quaternion.h>
 
+namespace classification{
+
 class PoseDataPoint: public DataPoint
 {
 
 public:
 	PoseDataPoint(PoseData data) :
-			classification(-1), poseData(data)
+			poseData(data)
 	{
 	}
 
@@ -36,29 +38,22 @@ public:
 	PoseDataPoint(PoseData data, short classification) :
 			poseData(data)
 	{
-		this->classification = classification;
+		setClassification(classification);
 	}
 
 	PoseDataPoint(const PoseData& data, const short& classification) :
 		poseData(data)
 	{
-		this->classification = classification;
+		setClassification(classification);
 	}
 
 	virtual std::vector<float> getPosition() const;
 	virtual float getDistance(const DataPoint&) const;
 	virtual ros::Time getTimestamp() const;
 
-	short getClassification() const
-	{
-		return classification;
-	}
-
 	// Made public for testing purposes
 	const PoseData poseData;
 private:
-//	const PoseData poseData;
-	short classification;
 
 	/**
 	 * Get the Quaternion element out of a TransformStamped (just for cleaner code).
@@ -81,12 +76,8 @@ private:
 	static float getDistance(geometry_msgs::Quaternion rotation1,
 			geometry_msgs::Quaternion rotation2);
 
-	// Should this be void instead of short?
-	short setClassification(short int classification)
-	{
-		this->classification = classification;
-	}
-
 };
+
+}
 
 #endif /* POSEDATAPOINT_H_ */

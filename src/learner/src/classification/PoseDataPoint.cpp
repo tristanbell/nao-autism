@@ -1,6 +1,6 @@
 #include <PoseDataPoint.h>
 
-float PoseDataPoint::getDistance(const DataPoint& p) const
+float classification::PoseDataPoint::getDistance(const DataPoint& p) const
 {
 	const PoseDataPoint& otherPoint = dynamic_cast<const PoseDataPoint&>(p);
 
@@ -16,7 +16,7 @@ float PoseDataPoint::getDistance(const DataPoint& p) const
 	return sumDistance;
 }
 
-std::vector<float> PoseDataPoint::getPosition() const
+std::vector<float> classification::PoseDataPoint::getPosition() const
 {
 	std::vector<float> pos;
 	std::vector<geometry_msgs::Quaternion> rotations = getRotations();
@@ -33,7 +33,7 @@ std::vector<float> PoseDataPoint::getPosition() const
 	return pos;
 }
 
-float PoseDataPoint::getDistance(geometry_msgs::Quaternion rotation1, geometry_msgs::Quaternion rotation2)
+float classification::PoseDataPoint::getDistance(geometry_msgs::Quaternion rotation1, geometry_msgs::Quaternion rotation2)
 {
 	float xDist = std::abs(rotation1.x - rotation2.x);
 	float yDist = std::abs(rotation1.y - rotation2.y);
@@ -43,7 +43,7 @@ float PoseDataPoint::getDistance(geometry_msgs::Quaternion rotation1, geometry_m
 	return xDist + yDist + zDist + wDist;
 }
 
-std::vector<geometry_msgs::Quaternion> PoseDataPoint::getRotations() const
+std::vector<geometry_msgs::Quaternion> classification::PoseDataPoint::getRotations() const
 {
 	std::vector<geometry_msgs::Quaternion> rotations(15);
 
@@ -66,7 +66,7 @@ std::vector<geometry_msgs::Quaternion> PoseDataPoint::getRotations() const
 	return rotations;
 }
 
-ros::Time PoseDataPoint::getTimestamp() const
+ros::Time classification::PoseDataPoint::getTimestamp() const
 {
 	return poseData.head.header.stamp;
 }

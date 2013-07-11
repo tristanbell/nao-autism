@@ -11,6 +11,8 @@
 #include <vector>
 #include <ros/ros.h>
 
+namespace classification{
+
 /**
  * This class acts as an interface that distance-based
  * machine learning algorithms will use (such as K-Nearest neighbour).
@@ -20,6 +22,16 @@ class DataPoint
 
 public:
 	virtual ~DataPoint() { }
+
+	void setClassification(short int classification)
+	{
+		this->classification = classification;
+	}
+
+	short getClassification() const
+	{
+		return classification;
+	}
 
 	/**
 	 * Given some other DataPoint, this function should calculate
@@ -50,6 +62,12 @@ public:
 		return getDistance(p) == 0;
 	}
 
+private:
+
+	short classification;
+
 };
+
+}
 
 #endif /* DATAPOINT_H_ */

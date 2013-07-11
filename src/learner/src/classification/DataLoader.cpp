@@ -20,7 +20,7 @@
 
 using namespace std;
 
-vector<DataPoint*> DataLoader::loadData(string filename)
+vector<classification::DataPoint*> classification::DataLoader::loadData(string filename)
 {
 	vector<DataPoint*> poses;
 
@@ -64,7 +64,7 @@ vector<DataPoint*> DataLoader::loadData(string filename)
 	return poses;
 }
 
-PoseData *DataLoader::extractPose(
+PoseData *classification::DataLoader::extractPose(
 		const vector<geometry_msgs::TransformStamped> transforms)
 {
 	PoseData *pose = new PoseData;
@@ -90,7 +90,7 @@ PoseData *DataLoader::extractPose(
 	return pose;
 }
 
-string DataLoader::findFile(string directory, boost::posix_time::ptime timestamp)
+string classification::DataLoader::findFile(string directory, boost::posix_time::ptime timestamp)
 {
 	using namespace boost::filesystem;
 
@@ -147,7 +147,7 @@ string DataLoader::findFile(string directory, boost::posix_time::ptime timestamp
  * Takes a single timestamp (3 lines: behavior, prompt, correct/incorrect)
  * and modifies start and end times accordingly.
  */
-void DataLoader::parseTimestamp(string timestamp, ros::Time &start, ros::Time &end, string &behaviorName)
+void classification::DataLoader::parseTimestamp(string timestamp, ros::Time &start, ros::Time &end, string &behaviorName)
 {
 	using namespace boost;
 
@@ -182,7 +182,7 @@ void DataLoader::parseTimestamp(string timestamp, ros::Time &start, ros::Time &e
 	}
 }
 
-vector<DataPoint*> DataLoader::getDataSubset(vector<DataPoint*> &data, ros::Time start, ros::Time end)
+vector<classification::DataPoint*> classification::DataLoader::getDataSubset(vector<DataPoint*> &data, ros::Time start, ros::Time end)
 {
 	vector<DataPoint*> subset;
 

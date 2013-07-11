@@ -15,6 +15,8 @@
 #include <DataPoint.h>
 #include <vector>
 
+namespace classification{
+
 typedef std::vector<DataPoint*> TrainingData;
 
 class DataStore {
@@ -33,6 +35,8 @@ public:
 protected:
 	TrainingData trainingData;
 };
+
+}
 
 
 #endif /* DATASTORE_H_ */

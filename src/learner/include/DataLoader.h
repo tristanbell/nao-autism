@@ -17,6 +17,8 @@
 
 #include <ros/ros.h>
 
+namespace classification{
+
 class DataLoader
 {
 public:
@@ -32,5 +34,7 @@ public:
 private:
 	static PoseData *extractPose(const std::vector<geometry_msgs::TransformStamped>);
 };
+
+}
 
 #endif /* DATALOADER_H_ */

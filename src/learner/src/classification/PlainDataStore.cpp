@@ -17,10 +17,10 @@
 #include <boost/foreach.hpp>
 #include <iostream>
 
-class PlainDataStore: public DataStore
+class PlainDataStore: public classification::DataStore
 {
 public:
-	PlainDataStore(TrainingData data)
+	PlainDataStore(classification::TrainingData data)
 	{
 		this->trainingData = data;
 	}
@@ -28,7 +28,7 @@ public:
 	/*
 	 * Gets the closest data point to otherPoint in the training data.
 	 */
-	DataPoint *getDataPoint(const DataPoint *otherPoint) const
+	classification::DataPoint *getDataPoint(const classification::DataPoint *otherPoint) const
 	{
 		float shortestDistance = otherPoint->getDistance(*trainingData[0]);
 		int resultIndex = 0;
@@ -48,8 +48,8 @@ public:
 	/*
 	 * Gets the closest data point in the training data that isn't in pointsToIgnore.
 	 */
-	DataPoint *getDataPoint(const DataPoint *otherPoint,
-			std::vector<DataPoint*> pointsToIgnore) const
+	classification::DataPoint *getDataPoint(const classification::DataPoint *otherPoint,
+			std::vector<classification::DataPoint*> pointsToIgnore) const
 	{
 		float shortestDistance = otherPoint->getDistance(*trainingData[0]);
 		int resultIndex = 0;
@@ -74,7 +74,7 @@ public:
 	/*
 	 * Gets k closest DataPoints to otherPoint.
 	 */
-	std::vector<DataPoint*> getDataPoints(const DataPoint *otherPoint,
+	std::vector<classification::DataPoint*> getDataPoints(const classification::DataPoint *otherPoint,
 			int k) const
 	{
 		if (k > trainingData.size()) {
@@ -84,10 +84,10 @@ public:
 					<< std::endl;
 		}
 
-		std::vector<DataPoint*> points;
+		std::vector<classification::DataPoint*> points;
 
 		while (k > 0) {
-			DataPoint *nearest = getDataPoint(otherPoint, points);
+			classification::DataPoint *nearest = getDataPoint(otherPoint, points);
 			points.push_back(nearest);
 			k--;
 		}
@@ -99,7 +99,7 @@ public:
 	 * Returns true if p is in points. I must be the size of points for the
 	 * recursion to work for the whole array.
 	 */
-	static bool isIn(DataPoint *p, std::vector<DataPoint*> &points, int i)
+	static bool isIn(classification::DataPoint *p, std::vector<classification::DataPoint*> &points, int i)
 	{
 		if (i <= -1)
 			return false;
@@ -112,12 +112,12 @@ public:
 /*
  * Convert a vector of DataPoint*s to PoseDataPoint*s.
  */
-std::vector<PoseDataPoint*> convertToPoses(std::vector<DataPoint*> points)
+std::vector<classification::PoseDataPoint*> convertToPoses(std::vector<classification::DataPoint*> points)
 {
-	std::vector<PoseDataPoint*> conversion;
+	std::vector<classification::PoseDataPoint*> conversion;
 
 	for (int i = 0; i < points.size(); i++) {
-		PoseDataPoint *p = dynamic_cast<PoseDataPoint*>(points[i]);
+		classification::PoseDataPoint *p = dynamic_cast<classification::PoseDataPoint*>(points[i]);
 		if (p) {
 			conversion.push_back(p);
 		} else {
@@ -139,18 +139,18 @@ int main(int argc, char **argv)
 	ros::Time start;
 	ros::Time end;
 	std::string behavior;
-	DataLoader::parseTimestamp(timestamp, start, end, behavior);
+	classification::DataLoader::parseTimestamp(timestamp, start, end, behavior);
 
 	std::cout << std::endl << "Start: " << start << ", End: " << end << std::endl;
 	std::cout << behavior << std::endl << std::endl;
 
 	// Find the file that contains the timestamp
-	std::string filepath = DataLoader::findFile("/home/tristan/nao-autism/recordings/", start.toBoost() + boost::posix_time::hours(1));
+	std::string filepath = classification::DataLoader::findFile("/home/tristan/nao-autism/recordings/", start.toBoost() + boost::posix_time::hours(1));
 	std::cout << filepath << std::endl;
 
 	// Construct training data from that file
-	TrainingData poses =
-			DataLoader::loadData(filepath);
+	classification::TrainingData poses =
+			classification::DataLoader::loadData(filepath);
 
 	// Create a test PoseData object to compare against (all 0s)
 	PoseData test_pose;
@@ -171,17 +171,17 @@ int main(int argc, char **argv)
 	test_pose.right_knee = transform;
 	test_pose.right_foot = transform;
 
-	PoseDataPoint posePoint(test_pose);
-	DataPoint *point1 = &posePoint;
+	classification::PoseDataPoint posePoint(test_pose);
+	classification::DataPoint *point1 = &posePoint;
 //	DataPoint *point2 = store.getDataPoint(point1);
 
 	// Get the subset of data that corresponds to the timestamp
-	TrainingData subset = DataLoader::getDataSubset(poses, start, end);
+	classification::TrainingData subset = classification::DataLoader::getDataSubset(poses, start, end);
 
 	// Create a PlainDataStore from that subset
 	PlainDataStore store(subset);
 	// Get the 5 nearest neighbours to the test point
-	TrainingData allThePoints = store.getDataPoints(point1, 5);
+	classification::TrainingData allThePoints = store.getDataPoints(point1, 5);
 
 //	std::vector<PoseDataPoint*> posey = convertToPoses(subset);
 

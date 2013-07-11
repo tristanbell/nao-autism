@@ -29,6 +29,8 @@ set(nao-autism_HDRS
 
 qt4_wrap_cpp(nao-autism_MOCS ${nao-autism_HDRS})
 
+add_dependencies(rosbag_recorder rosbag_recorder_gencpp)
+
 catkin_package(
    INCLUDE_DIRS include
 )

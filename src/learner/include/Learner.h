@@ -17,7 +17,7 @@ class Learner
 {
 
 public:
-	Learner(const DataStore* dataStore)
+	Learner(DataStore* dataStore)
 	{
 		this->dataStore = dataStore;
 	}

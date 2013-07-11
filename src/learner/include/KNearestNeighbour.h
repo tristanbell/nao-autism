@@ -18,15 +18,13 @@ class KNearestNeighbour : public Learner
 {
 
 public:
-	KNearestNeighbour(const DataStore* ds)
+	KNearestNeighbour(DataStore* ds) : classification::Learner(ds)
 	{
-			dataStore = ds;
 			defaultK = DEFAULT_VALUE_K;
 	}
 
-	KNearestNeighbour(const DataStore* ds, int k)
+	KNearestNeighbour(DataStore* ds, int k) : classification::Learner(ds)
 	{
-		dataStore = ds;
 		defaultK = k;
 	}
 

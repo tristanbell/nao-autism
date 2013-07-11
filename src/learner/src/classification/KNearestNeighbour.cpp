@@ -10,7 +10,7 @@ int classification::KNearestNeighbour::classify(const DataPoint* p) const
 
 int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k) const
 {
-	std::vector<DataPoint*> points = dataStore->getDataPoints(p, k);
+	std::vector<DataPoint*> points = getDatastore()->getDataPoints(p, k);
 
 	//Construct map containing pairs of class to number of votes (where the class is the key)
 	std::map<int, int> classificationVote;
@@ -20,10 +20,10 @@ int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k
 
 		if (p != NULL){
 			try{
-				int& pClassNum = classificationVote.at(p->classification);
+				int& pClassNum = classificationVote.at(p->getClassification());
 				pClassNum++;
 			}catch(std::out_of_range* oof){
-				classificationVote.insert(std::pair<int, int>(p->classification, 1));
+				classificationVote.insert(std::pair<int, int>(p->getClassification(), 1));
 			}
 		}
 	}

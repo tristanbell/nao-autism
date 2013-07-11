@@ -130,15 +130,18 @@ include_directories(include
 # catkin_add_nosetests(test)
 
 set(learner_SRCS
-		 src/DataLoader.cpp
-		 src/PoseDataPoint.cpp
-		 src/PlainDataStore.cpp)
+		 src/classification/DataLoader.cpp
+		 src/classification/KNearestNeighbour.cpp
+		 src/classification/PlainDataStore.cpp
+	  	 src/classification/PoseDataPoint.cpp)
 set(learner_HDRS
-		 include/DataLoader.h
-		 include/DataPoint.h
-		 include/PoseDataPoint.h
 		 include/PoseData.h
-		 include/DataStore.h)
+		 include/classification/DataLoader.h
+		 include/classification/DataPoint.h
+		 include/classification/DataStore.h
+		 include/classification/KNearestNeighbour.h
+		 include/classification/Learner.h
+		 include/classification/PoseDataPoint.h)
 
 #add_executable(dataLoader ${learner_SRCS} ${learner_HDRS})
 #target_link_libraries(dataLoader ${catkin_LIBRARIES})

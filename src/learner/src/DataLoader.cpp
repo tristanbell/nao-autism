@@ -34,7 +34,7 @@ std::vector<DataPoint*> DataLoader::loadData(std::string filename)
 
 				// Only deal with transforms from joints (not camera frame transforms)
 				if (fullTransform.child_frame_id.find("camera") == std::string::npos) {
-					// If 'transforms' is full of joint data, create a PoseData object
+					// If 'transforms' is full of joint data, create a PoseDataPoint object
 					// from it, push it onto 'poses', then reset it.
 					if (transforms.size() == 15) {
 						PoseData *p = extractPose(transforms);
@@ -88,7 +88,7 @@ PoseData *DataLoader::extractPose(
 
 	ROS_INFO("Starting...");
 
-	std::vector<PoseData*> poses = DataLoader::loadData(
+	std::vector<DataPoint*> poses = DataLoader::loadData(
 			"/home/tristan/nao-autism/recordings/happy_2013-07-03-09-58-54.bag");
 
 	for (int i = 0; i < poses.size(); i++) {

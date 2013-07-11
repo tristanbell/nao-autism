@@ -71,6 +71,9 @@ public:
 		return trainingData[resultIndex];
 	}
 
+	/*
+	 * Gets k closest DataPoints to otherPoint.
+	 */
 	std::vector<DataPoint*> getDataPoints(const DataPoint *otherPoint,
 			int k) const
 	{
@@ -92,9 +95,13 @@ public:
 		return points;
 	}
 
+	/*
+	 * Returns true if p is in points. I must be the size of points for the
+	 * recursion to work for the whole array.
+	 */
 	static bool isIn(DataPoint *p, std::vector<DataPoint*> &points, int i)
 	{
-		if (i == -1)
+		if (i <= -1)
 			return false;
 
 		return *p == *points[i] || isIn(p, points, i - 1);
@@ -102,13 +109,20 @@ public:
 
 };
 
+/*
+ * Convert a vector of DataPoint*s to PoseDataPoint*s.
+ */
 std::vector<PoseDataPoint*> convertToPoses(std::vector<DataPoint*> points)
 {
 	std::vector<PoseDataPoint*> conversion;
 
 	for (int i = 0; i < points.size(); i++) {
 		PoseDataPoint *p = dynamic_cast<PoseDataPoint*>(points[i]);
-		conversion.push_back(p);
+		if (p) {
+			conversion.push_back(p);
+		} else {
+			// TODO: throw exception?
+		}
 	}
 
 	return conversion;

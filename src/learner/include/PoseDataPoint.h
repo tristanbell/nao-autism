@@ -25,6 +25,8 @@ public:
 	{
 	}
 
+	// If this is included in the code then whenever you make a PoseDataPoint
+	// catkin complains that "call of overloaded ‘PoseDataPoint(PoseData&)’ is ambiguous"
 	/*PoseDataPoint(const PoseData& data) :
 			classification(-1), poseData(data)
 	{
@@ -50,6 +52,8 @@ public:
 	{
 		return classification;
 	}
+
+	// Made public for testing purposes
 	const PoseData poseData;
 private:
 //	const PoseData poseData;
@@ -76,6 +80,7 @@ private:
 	static float getDistance(geometry_msgs::Quaternion rotation1,
 			geometry_msgs::Quaternion rotation2);
 
+	// Should this be void instead of short?
 	short setClassification(short int classification)
 	{
 		this->classification = classification;

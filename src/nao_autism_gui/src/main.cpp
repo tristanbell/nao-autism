@@ -16,6 +16,8 @@
 
 #include <vector>
 
+#define NO_RECORD_FLAG "--no-record"
+
 using namespace std;
 
 void init(const NaoSpeechData& data);
@@ -46,6 +48,22 @@ int main(int argc, char** argv)
 	//Init ros
 	ros::init(argc, argv, "nao_cntrl");
 
+	//Check for no-record flag
+	bool record = true;
+
+	if (argc != 1){
+		for (int i=0;i<argc;i++){
+			std::string str(argv[i]); //hacky
+
+			if (str == NO_RECORD_FLAG){
+				ROS_INFO("--no-record flag found, not recording.");
+				record = false;
+
+				break;
+			}
+		}
+	}
+
 	ROS_INFO("Loading speech data");
 	NaoSpeechData data = NaoSpeechData::load("speechFile.data");
 
@@ -69,23 +87,25 @@ int main(int argc, char** argv)
 	behaviors.push_back(scared);
 	behaviors.push_back(angry);
 
+	//No --no-record flag set, we shall record
+	if (record){
+		ROS_INFO("Starting to record data.");
+		ros::NodeHandle nh;
+		ros::Publisher pub = nh.advertise<rosbag_recorder::Record>("record", 10);
+
+		ros::Rate rate(10);
+		while (pub.getNumSubscribers() == 0){
+			rate.sleep();
+		}
+
+		rosbag_recorder::Record msg;
+		msg.record = true;
+		pub.publish(msg);
+	}
+
 
 	//Init window and execute application
 	nao_gui::NaoAutismWindow window(behaviors, data);
-
-	//Everything is setup ok, start recording
-	ROS_INFO("Starting to record data.");
-	ros::NodeHandle nh;
-	ros::Publisher pub = nh.advertise<rosbag_recorder::Record>("record", 10);
-
-	ros::Rate rate(10);
-	while (pub.getNumSubscribers() == 0){
-		rate.sleep();
-	}
-
-	rosbag_recorder::Record msg;
-	msg.record = true;
-	pub.publish(msg);
 
 	return app.exec();
 }

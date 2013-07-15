@@ -15,6 +15,7 @@
 #include <tf/tfMessage.h>
 
 #include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <math.h>
 
@@ -141,6 +142,60 @@ string classification::DataLoader::findFile(string directory, boost::posix_time:
 	}
 
 
+}
+
+vector<string> classification::DataLoader::readTimestampFile(string filename)
+{
+	vector<string> timestamps;
+
+	ifstream in;
+	in.open(filename.c_str());
+	if (in.is_open()) {
+		string tmp, line1, line2, line3;
+		while(in.good()) {
+			getline(in, tmp);
+
+//			cout << "Reading lines" << endl;
+//			cout << line1 << endl;
+//			cout << line2 << endl;
+//			cout << line3 << endl;
+
+			if (tmp.find("BEHAVIOR_BUTTON") != string::npos) {
+				// If all lines filled, append together and push to timestamps
+				if (line1 != "" && line2 != "" && line3 != "") {
+					cout << "Pushing back!" << endl;
+					line1 += line2 += line3;
+					timestamps.push_back(line1);
+
+					line1 = line2 = line3 = "";
+				}
+				line1 = tmp;
+			}
+			else if (tmp.find("PROMPT_BUTTON") != string::npos) {
+				line2 = tmp;
+			}
+			else if (tmp.find("CORRECT_BUTTON") != string::npos) {
+				line3 = tmp;
+			}
+		}
+		if (line1 != "" && line2 != "" && line3 != "") {
+			cout << "Pushing back!" << endl;
+			line1 += "\n";
+			line2 += "\n";
+			line3 += "\n";
+			line1 += line2 += line3;
+			timestamps.push_back(line1);
+
+			line1 = line2 = line3 = "";
+		}
+
+		in.close();
+	} else {
+		// TODO: exception?
+		cout << "Could not open file " << filename << endl;
+	}
+
+	return timestamps;
 }
 
 /*

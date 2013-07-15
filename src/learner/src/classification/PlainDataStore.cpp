@@ -130,6 +130,12 @@ std::vector<classification::PoseDataPoint*> convertToPoses(std::vector<classific
 
 int main(int argc, char **argv)
 {
+	std::vector<std::string> ts = classification::DataLoader::readTimestampFile("timestamps.log");
+	for (int i = 0; i < ts.size(); i++) {
+		std::cout << ts[i] << std::endl;
+	}
+
+	/*
 	// Test timestamp taken from log file
 	std::string timestamp =
 			"[1373453545.520850339] BEHAVIOR_BUTTON BEHAVIOR_NAME=happy_1 PROMPT_ENABLED=FALSE\n[1373453575.833215096] PROMPT_BUTTON BEHAVIOR_NAME=happy_1\n[1373453581.945690118] CORRECT_BUTTON BEHAVIOR_NAME=happy_1";
@@ -184,6 +190,7 @@ int main(int argc, char **argv)
 	classification::TrainingData allThePoints = store.getDataPoints(point1, 5);
 
 //	std::vector<PoseDataPoint*> posey = convertToPoses(subset);
+    */
 
 	/*for (int i = 0; i < subset.size(); i++) {
 		std::cout << posey[i]->poseData.head << std::endl;

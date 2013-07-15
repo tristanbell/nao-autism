@@ -25,7 +25,7 @@ public:
 	static std::vector<DataPoint*> loadData(std::string filename);
 	static void parseTimestamp(std::string timestamp, ros::Time &start, ros::Time &end, std::string &behaviorName);
 	static std::vector<DataPoint*> getDataSubset(std::vector<DataPoint*> &data, ros::Time start, ros::Time end);
-
+	static std::vector<std::string> readTimestampFile(std::string filename);
 	/*
 	 * Get the name of the bagfile contained within a directory which includes the given timestamp.
 	 */

@@ -16,6 +16,8 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Quaternion.h>
 
+#include <boost/serialization/base_object.hpp>
+
 namespace classification{
 
 class PoseDataPoint: public DataPoint
@@ -45,6 +47,25 @@ public:
 		poseData(data)
 	{
 		setClassification(classification);
+	}
+
+	/*
+	 * Convert a vector of DataPoint*s to PoseDataPoint*s.
+	 */
+	static std::vector<classification::PoseDataPoint*> convertToPoses(std::vector<classification::DataPoint*> points)
+	{
+		std::vector<classification::PoseDataPoint*> conversion;
+
+		for (int i = 0; i < points.size(); i++) {
+			classification::PoseDataPoint *p = dynamic_cast<classification::PoseDataPoint*>(points[i]);
+			if (p) {
+				conversion.push_back(p);
+			} else {
+				// TODO: throw exception?
+			}
+		}
+
+		return conversion;
 	}
 
 	virtual std::vector<float> getPosition() const;
@@ -78,6 +99,18 @@ private:
 
 };
 
+using namespace boost;// {
+using namespace serialization;// {
+
+template<class Archive>
+void serialize(Archive & ar, PoseDataPoint & pd, const unsigned int version)
+{
+//	ar & boost::serialization::base_object<DataPoint>(*this);
+	ar & pd.poseData;
+}
+
+//} // namespace serialization
+//} // namespace boost
 }
 
 #endif /* POSEDATAPOINT_H_ */

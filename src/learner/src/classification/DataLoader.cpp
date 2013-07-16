@@ -9,8 +9,9 @@
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include <geometry_msgs/TransformStamped.h>
-#include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <tf/tfMessage.h>
 
@@ -21,9 +22,14 @@
 
 using namespace std;
 
-vector<classification::DataPoint*> classification::DataLoader::loadData(string filename)
+const float PLAYBACK_SPEED = 0.043;
+
+vector<classification::DataPoint*> classification::DataLoader::loadData(
+		string filename)
 {
 	vector<DataPoint*> poses;
+	ofstream out("test.thing");
+	boost::archive::text_oarchive archive(out);
 
 	try {
 		rosbag::Bag bag(filename);
@@ -33,7 +39,7 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(string f
 		vector<geometry_msgs::TransformStamped> transforms;
 
 		// Iterate over all messages published to this topic
-		BOOST_FOREACH(rosbag::MessageInstance const m, view) {
+		BOOST_FOREACH(rosbag::MessageInstance const m, view){
 			tf::tfMessage::ConstPtr i = m.instantiate<tf::tfMessage>();
 
 			if (i != NULL) {
@@ -47,6 +53,10 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(string f
 					if (transforms.size() == 15) {
 						PoseData *p = extractPose(transforms);
 						PoseDataPoint pose(*p);
+
+						// Save this data point to file
+						archive & pose;
+
 						poses.push_back(new PoseDataPoint(pose));
 						transforms.clear();
 					}
@@ -57,7 +67,8 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(string f
 		}
 
 		bag.close();
-
+//		out.close();
+//		archive.close();
 	} catch (rosbag::BagIOException &e) {
 		ROS_ERROR("%s", e.what());
 	}
@@ -91,7 +102,8 @@ PoseData *classification::DataLoader::extractPose(
 	return pose;
 }
 
-string classification::DataLoader::findFile(string directory, boost::posix_time::ptime timestamp)
+string classification::DataLoader::findFile(string directory,
+		boost::posix_time::ptime timestamp)
 {
 	using namespace boost::filesystem;
 
@@ -100,6 +112,7 @@ string classification::DataLoader::findFile(string directory, boost::posix_time:
 	path filepath(directory);
 	if (!exists(filepath)) {
 		// TODO: throw exception
+		cout << "Directory " << directory << " does not exist" << endl;
 	}
 
 	vector<path> paths;
@@ -109,13 +122,14 @@ string classification::DataLoader::findFile(string directory, boost::posix_time:
 
 	vector<boost::posix_time::ptime> times;
 	/*for (vector<path>::const_iterator it(paths.begin()); it != paths.end(); ++it) {
-		cout << "   " << *it << '\n';
-	}*/
+	 cout << "   " << *it << '\n';
+	 }*/
 
 	int latestIndex = 0;
 
 	for (int i = 0; i < paths.size(); i++) {
-		if (i == paths.size() - 1) break;
+		if (i == paths.size() - 1)
+			break;
 
 		string fileTime = paths[i].filename().generic_string();
 		fileTime = fileTime.substr(1, 19);
@@ -124,7 +138,8 @@ string classification::DataLoader::findFile(string directory, boost::posix_time:
 		fileTime[16] = ':';
 
 //		cout << fileTime << endl;
-		boost::posix_time::ptime fTime(boost::posix_time::time_from_string(fileTime));
+		boost::posix_time::ptime fTime(
+				boost::posix_time::time_from_string(fileTime));
 //		cout << (timestamp < fTime ? "Too late" : "Too early") << endl;
 
 		if (timestamp < fTime) {
@@ -137,10 +152,10 @@ string classification::DataLoader::findFile(string directory, boost::posix_time:
 		// Earliest recording is later than the timestamp, so not found.
 		// Should probably throw an exception instead.
 		return "";
-	} else {
-		return paths[latestIndex-1].generic_string();
 	}
-
+	else {
+		return paths[latestIndex - 1].generic_string();
+	}
 
 }
 
@@ -152,18 +167,16 @@ vector<string> classification::DataLoader::readTimestampFile(string filename)
 	in.open(filename.c_str());
 	if (in.is_open()) {
 		string tmp, line1, line2, line3;
-		while(in.good()) {
+		while (in.good()) {
 			getline(in, tmp);
-
-//			cout << "Reading lines" << endl;
-//			cout << line1 << endl;
-//			cout << line2 << endl;
-//			cout << line3 << endl;
 
 			if (tmp.find("BEHAVIOR_BUTTON") != string::npos) {
 				// If all lines filled, append together and push to timestamps
 				if (line1 != "" && line2 != "" && line3 != "") {
-					cout << "Pushing back!" << endl;
+//					cout << "Pushing back!" << endl;
+					line1 += "\n";
+					line2 += "\n";
+					line3 += "\n";
 					line1 += line2 += line3;
 					timestamps.push_back(line1);
 
@@ -177,9 +190,11 @@ vector<string> classification::DataLoader::readTimestampFile(string filename)
 			else if (tmp.find("CORRECT_BUTTON") != string::npos) {
 				line3 = tmp;
 			}
+			//TODO: deal with INCORRECT_BUTTON
 		}
+		// Deal with final line
 		if (line1 != "" && line2 != "" && line3 != "") {
-			cout << "Pushing back!" << endl;
+//			cout << "Pushing back!" << endl;
 			line1 += "\n";
 			line2 += "\n";
 			line3 += "\n";
@@ -190,7 +205,8 @@ vector<string> classification::DataLoader::readTimestampFile(string filename)
 		}
 
 		in.close();
-	} else {
+	}
+	else {
 		// TODO: exception?
 		cout << "Could not open file " << filename << endl;
 	}
@@ -202,32 +218,31 @@ vector<string> classification::DataLoader::readTimestampFile(string filename)
  * Takes a single timestamp (3 lines: behavior, prompt, correct/incorrect)
  * and modifies start and end times accordingly.
  */
-void classification::DataLoader::parseTimestamp(string timestamp, ros::Time &start, ros::Time &end, string &behaviorName)
+void classification::DataLoader::parseTimestamp(string timestamp,
+		ros::Time &start, ros::Time &end, string &behaviorName)
 {
 	using namespace boost;
 
-	vector <string> fields;
+	vector<string> fields;
 
 	// If you get an error here, it's just eclipse being a dick. Works if you compile from terminal.
 	split(fields, timestamp, is_any_of("\n"));
 
-//	for (int i = 0; i < fields.size(); i++) {
-//		cout << "Line " << i << ": " << fields[i] << endl;
-//	}
-
-	double startTime = atof((fields[1].substr(1, 20)).c_str()) - 1.5;
+	double startTime = atof((fields[1].substr(1, 20)).c_str()) - 0.5;
 	double endTime = atof((fields[2].substr(1, 20)).c_str());
 
-	ros::Time::init();
+//	ros::Time::init();
 	ros::Time s(startTime);
 	ros::Time e(endTime);
 
 	start = s;
 	end = e;
 
-	vector <string> behavior;
+	vector<string> behavior;
 	// Filter out everything but the behavior name (hacky, i know)
-	split(behavior, fields[0], is_any_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=[]. "), token_compress_on);
+	split(behavior, fields[0],
+			is_any_of("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=[]. "),
+			token_compress_on);
 
 	for (int i = 0; i < behavior.size(); i++) {
 		if (behavior[i].size() > 0) {
@@ -237,7 +252,8 @@ void classification::DataLoader::parseTimestamp(string timestamp, ros::Time &sta
 	}
 }
 
-vector<classification::DataPoint*> classification::DataLoader::getDataSubset(vector<DataPoint*> &data, ros::Time start, ros::Time end)
+vector<classification::DataPoint*> classification::DataLoader::getDataSubset(
+		vector<DataPoint*> &data, ros::Time start, ros::Time end)
 {
 	vector<DataPoint*> subset;
 
@@ -245,68 +261,106 @@ vector<classification::DataPoint*> classification::DataLoader::getDataSubset(vec
 	double endTime = floor(end.toSec());
 
 	// Find and push all DataPoints between start and end times
-	BOOST_FOREACH(DataPoint *point, data) {
-		double time = floor(point->getTimestamp().toSec());
+	BOOST_FOREACH(DataPoint *point, data){
+	double time = floor(point->getTimestamp().toSec());
 
-		if (time >= startTime && time <= endTime) {
-			subset.push_back(point);
-		} else if (time > endTime) {
-			break;
-		}
+	if (time >= startTime && time <= endTime) {
+		subset.push_back(point);
 	}
+	else if (time > endTime) {
+		break;
+	}
+}
 
 	return subset;
 }
 
-/*int main(int argc, char **argv) {
+void classification::DataLoader::filterData(string filename)
+{
+	vector<string> ts = classification::DataLoader::readTimestampFile(filename);
+
+	rosbag::Bag happyBag("happy.bag", rosbag::bagmode::Write);
+	rosbag::Bag sadBag("sad.bag", rosbag::bagmode::Write);
+	rosbag::Bag angryBag("angry.bag", rosbag::bagmode::Write);
+	rosbag::Bag scaredBag("scared.bag", rosbag::bagmode::Write);
+
+	ros::Time::init();
+	ros::Time timeToWrite = ros::Time::now();
+	ros::Duration timeToAdd(PLAYBACK_SPEED);
+
+	for (int i = 0; i < ts.size(); i++) {
+		printf("Adding timestamp %d...\n", i + 1);
+
+		string timestamp = ts[i];
+
+		// Get the start and end times for the timestamp
+		ros::Time start;
+		ros::Time end;
+		string behavior;
+
+		cout << "   Parsing timestamp..." << endl;
+		parseTimestamp(timestamp, start, end, behavior);
+
+		// Find the file that contains the timestamp
+		cout << "   Finding file..." << endl;
+		string filepath = findFile("/home/tristan/nao-autism/recordings/",
+				start.toBoost() + boost::posix_time::hours(1));
+		cout << "   " << filepath << endl;
+
+		// Construct training data from that file
+		classification::TrainingData poses = loadData(filepath);
+
+		// Get the subset of data that corresponds to the timestamp
+		classification::TrainingData subset = getDataSubset(poses, start, end);
+
+		if (behavior == "happy")
+			writeToFile(happyBag, subset, behavior, timeToWrite);
+		else if (behavior == "sad")
+			writeToFile(sadBag, subset, behavior, timeToWrite);
+		else if (behavior == "angry")
+			writeToFile(angryBag, subset, behavior, timeToWrite);
+		else if (behavior == "scared")
+			writeToFile(scaredBag, subset, behavior, timeToWrite);
+		else
+			cerr << "Unknown behavior name found" << endl;
+
+		timeToWrite += timeToAdd;
+		printf("...Done\n\n");
+	}
+
+	happyBag.close();
+	sadBag.close();
+	angryBag.close();
+	scaredBag.close();
+}
+
+void classification::DataLoader::writeToFile(rosbag::Bag &bag,
+		classification::TrainingData data, std::string behaviorName,
+		ros::Time &timeToWrite)
+{
+	vector<classification::PoseDataPoint*> dataPoints =
+			PoseDataPoint::convertToPoses(data);
+
+	BOOST_FOREACH(PoseDataPoint* pose, dataPoints){
+	(pose->poseData).writeToFile(bag, timeToWrite);
+}
+}
+
+int main(int argc, char **argv)
+{
 	ros::init(argc, argv, "data_loader");
 
-	ROS_INFO("Starting...");
+	ROS_INFO("Starting...\n");
 
-	vector<DataPoint*> poses = DataLoader::loadData(
-			"/home/tristan/nao-autism/recordings/happy_2013-07-03-09-58-54.bag");
-
-	for (int i = 0; i < poses.size(); i++) {
-		cout << "	POSE " << i << ":" << endl;
-		cout << poses[i].head << endl;
-		cout << poses[i].neck << endl;
-		cout << poses[i].torso << endl;
-		cout << poses[i].left_shoulder << endl;
-		cout << poses[i].left_elbow << endl;
-		cout << poses[i].left_hand << endl;
-		cout << poses[i].right_shoulder << endl;
-		cout << poses[i].right_elbow << endl;
-		cout << poses[i].right_hand << endl;
-		cout << poses[i].left_hip << endl;
-		cout << poses[i].left_knee << endl;
-		cout << poses[i].left_foot << endl;
-		cout << poses[i].right_hip << endl;
-		cout << poses[i].right_knee << endl;
-		cout << poses[i].right_foot << endl;
-	}
+//	classification::DataLoader::filterData("timestamps.log");
+//	ifstream in("test.thing");
+//    boost::archive::text_iarchive ia(in);
+//    classification::PoseDataPoint pd(PoseData::getTestPoseData());
+//    ia >> pd;
+//    cout << pd.poseData.head << endl;
 
 	ROS_INFO("Finished!");
 
 	return 0;
-}*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 

@@ -20,7 +20,7 @@ class KNearestNeighbour : public Learner
 public:
 	KNearestNeighbour(DataStore* ds) : classification::Learner(ds)
 	{
-			defaultK = DEFAULT_VALUE_K;
+		defaultK = DEFAULT_VALUE_K;
 	}
 
 	KNearestNeighbour(DataStore* ds, int k) : classification::Learner(ds)

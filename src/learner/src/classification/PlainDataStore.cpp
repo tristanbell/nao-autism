@@ -128,7 +128,7 @@ std::vector<classification::PoseDataPoint*> convertToPoses(std::vector<classific
 	return conversion;
 }
 
-int main(int argc, char **argv)
+/*int main(int argc, char **argv)
 {
 	std::vector<std::string> ts = classification::DataLoader::readTimestampFile("timestamps.log");
 	for (int i = 0; i < ts.size(); i++) {
@@ -209,5 +209,5 @@ int main(int argc, char **argv)
 		std::cout << posey[i]->poseData.right_knee << std::endl;
 		std::cout << posey[i]->poseData.right_foot << std::endl;
 	}*/
-}
+//}
 

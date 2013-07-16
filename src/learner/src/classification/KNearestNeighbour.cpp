@@ -13,24 +13,24 @@ int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k
 	std::vector<DataPoint*> points = getDatastore()->getDataPoints(p, k);
 
 	//Construct map containing pairs of class to number of votes (where the class is the key)
-	std::map<int, int> classificationVote;
+	std::map<short, int> classificationVote;
 
 	for (int i=0;i<points.size();i++){
-		DataPoint* p = points[i];
+		DataPoint* pt = points[i];
 
-		if (p != NULL){
+		if (pt != NULL){
 			try{
-				int& pClassNum = classificationVote.at(p->getClassification());
+				int& pClassNum = classificationVote.at(pt->getClassification());
 				pClassNum++;
 			}catch(std::out_of_range* oof){
-				classificationVote.insert(std::pair<int, int>(p->getClassification(), 1));
+				classificationVote.insert(std::pair<int, int>(pt->getClassification(), 1));
 			}
 		}
 	}
 
 	//Find class that has the highest vote by iterating through the map
-	std::map<int, int>::iterator it = classificationVote.begin();
-	std::pair<int, int> pair = *it;
+	std::map<short, int>::iterator it = classificationVote.begin();
+	std::pair<short, int> pair = *it;
 
 	int highestClass = pair.first;
 	int highestNum = pair.second;
@@ -44,6 +44,8 @@ int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k
 			highestClass = pair.first;
 			highestNum = pair.second;
 		}
+
+		it++;
 	}
 
 	return highestClass;

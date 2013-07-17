@@ -1,0 +1,2 @@
+int32 user_number
+int32 classification

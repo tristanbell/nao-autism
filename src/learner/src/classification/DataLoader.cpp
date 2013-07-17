@@ -346,21 +346,21 @@ void classification::DataLoader::writeToFile(rosbag::Bag &bag,
 }
 }
 
-int main(int argc, char **argv)
-{
-	ros::init(argc, argv, "data_loader");
-
-	ROS_INFO("Starting...\n");
-
-//	classification::DataLoader::filterData("timestamps.log");
-//	ifstream in("test.thing");
-//    boost::archive::text_iarchive ia(in);
-//    classification::PoseDataPoint pd(PoseData::getTestPoseData());
-//    ia >> pd;
-//    cout << pd.poseData.head << endl;
-
-	ROS_INFO("Finished!");
-
-	return 0;
-}
+//int main(int argc, char **argv)
+//{
+//	ros::init(argc, argv, "data_loader");
+//
+//	ROS_INFO("Starting...\n");
+//
+////	classification::DataLoader::filterData("timestamps.log");
+////	ifstream in("test.thing");
+////    boost::archive::text_iarchive ia(in);
+////    classification::PoseDataPoint pd(PoseData::getTestPoseData());
+////    ia >> pd;
+////    cout << pd.poseData.head << endl;
+//
+//	ROS_INFO("Finished!");
+//
+//	return 0;
+//}
 

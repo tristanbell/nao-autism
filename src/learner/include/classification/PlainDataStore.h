@@ -99,6 +99,11 @@ public:
 //		return points;
 //	}
 
+	std::vector<DataPoint*> getDataPoints() const
+	{
+		return trainingData;
+	}
+
 	std::vector<classification::DataPoint*> getDataPoints(const classification::DataPoint *otherPoint,
 			int k) const
 	{

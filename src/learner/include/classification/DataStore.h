@@ -27,6 +27,9 @@ public:
 	 * Returns the DataPoint closest to otherPoint.
 	 */
 	virtual DataPoint *getDataPoint(const DataPoint *otherPoint) const = 0;
+
+	virtual std::vector<DataPoint*> getDataPoints() const = 0;
+
 	/*
 	 * Returns the k DataPoints which are closest to otherPoint.
 	 */

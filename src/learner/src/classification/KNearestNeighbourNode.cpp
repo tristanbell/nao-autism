@@ -1,5 +1,6 @@
 #include <classification/Learner.h>
 #include <classification/KNearestNeighbour.h>
+//#include <classification/DWKNearestNeighbour.h>
 #include <classification/DataLoader.h>
 #include <classification/DataStore.h>
 #include <classification/PlainDataStore.h>
@@ -173,12 +174,13 @@ int main(int argc, char** argv)
 
 		classification::DataStore* store = new classification::PlainDataStore(classifiedPoints);
 		knn_learner = new classification::KNearestNeighbour(store, 5);
+//		knn_learner = new classification::DWKNearestNeighbour(store);
 		ROS_INFO("Created KNN instance.");
 
 		ROS_INFO("Creating subscriber to /tf");
 		ros::NodeHandle nh;
 
-		tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
+		tf_subscriber = nh.subscribe("/tf", 1, tfCallback);
 
 		ROS_INFO("Creating classification advertiser");
 		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1);

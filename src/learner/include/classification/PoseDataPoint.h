@@ -16,7 +16,8 @@
 #include <geometry_msgs/Transform.h>
 #include <geometry_msgs/Quaternion.h>
 
-#include <boost/serialization/base_object.hpp>
+#include <iostream>
+#include <fstream>
 
 namespace classification{
 
@@ -68,11 +69,15 @@ public:
 		return conversion;
 	}
 
+	void serialize(std::string filename)
+	{
+		poseData.serialize(filename);
+	}
+
 	virtual std::vector<float> getPosition() const;
 	virtual float getDistance(const DataPoint&) const;
 	virtual ros::Time getTimestamp() const;
 
-	// Made public for testing purposes
 	const PoseData poseData;
 private:
 
@@ -99,18 +104,19 @@ private:
 
 };
 
-using namespace boost;// {
-using namespace serialization;// {
+//using namespace boost;// {
+//using namespace serialization;// {
+//
+//template<class Archive>
+//void serialize(Archive & ar, PoseDataPoint & pd, const unsigned int version)
+//{
+////	ar & boost::serialization::base_object<DataPoint>(*this);
+//	ar & pd.poseData;
+//}
+//
+////} // namespace serialization
+////} // namespace boost
 
-template<class Archive>
-void serialize(Archive & ar, PoseDataPoint & pd, const unsigned int version)
-{
-//	ar & boost::serialization::base_object<DataPoint>(*this);
-	ar & pd.poseData;
-}
-
-//} // namespace serialization
-//} // namespace boost
-}
+} // namespace classification
 
 #endif /* POSEDATAPOINT_H_ */

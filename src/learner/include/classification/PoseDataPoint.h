@@ -69,11 +69,6 @@ public:
 		return conversion;
 	}
 
-	void serialize(std::string filename)
-	{
-		poseData.serialize(filename);
-	}
-
 	virtual std::vector<float> getPosition() const;
 	virtual float getDistance(const DataPoint&) const;
 	virtual ros::Time getTimestamp() const;
@@ -103,19 +98,6 @@ private:
 			geometry_msgs::Quaternion rotation2);
 
 };
-
-//using namespace boost;// {
-//using namespace serialization;// {
-//
-//template<class Archive>
-//void serialize(Archive & ar, PoseDataPoint & pd, const unsigned int version)
-//{
-////	ar & boost::serialization::base_object<DataPoint>(*this);
-//	ar & pd.poseData;
-//}
-//
-////} // namespace serialization
-////} // namespace boost
 
 } // namespace classification
 

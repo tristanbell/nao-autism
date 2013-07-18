@@ -70,17 +70,6 @@ private:
 
 };
 
-using namespace boost;// {
-using namespace serialization;// {
-
-template<class Archive>
-void serialize(Archive & ar, DataPoint & g, const unsigned int version)
-{
-    ar & g.classification;
-}
-
-//} // namespace serialization
-//} // namespace boost
 } // namespace classification
 
 

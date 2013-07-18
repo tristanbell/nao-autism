@@ -28,8 +28,6 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(
 		string filename)
 {
 	vector<DataPoint*> poses;
-	ofstream out("test.thing");
-	boost::archive::text_oarchive archive(out);
 
 	try {
 		rosbag::Bag bag(filename);
@@ -55,7 +53,7 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(
 						PoseDataPoint pose(*p);
 
 						// Save this data point to file
-						archive & pose;
+						pose.serialize("test.thing");
 
 						poses.push_back(new PoseDataPoint(pose));
 						transforms.clear();
@@ -342,25 +340,20 @@ void classification::DataLoader::writeToFile(rosbag::Bag &bag,
 			PoseDataPoint::convertToPoses(data);
 
 	BOOST_FOREACH(PoseDataPoint* pose, dataPoints){
-	(pose->poseData).writeToFile(bag, timeToWrite);
-}
+		(pose->poseData).writeToFile(bag, timeToWrite);
+	}
 }
 
-//int main(int argc, char **argv)
-//{
-//	ros::init(argc, argv, "data_loader");
-//
-//	ROS_INFO("Starting...\n");
-//
-////	classification::DataLoader::filterData("timestamps.log");
-////	ifstream in("test.thing");
-////    boost::archive::text_iarchive ia(in);
-////    classification::PoseDataPoint pd(PoseData::getTestPoseData());
-////    ia >> pd;
-////    cout << pd.poseData.head << endl;
-//
-//	ROS_INFO("Finished!");
-//
-//	return 0;
-//}
+int main(int argc, char **argv)
+{
+	ros::init(argc, argv, "data_loader");
+
+	ROS_INFO("Starting...\n");
+
+	classification::DataLoader::filterData("timestamps.log");
+
+	ROS_INFO("Finished!");
+
+	return 0;
+}
 

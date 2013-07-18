@@ -126,9 +126,7 @@ string classification::DataLoader::findFile(string directory,
 	int latestIndex = 0;
 
 	for (int i = 0; i < paths.size(); i++) {
-		if (i == paths.size() - 1)
-			break;
-
+		// Construct a string that matches the format for boost::posix_time::time_from_string argument
 		string fileTime = paths[i].filename().generic_string();
 		fileTime = fileTime.substr(1, 19);
 		fileTime[10] = ' ';
@@ -136,8 +134,7 @@ string classification::DataLoader::findFile(string directory,
 		fileTime[16] = ':';
 
 //		cout << fileTime << endl;
-		boost::posix_time::ptime fTime(
-				boost::posix_time::time_from_string(fileTime));
+		boost::posix_time::ptime fTime(boost::posix_time::time_from_string(fileTime));
 //		cout << (timestamp < fTime ? "Too late" : "Too early") << endl;
 
 		if (timestamp < fTime) {
@@ -344,16 +341,16 @@ void classification::DataLoader::writeToFile(rosbag::Bag &bag,
 	}
 }
 
-int main(int argc, char **argv)
-{
-	ros::init(argc, argv, "data_loader");
-
-	ROS_INFO("Starting...\n");
-
-	classification::DataLoader::filterData("timestamps.log");
-
-	ROS_INFO("Finished!");
-
-	return 0;
-}
+//int main(int argc, char **argv)
+//{
+//	ros::init(argc, argv, "data_loader");
+//
+//	ROS_INFO("Starting...\n");
+//
+//	classification::DataLoader::filterData("timestamps.log");
+//
+//	ROS_INFO("Finished!");
+//
+//	return 0;
+//}
 

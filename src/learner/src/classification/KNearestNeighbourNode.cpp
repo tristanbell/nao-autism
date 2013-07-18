@@ -50,16 +50,16 @@ int main(int argc, char** argv)
 		ROS_INFO("Finished retrieving data.");
 
 		classification::DataStore* store = new classification::PlainDataStore(classifiedPoints);
-		knn_learner = new classification::KNearestNeighbour(store, 50);
+		knn_learner = new classification::KNearestNeighbour(store, 5);
 		ROS_INFO("Created KNN instance.");
 
 		ROS_INFO("Creating subscriber to /tf");
 		ros::NodeHandle nh;
 
-		tf_subscriber = nh.subscribe("/tf", 1000, tfCallback);
+		tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
 
 		ROS_INFO("Creating classification advertiser");
-		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1000);
+		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1);
 
 		ROS_INFO("Setup complete, spinning");
 		ros::spin();

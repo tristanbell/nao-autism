@@ -14,8 +14,6 @@ int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k
 {
 	std::vector<DataPoint*> points = getDatastore()->getDataPoints(p, k);
 
-	std::cout << "Got points!" << "\n";
-
 	//Construct map containing pairs of class to number of votes (where the class is the key)
 	std::map<short, int> classificationVote;
 
@@ -41,7 +39,7 @@ int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k
 
 	it++;
 
-	for (int i=1;i<classificationVote.size();i++){
+	while (it != classificationVote.end()){
 		pair = *it;
 
 		if (pair.second > highestNum){

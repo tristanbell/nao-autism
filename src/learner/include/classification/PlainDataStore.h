@@ -151,7 +151,7 @@ public:
 	}
 
 	/*
-	 * Returns true if p is in points. I must be the size of points for the
+	 * Returns true if p is in points. i must be the size of points for the
 	 * recursion to work for the whole array.
 	 */
 	static bool isIn(classification::DataPoint *p, std::vector<classification::DataPoint*> &points, int i)

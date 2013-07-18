@@ -8,7 +8,6 @@
 #include <classification/DataLoader.h>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <geometry_msgs/TransformStamped.h>
@@ -36,7 +35,7 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(
 		// Vector for generating PoseData (re-used when each is created)
 		vector<geometry_msgs::TransformStamped> transforms;
 
-		// Iterate over all messages published to this topic
+		// Iterate over all messages published to this topic and construct complete poses
 		BOOST_FOREACH(rosbag::MessageInstance const m, view){
 			tf::tfMessage::ConstPtr i = m.instantiate<tf::tfMessage>();
 
@@ -52,9 +51,6 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(
 						PoseData *p = extractPose(transforms);
 						PoseDataPoint pose(*p);
 
-						// Save this data point to file
-						pose.serialize("test.thing");
-
 						poses.push_back(new PoseDataPoint(pose));
 						transforms.clear();
 					}
@@ -65,8 +61,6 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(
 		}
 
 		bag.close();
-//		out.close();
-//		archive.close();
 	} catch (rosbag::BagIOException &e) {
 		ROS_ERROR("%s", e.what());
 	}
@@ -100,56 +94,62 @@ PoseData *classification::DataLoader::extractPose(
 	return pose;
 }
 
+int classification::DataLoader::getFileIndex(vector<boost::filesystem::path>& paths,
+		boost::posix_time::ptime timestamp)
+{
+	int latestIndex = 0;
+
+	for (int i = 0; i < paths.size(); i++) {
+		// The name of the recorded bagfile is the date it was recorded
+		string fileTime = paths[i].filename().generic_string();
+
+		// Take this name and modify it to the format accepted by
+		// boost::posix_time::time_from_string()
+		fileTime = fileTime.substr(1, 19);
+		fileTime[10] = ' ';
+		fileTime[13] = ':';
+		fileTime[16] = ':';
+		boost::posix_time::ptime fTime(
+				boost::posix_time::time_from_string(fileTime));
+
+		// Because 'paths' is assumed to be sorted, the last path that was created
+		// before the timestamp was must be the file we need.
+		if (timestamp < fTime) {
+			latestIndex = i-1;
+			break;
+		}
+	}
+
+	return latestIndex;
+}
+
 string classification::DataLoader::findFile(string directory,
 		boost::posix_time::ptime timestamp)
 {
 	using namespace boost::filesystem;
 
-//	cout << timestamp.date() << " " << timestamp.time_of_day() << endl << endl;
-
 	path filepath(directory);
 	if (!exists(filepath)) {
-		// TODO: throw exception
+		// TODO: exception
 		cout << "Directory " << directory << " does not exist" << endl;
 	}
 
-	vector<path> paths;
+	// Get all the files contained within the directory and sort by name.
+	// Assuming the files are named with the dates they were recorded,
+	// this will put them in date order.
+	vector < path > paths;
 	copy(directory_iterator(filepath), directory_iterator(),
 			back_inserter(paths));
 	sort(paths.begin(), paths.end());
+	vector < boost::posix_time::ptime > times;
 
-	vector<boost::posix_time::ptime> times;
-	/*for (vector<path>::const_iterator it(paths.begin()); it != paths.end(); ++it) {
-	 cout << "   " << *it << '\n';
-	 }*/
+	int fileIndex = getFileIndex(paths, timestamp);
 
-	int latestIndex = 0;
-
-	for (int i = 0; i < paths.size(); i++) {
-		// Construct a string that matches the format for boost::posix_time::time_from_string argument
-		string fileTime = paths[i].filename().generic_string();
-		fileTime = fileTime.substr(1, 19);
-		fileTime[10] = ' ';
-		fileTime[13] = ':';
-		fileTime[16] = ':';
-
-//		cout << fileTime << endl;
-		boost::posix_time::ptime fTime(boost::posix_time::time_from_string(fileTime));
-//		cout << (timestamp < fTime ? "Too late" : "Too early") << endl;
-
-		if (timestamp < fTime) {
-			latestIndex = i;
-			break;
-		}
-	}
-
-	if (latestIndex == 0) {
-		// Earliest recording is later than the timestamp, so not found.
-		// Should probably throw an exception instead.
+	if (fileIndex == -1) {
 		return "";
 	}
 	else {
-		return paths[latestIndex - 1].generic_string();
+		return paths[fileIndex].generic_string();
 	}
 
 }
@@ -168,13 +168,13 @@ vector<string> classification::DataLoader::readTimestampFile(string filename)
 			if (tmp.find("BEHAVIOR_BUTTON") != string::npos) {
 				// If all lines filled, append together and push to timestamps
 				if (line1 != "" && line2 != "" && line3 != "") {
-//					cout << "Pushing back!" << endl;
 					line1 += "\n";
 					line2 += "\n";
 					line3 += "\n";
 					line1 += line2 += line3;
 					timestamps.push_back(line1);
 
+					// Then reset line variables
 					line1 = line2 = line3 = "";
 				}
 				line1 = tmp;
@@ -187,9 +187,8 @@ vector<string> classification::DataLoader::readTimestampFile(string filename)
 			}
 			//TODO: deal with INCORRECT_BUTTON
 		}
-		// Deal with final line
+		// Deal with final line (off by one)
 		if (line1 != "" && line2 != "" && line3 != "") {
-//			cout << "Pushing back!" << endl;
 			line1 += "\n";
 			line2 += "\n";
 			line3 += "\n";
@@ -209,10 +208,6 @@ vector<string> classification::DataLoader::readTimestampFile(string filename)
 	return timestamps;
 }
 
-/*
- * Takes a single timestamp (3 lines: behavior, prompt, correct/incorrect)
- * and modifies start and end times accordingly.
- */
 void classification::DataLoader::parseTimestamp(string timestamp,
 		ros::Time &start, ros::Time &end, string &behaviorName)
 {
@@ -223,13 +218,14 @@ void classification::DataLoader::parseTimestamp(string timestamp,
 	// If you get an error here, it's just eclipse being a dick. Works if you compile from terminal.
 	split(fields, timestamp, is_any_of("\n"));
 
+	// The first part of the timestamp should be the time a button was clicked
 	double startTime = atof((fields[1].substr(1, 20)).c_str()) - 0.5;
 	double endTime = atof((fields[2].substr(1, 20)).c_str());
 
-//	ros::Time::init();
+	// Construct ros::Time variables for start and end times, then modify
+	// the arguments accordingly.
 	ros::Time s(startTime);
 	ros::Time e(endTime);
-
 	start = s;
 	end = e;
 
@@ -240,7 +236,9 @@ void classification::DataLoader::parseTimestamp(string timestamp,
 			token_compress_on);
 
 	for (int i = 0; i < behavior.size(); i++) {
+		// Get the line with the behavior name in it
 		if (behavior[i].size() > 0) {
+			// Set the argument to the behavior name
 			behaviorName = behavior[i];
 			break;
 		}
@@ -252,20 +250,22 @@ vector<classification::DataPoint*> classification::DataLoader::getDataSubset(
 {
 	vector<DataPoint*> subset;
 
+	// Times are not totally accurate, floor them to round to closest second
 	double startTime = floor(start.toSec());
 	double endTime = floor(end.toSec());
 
 	// Find and push all DataPoints between start and end times
 	BOOST_FOREACH(DataPoint *point, data){
-	double time = floor(point->getTimestamp().toSec());
+		double time = floor(point->getTimestamp().toSec());
 
-	if (time >= startTime && time <= endTime) {
-		subset.push_back(point);
+		// Add 0.3 seconds to compensate for inaccuracies
+		if (time >= startTime && time + 0.3 <= endTime) {
+			subset.push_back(point);
+		}
+		else if (time + 0.3 > endTime) {
+			break;
+		}
 	}
-	else if (time > endTime) {
-		break;
-	}
-}
 
 	return subset;
 }
@@ -274,6 +274,7 @@ void classification::DataLoader::filterData(string filename)
 {
 	vector<string> ts = classification::DataLoader::readTimestampFile(filename);
 
+	// Create bagfiles for each emotion
 	rosbag::Bag happyBag("happy.bag", rosbag::bagmode::Write);
 	rosbag::Bag sadBag("sad.bag", rosbag::bagmode::Write);
 	rosbag::Bag angryBag("angry.bag", rosbag::bagmode::Write);
@@ -288,11 +289,10 @@ void classification::DataLoader::filterData(string filename)
 
 		string timestamp = ts[i];
 
-		// Get the start and end times for the timestamp
+		// Get the start and end times for the timestamp, as well as the behavior name
 		ros::Time start;
 		ros::Time end;
 		string behavior;
-
 		cout << "   Parsing timestamp..." << endl;
 		parseTimestamp(timestamp, start, end, behavior);
 
@@ -308,6 +308,7 @@ void classification::DataLoader::filterData(string filename)
 		// Get the subset of data that corresponds to the timestamp
 		classification::TrainingData subset = getDataSubset(poses, start, end);
 
+		// Write to the proper file
 		if (behavior == "happy")
 			writeToFile(happyBag, subset, behavior, timeToWrite);
 		else if (behavior == "sad")
@@ -319,6 +320,7 @@ void classification::DataLoader::filterData(string filename)
 		else
 			cerr << "Unknown behavior name found" << endl;
 
+		// Simulates very short pauses between data (mainly for playback in rviz)
 		timeToWrite += timeToAdd;
 		printf("...Done\n\n");
 	}
@@ -340,17 +342,4 @@ void classification::DataLoader::writeToFile(rosbag::Bag &bag,
 		(pose->poseData).writeToFile(bag, timeToWrite);
 	}
 }
-
-//int main(int argc, char **argv)
-//{
-//	ros::init(argc, argv, "data_loader");
-//
-//	ROS_INFO("Starting...\n");
-//
-//	classification::DataLoader::filterData("timestamps.log");
-//
-//	ROS_INFO("Finished!");
-//
-//	return 0;
-//}
 

@@ -91,6 +91,7 @@ public:
 		writeMsg(right_knee, trans, msg, bag, time);
 		writeMsg(right_foot, trans, msg, bag, time);
 	}
+
 	static PoseData getTestPoseData()
 	{
 		PoseData test_pose;
@@ -113,123 +114,6 @@ public:
 		return test_pose;
 	}
 
-	void serialize(std::string filename) const
-	{
-		std::ofstream out;
-		out.open(filename.c_str(), std::ios::app | std::ios::out);
-
-//		serializeTransform(out, getJoints());
-
-		std::vector<geometry_msgs::TransformStamped> transforms = getJoints();
-
-		BOOST_FOREACH(geometry_msgs::TransformStamped transform, transforms) {
-			out << transform;
-
-		//	out << transform.header.frame_id;
-		//	out << transform.header.seq;
-		//	out << transform.header.stamp;
-		//	out << transform.transform.translation.x;
-		//	out << transform.transform.translation.y;
-		//	out << transform.transform.translation.z;
-		//	out << transform.transform.rotation.x;
-		//	out << transform.transform.rotation.y;
-		//	out << transform.transform.rotation.z;
-		//	out << transform.transform.rotation.w;
-		}
-
-		out.close();
-	}
-
-//	void serializeTransform(std::ofstream out,
-//			const std::vector<geometry_msgs::TransformStamped> &transforms) const
-//	{
-//		BOOST_FOREACH(geometry_msgs::TransformStamped transform, transforms) {
-//			out << transform;
-//
-////			out << transform.header.frame_id;
-////			out << transform.header.seq;
-////			out << transform.header.stamp;
-////			out << transform.transform.translation.x;
-////			out << transform.transform.translation.y;
-////			out << transform.transform.translation.z;
-////			out << transform.transform.rotation.x;
-////			out << transform.transform.rotation.y;
-////			out << transform.transform.rotation.z;
-////			out << transform.transform.rotation.w;
-//		}
-//	}
 };
-
-//using namespace boost; //{
-//using namespace serialization; //{
-//
-//template<class Archive>
-//void serialize(Archive & ar, PoseData & p, const unsigned int version)
-//{
-//	geometry_msgs::TransformStamped transform = p.head;
-//	serializeTransform(ar, transform);
-//    transform = p.neck;
-//	serializeTransform(ar, transform);
-//    transform = p.torso;
-//	serializeTransform(ar, transform);
-//    transform = p.left_shoulder;
-//	serializeTransform(ar, transform);
-//    transform = p.left_elbow;
-//	serializeTransform(ar, transform);
-//    transform = p.left_hand;
-//	serializeTransform(ar, transform);
-//    transform = p.right_shoulder;
-//	serializeTransform(ar, transform);
-//    transform = p.right_elbow;
-//	serializeTransform(ar, transform);
-//    transform = p.right_hand;
-//	serializeTransform(ar, transform);
-//    transform = p.left_hip;
-//	serializeTransform(ar, transform);
-//    transform = p.left_knee;
-//	serializeTransform(ar, transform);
-//    transform = p.left_foot;
-//	serializeTransform(ar, transform);
-//    transform = p.right_hip;
-//	serializeTransform(ar, transform);
-//    transform = p.right_knee;
-//	serializeTransform(ar, transform);
-//    transform = p.right_foot;
-//	serializeTransform(ar, transform);
-//
-//	/*ar & p.head;
-//	ar & p.neck;
-//	ar & p.torso;
-//	ar & p.left_shoulder;
-//	ar & p.left_elbow;
-//	ar & p.left_hand;
-//	ar & p.right_shoulder;
-//	ar & p.right_elbow;
-//	ar & p.right_hand;
-//	ar & p.left_hip;
-//	ar & p.left_knee;
-//	ar & p.left_foot;
-//	ar & p.right_hip;
-//	ar & p.right_knee;
-//	ar & p.right_foot;*/
-//}
-//
-//template<class Archive>
-//void serializeTransform(Archive& ar, geometry_msgs::TransformStamped& transform)
-//{
-//	ar & transform.header.frame_id;
-//	ar & transform.header.seq;
-//	ar & transform.header.stamp;
-//	ar & transform.transform.translation.x;
-//	ar & transform.transform.translation.y;
-//	ar & transform.transform.translation.z;
-//	ar & transform.transform.rotation.x;
-//	ar & transform.transform.rotation.y;
-//	ar & transform.transform.rotation.z;
-//	ar & transform.transform.rotation.w;
-//}
-
-//} // namespace serialization
-//} // namespace boost
 
 #endif /* POSEDATA_H_ */

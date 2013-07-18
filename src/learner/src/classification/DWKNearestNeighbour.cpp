@@ -6,14 +6,18 @@
 int classification::DWKNearestNeighbour::classify(const DataPoint* p) const
 {
 	std::vector<DataPoint*> vect = getDatastore()->getDataPoints();
+
+	// Pairs consisting of distances to points (distance, point)
 	std::list<std::pair<float, const DataPoint*> > distToPoint;
 
 	float total = 0;
+	// Populate distToPoint
 	for (int i=0;i<vect.size();i++){
 		DataPoint* curr = vect[i];
 
 		float dist = p->getDistance(*curr);
 		std::pair<float, const DataPoint*> pair(dist, p);
+		total += dist;
 
 		distToPoint.push_back(pair);
 	}
@@ -24,12 +28,14 @@ int classification::DWKNearestNeighbour::classify(const DataPoint* p) const
 	while (it != distToPoint.end()){
 		std::pair<float, const DataPoint*> pair = *it;
 
+		// If there aren't any elements with the current DataPoint's classification
+		// in classificationList, insert the classification of that element.
 		if (classificationList.find(pair.second->getClassification()) == classificationList.end()){
 			classificationList.insert(std::pair<short, float>(pair.second->getClassification(), 0));
 		}
 
-		float& val = classificationList.at(pair.second->getClassification());
-		val += (pair.first / total);
+		float& weight = classificationList.at(pair.second->getClassification());
+		weight += (pair.first / total);
 
 		it++;
 	}

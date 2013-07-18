@@ -78,25 +78,76 @@ public:
 	/*
 	 * Gets k closest DataPoints to otherPoint.
 	 */
+//	std::vector<classification::DataPoint*> getDataPoints(const classification::DataPoint *otherPoint,
+//			int k) const
+//	{
+//		if (k > trainingData.size()) {
+//			//TODO: Throw error
+//			std::cout
+//					<< "Hey, k is larger than your training data. Don't do that."
+//					<< std::endl;
+//		}
+//
+//		std::vector<classification::DataPoint*> points;
+//
+//		while (k > 0) {
+//			classification::DataPoint *nearest = getDataPoint(otherPoint, points);
+//			points.push_back(nearest);
+//			k--;
+//		}
+//
+//		return points;
+//	}
+
 	std::vector<classification::DataPoint*> getDataPoints(const classification::DataPoint *otherPoint,
 			int k) const
 	{
-		if (k > trainingData.size()) {
-			//TODO: Throw error
-			std::cout
-					<< "Hey, k is larger than your training data. Don't do that."
-					<< std::endl;
+		std::list<std::pair<float, DataPoint*> > distToPoint;
+
+		//Construct dist to point list
+		for (int i=0;i<trainingData.size();i++){
+			DataPoint* p = trainingData[i];
+
+			float dist = otherPoint->getDistance(*p);
+
+			std::pair<float, DataPoint*> pair(dist, p);
+
+			std::list<std::pair<float, DataPoint*> >::iterator it = distToPoint.begin();
+
+			bool inserted = false;
+			//Insert in order
+			while (it != distToPoint.end()){
+				std::pair<float, DataPoint*> current = *it;
+
+				if (dist < current.first){
+					//Insert here...
+					distToPoint.insert(it, pair);
+					inserted = true;
+					break;
+				}
+
+				it++;
+			}
+
+			if (!inserted)
+				distToPoint.push_back(pair);
 		}
 
-		std::vector<classification::DataPoint*> points;
+		std::vector<classification::DataPoint*> vect;
 
-		while (k > 0) {
-			classification::DataPoint *nearest = getDataPoint(otherPoint, points);
-			points.push_back(nearest);
-			k--;
+		std::list<std::pair<float, DataPoint*> >::iterator it = distToPoint.begin();
+		for (int i=0;i<k;i++){
+			std::pair<float, DataPoint*> current = *it;
+			vect.push_back(current.second);
+
+			std::cout << "Neighbour " << i << " dist: " << current.first << "\n";
+
+			it++;
 		}
 
-		return points;
+		std::cout << "knn_done" << "\n";
+
+		return vect;
 	}
 
 	/*

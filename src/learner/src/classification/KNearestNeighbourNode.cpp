@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 		ROS_INFO("Finished retrieving data.");
 
 		classification::DataStore* store = new classification::PlainDataStore(classifiedPoints);
-		knn_learner = new classification::KNearestNeighbour(store);
+		knn_learner = new classification::KNearestNeighbour(store, 50);
 		ROS_INFO("Created KNN instance.");
 
 		ROS_INFO("Creating subscriber to /tf");
@@ -75,8 +75,6 @@ int main(int argc, char** argv)
 
 void tfCallback(const tf::tfMessage msg)
 {
-	ROS_INFO("Recieved message!");
-
 	if (msg.transforms.size() > 0){
 		geometry_msgs::TransformStamped ts = msg.transforms[0];
 
@@ -125,8 +123,6 @@ void tfCallback(const tf::tfMessage msg)
 				}else if (str.find("right_knee") != std::string::npos){
 					point.right_knee = ts;
 				}else if (str.find("right_foot") != std::string::npos){
-					ROS_INFO("Whole skeleton found.");
-
 					point.right_foot = ts;
 
 					//Classify point

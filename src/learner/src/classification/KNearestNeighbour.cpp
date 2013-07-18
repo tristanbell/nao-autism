@@ -3,6 +3,8 @@
 #include <map>
 #include <exception>
 
+#include <iostream>
+
 int classification::KNearestNeighbour::classify(const DataPoint* p) const
 {
 	return classify(p, defaultK);
@@ -11,6 +13,8 @@ int classification::KNearestNeighbour::classify(const DataPoint* p) const
 int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k) const
 {
 	std::vector<DataPoint*> points = getDatastore()->getDataPoints(p, k);
+
+	std::cout << "Got points!" << "\n";
 
 	//Construct map containing pairs of class to number of votes (where the class is the key)
 	std::map<short, int> classificationVote;
@@ -22,7 +26,7 @@ int classification::KNearestNeighbour::classify(const DataPoint* p, const int& k
 			try{
 				int& pClassNum = classificationVote.at(pt->getClassification());
 				pClassNum++;
-			}catch(std::out_of_range* oof){
+			}catch(std::out_of_range& oof){
 				classificationVote.insert(std::pair<int, int>(pt->getClassification(), 1));
 			}
 		}

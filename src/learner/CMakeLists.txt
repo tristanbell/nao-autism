@@ -19,6 +19,7 @@ generate_messages(
 catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES ${PROJECT_NAME}
+	CATKIN_DEPENDS message_runtime
 )
 
 include_directories(include
@@ -28,6 +29,7 @@ include_directories(include
 
 set(learner_SRCS
 		 src/classification/DataLoader.cpp
+		 src/classification/DataLoaderNode.cpp
 		 src/classification/KNearestNeighbour.cpp
 		 src/classification/PlainDataStore.cpp
 	  	 src/classification/PoseDataPoint.cpp)
@@ -48,11 +50,12 @@ set(knn_node_SRCS
 		src/classification/PlainDataStore.cpp
 		src/classification/KNearestNeighbourNode.cpp)
 
-#add_executable(dataLoader ${learner_SRCS} ${learner_HDRS})
-#target_link_libraries(dataLoader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(dataLoader ${learner_SRCS} ${learner_HDRS})
+target_link_libraries(dataLoader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(knn_node ${knn_node_SRCS} ${learner_HDRS})
 target_link_libraries(knn_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(knn_node learner_generate_msg_cpp)
 
 #add_executable(PlainDataStoreTest ${learner_SRCS} ${learner_HDRS})
 #target_link_libraries(PlainDataStoreTest ${catkin_LIBRARIES})

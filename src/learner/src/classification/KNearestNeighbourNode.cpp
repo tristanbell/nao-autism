@@ -24,7 +24,129 @@ classification::Learner* knn_learner;
 ros::Subscriber tf_subscriber;
 ros::Publisher classification_publisher;
 
-std::map<int, PoseData> pose_map;
+class TempPoseData
+{
+
+public:
+	TempPoseData()
+	{
+		nullAll();
+	}
+
+	geometry_msgs::TransformStamped* head;
+	geometry_msgs::TransformStamped* neck;
+	geometry_msgs::TransformStamped* torso;
+	geometry_msgs::TransformStamped* left_shoulder;
+	geometry_msgs::TransformStamped* left_elbow;
+	geometry_msgs::TransformStamped* left_hand;
+	geometry_msgs::TransformStamped* right_shoulder;
+	geometry_msgs::TransformStamped* right_elbow;
+	geometry_msgs::TransformStamped* right_hand;
+	geometry_msgs::TransformStamped* left_hip;
+	geometry_msgs::TransformStamped* left_knee;
+	geometry_msgs::TransformStamped* left_foot;
+	geometry_msgs::TransformStamped* right_hip;
+	geometry_msgs::TransformStamped* right_knee;
+	geometry_msgs::TransformStamped* right_foot;
+
+	bool valid() const
+	{
+		return head && neck && torso && left_shoulder && left_elbow && left_hand &&
+				right_shoulder && right_elbow && right_hand && left_hip && left_knee &&
+				left_foot && right_hip && right_knee && right_foot;
+	}
+
+	void clear()
+	{
+		deleteAll();
+		nullAll();
+	}
+
+private:
+	inline void nullAll()
+	{
+		head = NULL;
+		neck = NULL;
+		torso = NULL;
+		left_shoulder = NULL;
+		left_elbow = NULL;
+		left_hand = NULL;
+		right_shoulder = NULL;
+		right_elbow = NULL;
+		right_hand = NULL;
+		left_hip = NULL;
+		left_knee = NULL;
+		left_foot = NULL;
+		right_hip = NULL;
+		right_knee = NULL;
+		right_foot = NULL;
+	}
+
+	inline void deleteAll()
+	{
+		if (head){
+			delete head;
+		}
+
+		if (neck){
+			delete neck;
+		}
+
+		if (torso){
+			delete torso;
+		}
+
+		if (left_shoulder){
+			delete left_shoulder;
+		}
+
+		if (left_elbow){
+			delete left_elbow;
+		}
+
+		if (left_hand){
+			delete left_hand;
+		}
+
+		if (right_shoulder){
+			delete right_shoulder;
+		}
+
+		if (right_elbow){
+			delete right_elbow;
+		}
+
+		if (right_hand){
+			delete right_hand;
+		}
+
+		if (left_hip){
+			delete left_hip;
+		}
+
+		if (left_knee){
+			delete left_knee;
+		}
+
+		if (left_foot){
+			delete left_foot;
+		}
+
+		if (right_hip){
+			delete right_hip;
+		}
+
+		if (right_knee){
+			delete right_knee;
+		}
+
+		if (right_foot){
+			delete right_foot;
+		}
+	}
+};
+
+std::map<int, TempPoseData> pose_map;
 
 int main(int argc, char** argv)
 {
@@ -50,16 +172,16 @@ int main(int argc, char** argv)
 		ROS_INFO("Finished retrieving data.");
 
 		classification::DataStore* store = new classification::PlainDataStore(classifiedPoints);
-		knn_learner = new classification::KNearestNeighbour(store, 50);
+		knn_learner = new classification::KNearestNeighbour(store, 5);
 		ROS_INFO("Created KNN instance.");
 
 		ROS_INFO("Creating subscriber to /tf");
 		ros::NodeHandle nh;
 
-		tf_subscriber = nh.subscribe("/tf", 1000, tfCallback);
+		tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
 
 		ROS_INFO("Creating classification advertiser");
-		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1000);
+		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1);
 
 		ROS_INFO("Setup complete, spinning");
 		ros::spin();
@@ -76,9 +198,9 @@ int main(int argc, char** argv)
 void tfCallback(const tf::tfMessage msg)
 {
 	if (msg.transforms.size() > 0){
-		geometry_msgs::TransformStamped ts = msg.transforms[0];
+		geometry_msgs::TransformStamped tsn = msg.transforms[0];
 
-		std::string str(ts.child_frame_id);
+		std::string str(tsn.child_frame_id);
 		for (int i=0;i<str.length();i++){
 			char curr = str[i];
 
@@ -88,10 +210,11 @@ void tfCallback(const tf::tfMessage msg)
 				int val = strtol(newStr.c_str(), NULL, 10);
 
 				if (pose_map.find(val) == pose_map.end()){
-					pose_map.insert(std::pair<int, PoseData>(val, PoseData()));
+					pose_map.insert(std::pair<int, TempPoseData>(val, TempPoseData()));
 				}
 
-				PoseData& point = pose_map.at(val);
+				geometry_msgs::TransformStamped* ts = new geometry_msgs::TransformStamped(tsn);
+				TempPoseData& point = pose_map.at(val);
 
 				//Long if statement ftw...
 				if (str.find("head") != std::string::npos){
@@ -125,18 +248,40 @@ void tfCallback(const tf::tfMessage msg)
 				}else if (str.find("right_foot") != std::string::npos){
 					point.right_foot = ts;
 
-					//Classify point
-					classification::PoseDataPoint* pdp = new classification::PoseDataPoint(point);
-					int classification = knn_learner->classify(pdp);
-					delete pdp;
+					if (point.valid()){
+						PoseData poseData;
 
-					//Create message and send classification
-					learner::PoseClassification pc;
+						poseData.head = *point.head;
+						poseData.neck = *point.neck;
+						poseData.torso = *point.torso;
+						poseData.left_shoulder = *point.left_shoulder;
+						poseData.left_elbow = *point.left_elbow;
+						poseData.left_hand = *point.left_hand;
+						poseData.right_shoulder = *point.right_shoulder;
+						poseData.right_elbow = *point.right_elbow;
+						poseData.right_hand = *point.right_hand;
+						poseData.left_hip = *point.left_hip;
+						poseData.left_knee = *point.left_knee;
+						poseData.left_foot = *point.left_foot;
+						poseData.right_hip = *point.right_hip;
+						poseData.right_knee = *point.right_knee;
+						poseData.right_foot = *point.right_foot;
 
-					pc.user_number = val;
-					pc.classification = classification;
+						//Classify point
+						classification::PoseDataPoint* pdp = new classification::PoseDataPoint(poseData);
+						int classification = knn_learner->classify(pdp);
+						delete pdp;
 
-					classification_publisher.publish(pc);
+						//Create message and send classification
+						learner::PoseClassification pc;
+
+						pc.user_number = val;
+						pc.classification = classification;
+
+						classification_publisher.publish(pc);
+					}
+
+					point.clear();
 				}
 			}
 		}

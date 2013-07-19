@@ -77,7 +77,7 @@ private:
 	/*
 	 * Get the index in 'paths' that corresponds to the file including the time at 'timestamp'.
 	 */
-	int getFileIndex(std::vector<boost::filesystem::path>& paths, boost::posix_time::ptime timestamp);
+	static int getFileIndex(std::vector<boost::filesystem::path>& paths, boost::posix_time::ptime timestamp);
 };
 
 }

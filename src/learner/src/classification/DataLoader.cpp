@@ -270,6 +270,11 @@ vector<classification::DataPoint*> classification::DataLoader::getDataSubset(
 	return subset;
 }
 
+// PROBLEM WRITING: poses are added immediately after one another, instead
+// of the intended 0.43 second delay. This makes them play back very quickly
+// when played through rosbag. The delay is currently added after each subset
+// of data is added, but it should be after each /pose/ is added (i.e. in
+// writeToFile() )
 void classification::DataLoader::filterData(string filename)
 {
 	vector<string> ts = classification::DataLoader::readTimestampFile(filename);
@@ -282,7 +287,6 @@ void classification::DataLoader::filterData(string filename)
 
 	ros::Time::init();
 	ros::Time timeToWrite = ros::Time::now();
-	ros::Duration timeToAdd(PLAYBACK_SPEED);
 
 	for (int i = 0; i < ts.size(); i++) {
 		printf("Adding timestamp %d...\n", i + 1);
@@ -320,8 +324,6 @@ void classification::DataLoader::filterData(string filename)
 		else
 			cerr << "Unknown behavior name found" << endl;
 
-		// Simulates very short pauses between data (mainly for playback in rviz)
-		timeToWrite += timeToAdd;
 		printf("...Done\n\n");
 	}
 
@@ -335,11 +337,14 @@ void classification::DataLoader::writeToFile(rosbag::Bag &bag,
 		classification::TrainingData data, std::string behaviorName,
 		ros::Time &timeToWrite)
 {
+	ros::Duration timeToAdd(PLAYBACK_SPEED);
 	vector<classification::PoseDataPoint*> dataPoints =
 			PoseDataPoint::convertToPoses(data);
 
 	BOOST_FOREACH(PoseDataPoint* pose, dataPoints){
 		(pose->poseData).writeToFile(bag, timeToWrite);
+		// Simulates very short pauses between data (mainly for playback in rviz)
+		timeToWrite += timeToAdd;
 	}
 }
 

@@ -286,7 +286,10 @@ void classification::DataLoader::filterData(string filename)
 	rosbag::Bag scaredBag("scared.bag", rosbag::bagmode::Write);
 
 	ros::Time::init();
-	ros::Time timeToWrite = ros::Time::now();
+	ros::Time happyTimeToWrite = ros::Time::now();
+	ros::Time sadTimeToWrite = ros::Time::now();
+	ros::Time scaredTimeToWrite = ros::Time::now();
+	ros::Time angryTimeToWrite = ros::Time::now();
 
 	for (int i = 0; i < ts.size(); i++) {
 		printf("Adding timestamp %d...\n", i + 1);
@@ -302,7 +305,9 @@ void classification::DataLoader::filterData(string filename)
 
 		// Find the file that contains the timestamp
 		cout << "   Finding file..." << endl;
-		string filepath = findFile("/home/tristan/nao-autism/recordings/",
+//		string filepath = findFile("/home/tristan/nao-autism/recordings/",
+//				start.toBoost() + boost::posix_time::hours(1));
+		string filepath = findFile("/media/Partition 1/recordings/",
 				start.toBoost() + boost::posix_time::hours(1));
 		cout << "   " << filepath << endl;
 
@@ -314,13 +319,13 @@ void classification::DataLoader::filterData(string filename)
 
 		// Write to the proper file
 		if (behavior == "happy")
-			writeToFile(happyBag, subset, behavior, timeToWrite);
+			writeToFile(happyBag, subset, behavior, happyTimeToWrite);
 		else if (behavior == "sad")
-			writeToFile(sadBag, subset, behavior, timeToWrite);
+			writeToFile(sadBag, subset, behavior, sadTimeToWrite);
 		else if (behavior == "angry")
-			writeToFile(angryBag, subset, behavior, timeToWrite);
+			writeToFile(angryBag, subset, behavior, angryTimeToWrite);
 		else if (behavior == "scared")
-			writeToFile(scaredBag, subset, behavior, timeToWrite);
+			writeToFile(scaredBag, subset, behavior, scaredTimeToWrite);
 		else
 			cerr << "Unknown behavior name found" << endl;
 

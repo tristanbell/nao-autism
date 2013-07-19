@@ -6,7 +6,7 @@
 #include <classification/PlainDataStore.h>
 #include <classification/DataPoint.h>
 
-//#include <learner/PoseClassification.h>
+#include <learner/PoseClassification.h>
 
 #include <vector>
 #include <map>
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
 		tf_subscriber = nh.subscribe("/tf", 1, tfCallback);
 
 		ROS_INFO("Creating classification advertiser");
-//		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1);
+		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1);
 
 		ROS_INFO("Setup complete, spinning");
 		ros::spin();
@@ -275,12 +275,12 @@ void tfCallback(const tf::tfMessage msg)
 						delete pdp;
 
 						//Create message and send classification
-//						learner::PoseClassification pc;
+						learner::PoseClassification pc;
 
-//						pc.user_number = val;
-//						pc.classification = classification;
+						pc.user_number = val;
+						pc.classification = classification;
 
-//						classification_publisher.publish(pc);
+						classification_publisher.publish(pc);
 					}
 
 					point.clear();

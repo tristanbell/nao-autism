@@ -42,12 +42,12 @@ public:
 	 */
 	static void filterData(std::string filename);
 
-private:
 	/*
 	 * Write data to a bagfile. The file to be written to corresponds to 'behaviorName'.
 	 */
 	static void writeToFile(rosbag::Bag &bag, classification::TrainingData data,
-			std::string behaviorName, ros::Time &timeToWrite);
+			ros::Time &timeToWrite);
+private:
 
 	/*
 	 * Get the name of the bagfile contained within 'directory' which includes the given timestamp.

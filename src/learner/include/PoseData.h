@@ -92,7 +92,7 @@ public:
 		writeMsg(right_foot, trans, msg, bag, time);
 	}
 
-	static PoseData getTestPoseData()
+	static PoseData getStandingPoseData()
 	{
 		PoseData test_pose;
 		geometry_msgs::TransformStamped transform;

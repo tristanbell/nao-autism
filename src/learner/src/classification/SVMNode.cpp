@@ -1,3 +1,12 @@
+/*
+ * SVMNode.cpp
+ *
+ *  Created on: Jul 23, 2013
+ *      Author: parallels
+ */
+
+#include <libsvm/svm.h>
+
 #include <classification/Learner.h>
 #include <classification/KNearestNeighbour.h>
 #include <classification/DWKNearestNeighbour.h>
@@ -5,6 +14,7 @@
 #include <classification/DataStore.h>
 #include <classification/PlainDataStore.h>
 #include <classification/DataPoint.h>
+#include <classification/PoseDataPoint.h>
 
 #include <learner/PoseClassification.h>
 
@@ -14,18 +24,19 @@
 #include <iostream>
 #include <fstream>
 
+#include <ros/ros.h>
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
 
-#include <ros/ros.h>
 #include <std_msgs/Int32.h>
 
 //Method prototypes
 void tfCallback(const tf::tfMessage msg);
+svm_node *convertToNode(PoseData pose);
 
-classification::Learner* knn_learner;
 ros::Subscriber _tf_subscriber;
 ros::Publisher _classification_publisher;
+svm_model *_model;
 
 class TempPoseData
 {
@@ -151,77 +162,24 @@ private:
 
 std::map<int, TempPoseData> pose_map;
 
-int main(int argc, char** argv)
-{
-	if ((argc % 2) == 1 && argc > 1){
-		ros::init(argc, argv, "knn_node");
+int main(int argc, char** argv) {
+	ros::init(argc, argv, "svm_node");
 
-		classification::TrainingData classifiedPoints;
+	_model = ::svm_load_model("nao_autism.model");
 
-		ROS_INFO("Scanning argument(s)");
-		for (unsigned int i=1;i<argc;i+=2){
-			std::string fileName(argv[i]);
-			short classification = strtol(argv[i+1], NULL, 10);
+	ROS_INFO("Created model.");
 
-			std::vector<classification::DataPoint*> dataPoints = classification::DataLoader::loadData(fileName);
-			for (unsigned int j=0;j<dataPoints.size();j++){
-				classification::DataPoint* current = dataPoints[j];
+	ROS_INFO("Creating subscriber to /tf");
+	ros::NodeHandle nh;
 
-				current->setClassification(classification);
-				classifiedPoints.push_back(current);
-			}
-		}
+	_tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
 
-		using namespace std;
+	ROS_INFO("Creating classification advertiser");
+	_classification_publisher = nh.advertise<learner::PoseClassification>(
+			"/classification", 1);
 
-		ofstream out("nao_autism", ios::app);
-
-		vector<classification::PoseDataPoint*> pdata =
-				classification::PoseDataPoint::convertToPoses(classifiedPoints);
-
-		BOOST_FOREACH(classification::PoseDataPoint* dataPoint, pdata){
-			// Classification will be the index, so written first
-			out << "+" << dataPoint->getClassification() << " ";
-
-			vector<geometry_msgs::TransformStamped> joints = dataPoint->poseData.getJoints();
-
-			int indexCount = 1;
-
-			for (int i = 0; i < joints.size(); i++) {
-				out << indexCount++ << ":" << joints[i].transform.rotation.x << " ";
-				out << indexCount++ << ":" << joints[i].transform.rotation.y << " ";
-				out << indexCount++ << ":" << joints[i].transform.rotation.z << " ";
-				out << indexCount++ << ":" << joints[i].transform.rotation.w << " ";
-			}
-
-			out << "\n";
-		}
-
-		out.close();
-
-		/*ROS_INFO("Finished retrieving data.");
-
-		classification::DataStore* store = new classification::PlainDataStore(classifiedPoints);
-//		knn_learner = new classification::KNearestNeighbour(store, 5);
-		knn_learner = new classification::DWKNearestNeighbour(store);
-		ROS_INFO("Created KNN instance.");
-
-		ROS_INFO("Creating subscriber to /tf");
-		ros::NodeHandle nh;
-
-		tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
-
-		ROS_INFO("Creating classification advertiser");
-		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1);
-
-		ROS_INFO("Setup complete, spinning");
-		ros::spin();*/
-	}else{
-		ROS_INFO("Invalid arguments, The arguments should be supplied in pairs of <filename> and <classification>");
-		ROS_INFO("Where the filename is the name of the bag file containing solely tf transforms and the classification is some short integer.");
-
-		return -1;
-	}
+	ROS_INFO("Setup complete, spinning");
+	ros::spin();
 
 	return 0;
 }
@@ -299,15 +257,15 @@ void tfCallback(const tf::tfMessage msg)
 						poseData.right_foot = *point.right_foot;
 
 						//Classify point
-						classification::PoseDataPoint* pdp = new classification::PoseDataPoint(poseData);
-						int classification = knn_learner->classify(pdp);
-						delete pdp;
+						svm_node *node = convertToNode(poseData);
+						double thisClass = ::svm_predict(_model, node);
 
 						//Create message and send classification
 						learner::PoseClassification pc;
 
 						pc.user_number = val;
-						pc.classification = classification;
+						// Fill this with the actual value
+						pc.classification = (int) thisClass;
 
 						_classification_publisher.publish(pc);
 					}
@@ -318,3 +276,59 @@ void tfCallback(const tf::tfMessage msg)
 		}
 	}
 }
+
+svm_node *convertToNode(PoseData data) {
+	svm_node *nodes = new svm_node[61];
+
+	std::vector<geometry_msgs::TransformStamped> joints = data.getJoints();
+	int indexCount = 1;
+
+	for (int i = 0; i < joints.size(); i++) {
+		svm_node n1, n2, n3, n4;
+
+		n1.index = indexCount++;
+		n1.value = joints[i].transform.rotation.x;
+		nodes[indexCount-2] = n1;
+
+		n2.index = indexCount++;
+		n2.value = joints[i].transform.rotation.y;
+		nodes[indexCount-2] = n2;
+
+		n3.index = indexCount++;
+		n3.value = joints[i].transform.rotation.z;
+		nodes[indexCount-2] = n3;
+
+		n4.index = indexCount++;
+		n4.value = joints[i].transform.rotation.w;
+		nodes[indexCount-2] = n4;
+	}
+
+	svm_node last;
+	last.index = -1;
+	nodes[60] = last;
+
+	return nodes;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

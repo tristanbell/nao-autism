@@ -16,7 +16,7 @@ int classification::DWKNearestNeighbour::classify(const DataPoint* p) const
 		DataPoint* curr = vect[i];
 
 		float dist = p->getDistance(*curr);
-		std::pair<float, const DataPoint*> pair(dist, p);
+		std::pair<float, const DataPoint*> pair(dist, curr);
 		total += dist;
 
 		distToPoint.push_back(pair);
@@ -35,13 +35,13 @@ int classification::DWKNearestNeighbour::classify(const DataPoint* p) const
 		}
 
 		float& weight = classificationList.at(pair.second->getClassification());
-		weight += (pair.first / total);
+		weight += (1 / (pair.first / total));
 
 		it++;
 	}
 
 	short classification = 0;
-	float highestVal = -10000000000000000000000;
+	float highestVal = -10000000000;
 
 	//Now, finally, find the classification with the highest weight
 	std::map<short, float>::iterator mapIt = classificationList.begin();

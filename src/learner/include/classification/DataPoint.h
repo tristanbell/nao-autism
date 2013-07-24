@@ -10,8 +10,6 @@
 
 #include <vector>
 #include <ros/ros.h>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
 
 namespace classification{
 

@@ -219,8 +219,8 @@ void classification::DataLoader::parseTimestamp(string timestamp,
 	split(fields, timestamp, is_any_of("\n"));
 
 	// The first part of the timestamp should be the time a button was clicked
-	double startTime = atof((fields[1].substr(1, 20)).c_str()) - 0.5;
-	double endTime = atof((fields[2].substr(1, 20)).c_str());
+	double startTime = atof((fields[1].substr(1, 20)).c_str()) + 0.5;
+	double endTime = atof((fields[2].substr(1, 20)).c_str()) - 0.5;
 
 	// Construct ros::Time variables for start and end times, then modify
 	// the arguments accordingly.
@@ -270,11 +270,6 @@ vector<classification::DataPoint*> classification::DataLoader::getDataSubset(
 	return subset;
 }
 
-// PROBLEM WRITING: poses are added immediately after one another, instead
-// of the intended 0.43 second delay. This makes them play back very quickly
-// when played through rosbag. The delay is currently added after each subset
-// of data is added, but it should be after each /pose/ is added (i.e. in
-// writeToFile() )
 void classification::DataLoader::filterData(string filename)
 {
 	vector<string> ts = classification::DataLoader::readTimestampFile(filename);
@@ -319,13 +314,13 @@ void classification::DataLoader::filterData(string filename)
 
 		// Write to the proper file
 		if (behavior == "happy")
-			writeToFile(happyBag, subset, behavior, happyTimeToWrite);
+			writeToFile(happyBag, subset, happyTimeToWrite);
 		else if (behavior == "sad")
-			writeToFile(sadBag, subset, behavior, sadTimeToWrite);
+			writeToFile(sadBag, subset, sadTimeToWrite);
 		else if (behavior == "angry")
-			writeToFile(angryBag, subset, behavior, angryTimeToWrite);
+			writeToFile(angryBag, subset, angryTimeToWrite);
 		else if (behavior == "scared")
-			writeToFile(scaredBag, subset, behavior, scaredTimeToWrite);
+			writeToFile(scaredBag, subset, scaredTimeToWrite);
 		else
 			cerr << "Unknown behavior name found" << endl;
 
@@ -339,7 +334,7 @@ void classification::DataLoader::filterData(string filename)
 }
 
 void classification::DataLoader::writeToFile(rosbag::Bag &bag,
-		classification::TrainingData data, std::string behaviorName,
+		classification::TrainingData data,
 		ros::Time &timeToWrite)
 {
 	ros::Duration timeToAdd(PLAYBACK_SPEED);

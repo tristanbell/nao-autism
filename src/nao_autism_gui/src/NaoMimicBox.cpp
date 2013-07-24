@@ -199,7 +199,7 @@ void nao_gui::NaoMimicBox::writeToLogBehavior()
 
 	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
 
-	stream << "[" << getTimestamp() << "] ";
+	stream << "[" << ros::Time::now() << "] ";
 
 	stream << "BEHAVIOR_BUTTON ";
 
@@ -224,7 +224,7 @@ void nao_gui::NaoMimicBox::writeToLogPrompt()
 
 	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
 
-	stream << "[" << getTimestamp() << "] ";
+	stream << "[" << ros::Time::now() << "] ";
 
 	stream << "PROMPT_BUTTON ";
 
@@ -239,7 +239,7 @@ void nao_gui::NaoMimicBox::writeToLogAnswer(const bool& ans)
 
 	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
 
-	stream << "[" << getTimestamp() << "] ";
+	stream << "[" << ros::Time::now() << "] ";
 
 	if (ans){
 		stream << "CORRECT_BUTTON ";

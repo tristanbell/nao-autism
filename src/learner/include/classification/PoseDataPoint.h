@@ -73,6 +73,12 @@ public:
 	virtual float getDistance(const DataPoint&) const;
 	virtual ros::Time getTimestamp() const;
 
+	static PoseDataPoint* getStandingPose(void)
+	{
+		PoseData data = PoseData::getStandingPoseData();
+		return new PoseDataPoint(data);
+	}
+
 	const PoseData poseData;
 private:
 

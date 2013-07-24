@@ -17,7 +17,7 @@ class DWKNearestNeighbour : public Learner
 {
 
 public:
-	DWKNearestNeighbour(DataStore* data) : Learner(data)
+	DWKNearestNeighbour(DataStore* data) : classification::Learner(data)
 	{  }
 
 	virtual int classify(const DataPoint* p) const;

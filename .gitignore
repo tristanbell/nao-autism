@@ -3,6 +3,7 @@
 build
 devel
 install
+recordings
 
 ## C++ stuff
 bin

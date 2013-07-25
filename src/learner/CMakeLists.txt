@@ -6,7 +6,7 @@ project(learner)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf std_msgs message_generation)
 find_package(Boost REQUIRED COMPONENTS system filesystem date_time)
-find_package(LibSVM REQUIRED)
+#find_package(LibSVM REQUIRED)
 
 add_message_files(
 	FILES
@@ -59,6 +59,14 @@ set(svm_node_SRCS
 		src/classification/SVMNode.cpp
 		libsvm-3.17/svm.cpp)
 		
+set(svm_export_SRCS
+		src/classification/PoseDataPoint.cpp
+		src/classification/KNearestNeighbour.cpp
+		src/classification/DWKNearestNeighbour.cpp
+		src/classification/DataLoader.cpp
+		src/classification/PlainDataStore.cpp
+		src/classification/SvmExport.cpp)
+		
 
 add_executable(dataLoader ${learner_SRCS} ${learner_HDRS})
 target_link_libraries(dataLoader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -70,8 +78,8 @@ add_executable(knn_node ${knn_node_SRCS} ${learner_HDRS})
 target_link_libraries(knn_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(knn_node learner_generate_msg_cpp)
 
-#add_executable(PlainDataStoreTest ${learner_SRCS} ${learner_HDRS})
-#target_link_libraries(PlainDataStoreTest ${catkin_LIBRARIES})
+add_executable(svm_export ${svm_export_SRCS} ${learner_HDRS})
+target_link_libraries(svm_export ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 
 

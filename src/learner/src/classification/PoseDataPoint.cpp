@@ -66,6 +66,11 @@ std::vector<geometry_msgs::Quaternion> classification::PoseDataPoint::getRotatio
 	return rotations;
 }
 
+void classification::PoseDataPoint::writeToFile(rosbag::Bag &bag, ros::Time &time) const
+{
+	poseData.writeToFile(bag, time);
+}
+
 ros::Time classification::PoseDataPoint::getTimestamp() const
 {
 	return poseData.head.header.stamp;

@@ -22,6 +22,7 @@
 using namespace std;
 
 const float PLAYBACK_SPEED = 0.043;
+classification::TrainingData _standingData;
 
 vector<classification::DataPoint*> classification::DataLoader::loadData(
 		string filename)
@@ -272,6 +273,8 @@ vector<classification::DataPoint*> classification::DataLoader::getDataSubset(
 
 void classification::DataLoader::filterData(string filename)
 {
+	_standingData = classification::DataLoader::loadData("standing.bag");
+
 	vector<string> ts = classification::DataLoader::readTimestampFile(filename);
 
 	// Create bagfiles for each emotion
@@ -342,9 +345,30 @@ void classification::DataLoader::writeToFile(rosbag::Bag &bag,
 			PoseDataPoint::convertToPoses(data);
 
 	BOOST_FOREACH(PoseDataPoint* pose, dataPoints){
-		(pose->poseData).writeToFile(bag, timeToWrite);
-		// Simulates very short pauses between data (mainly for playback in rviz)
-		timeToWrite += timeToAdd;
+		int rnd = rand() % (_standingData.size() - 1);
+		DataPoint* pointToIgnore = _standingData[rnd];
+//		printf("Choosing point %d of %d:\n", rnd, ((int)_standingData.size()));
+//		printf("  Distance between points: %f        \n", pose->getDistance(*pointToIgnore));
+
+		// Only write this data point to file if it is far enough away from pointToIgnore
+		if (pose->getDistance(*pointToIgnore) > 10.0) {
+			pose->writeToFile(bag, timeToWrite);
+			// Simulates very short pauses between data (for playback in rviz)
+			timeToWrite += timeToAdd;
+		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 

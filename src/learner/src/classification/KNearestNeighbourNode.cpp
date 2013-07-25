@@ -172,50 +172,50 @@ int main(int argc, char** argv)
 			}
 		}
 
-		using namespace std;
+//		using namespace std;
+//
+//		ofstream out("nao_autism");
+//
+//		vector<classification::PoseDataPoint*> pdata =
+//				classification::PoseDataPoint::convertToPoses(classifiedPoints);
+//
+//		BOOST_FOREACH(classification::PoseDataPoint* dataPoint, pdata){
+//			// Classification will be the index, so written first
+//			out << "+" << dataPoint->getClassification() << " ";
+//
+//			vector<geometry_msgs::TransformStamped> joints = dataPoint->poseData.getJoints();
+//
+//			int indexCount = 1;
+//
+//			for (int i = 0; i < joints.size(); i++) {
+//				out << indexCount++ << ":" << joints[i].transform.rotation.x << " ";
+//				out << indexCount++ << ":" << joints[i].transform.rotation.y << " ";
+//				out << indexCount++ << ":" << joints[i].transform.rotation.z << " ";
+//				out << indexCount++ << ":" << joints[i].transform.rotation.w << " ";
+//			}
+//
+//			out << "\n";
+//		}
+//
+//		out.close();
 
-		ofstream out("nao_autism", ios::app);
-
-		vector<classification::PoseDataPoint*> pdata =
-				classification::PoseDataPoint::convertToPoses(classifiedPoints);
-
-		BOOST_FOREACH(classification::PoseDataPoint* dataPoint, pdata){
-			// Classification will be the index, so written first
-			out << "+" << dataPoint->getClassification() << " ";
-
-			vector<geometry_msgs::TransformStamped> joints = dataPoint->poseData.getJoints();
-
-			int indexCount = 1;
-
-			for (int i = 0; i < joints.size(); i++) {
-				out << indexCount++ << ":" << joints[i].transform.rotation.x << " ";
-				out << indexCount++ << ":" << joints[i].transform.rotation.y << " ";
-				out << indexCount++ << ":" << joints[i].transform.rotation.z << " ";
-				out << indexCount++ << ":" << joints[i].transform.rotation.w << " ";
-			}
-
-			out << "\n";
-		}
-
-		out.close();
-
-		/*ROS_INFO("Finished retrieving data.");
+		ROS_INFO("Finished retrieving data.");
 
 		classification::DataStore* store = new classification::PlainDataStore(classifiedPoints);
-//		knn_learner = new classification::KNearestNeighbour(store, 5);
-		knn_learner = new classification::DWKNearestNeighbour(store);
+		knn_learner = new classification::KNearestNeighbour(store, 5);
+//		knn_learner = new classification::DWKNearestNeighbour(store);
 		ROS_INFO("Created KNN instance.");
 
 		ROS_INFO("Creating subscriber to /tf");
 		ros::NodeHandle nh;
 
-		tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
+		_tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
 
 		ROS_INFO("Creating classification advertiser");
-		classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1);
+		_classification_publisher = nh.advertise<learner::PoseClassification>("/classification", 1);
 
 		ROS_INFO("Setup complete, spinning");
-		ros::spin();*/
+		ros::spin();
 	}else{
 		ROS_INFO("Invalid arguments, The arguments should be supplied in pairs of <filename> and <classification>");
 		ROS_INFO("Where the filename is the name of the bag file containing solely tf transforms and the classification is some short integer.");

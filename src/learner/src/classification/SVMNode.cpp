@@ -163,25 +163,30 @@ private:
 std::map<int, TempPoseData> pose_map;
 
 int main(int argc, char** argv) {
-	ros::init(argc, argv, "svm_node");
+	if (argc > 1) {
+		ros::init(argc, argv, "svm_node");
 
-	_model = ::svm_load_model("nao_autism.model");
+		_model = ::svm_load_model(argv[1]);
 
-	ROS_INFO("Created model.");
+		ROS_INFO("Created model.");
 
-	ROS_INFO("Creating subscriber to /tf");
-	ros::NodeHandle nh;
+		ROS_INFO("Creating subscriber to /tf");
+		ros::NodeHandle nh;
 
-	_tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
+		_tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
 
-	ROS_INFO("Creating classification advertiser");
-	_classification_publisher = nh.advertise<learner::PoseClassification>(
-			"/classification", 1);
+		ROS_INFO("Creating classification advertiser");
+		_classification_publisher = nh.advertise<learner::PoseClassification>(
+				"/classification", 1);
 
-	ROS_INFO("Setup complete, spinning");
-	ros::spin();
+		ROS_INFO("Setup complete, spinning");
+		ros::spin();
 
-	return 0;
+		return 0;
+	} else {
+		std::cout << "Usage: rosrun learner svm_node <libsvm model file>" << std::endl;
+		return -1;
+	}
 }
 
 void tfCallback(const tf::tfMessage msg)

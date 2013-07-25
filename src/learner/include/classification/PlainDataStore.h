@@ -145,12 +145,12 @@ public:
 			std::pair<float, DataPoint*> current = *it;
 			vect.push_back(current.second);
 
-			std::cout << "Neighbour " << i << " dist: " << current.first << "\n";
+			std::cout << "Neighbour " << i << " dist: " << current.first << "        \n";
 
 			it++;
 		}
 
-		std::cout << "knn_done" << "\n";
+		std::cout << "knn_done" << "\n\n";
 
 		return vect;
 	}

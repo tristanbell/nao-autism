@@ -72,6 +72,7 @@ public:
 	virtual std::vector<float> getPosition() const;
 	virtual float getDistance(const DataPoint&) const;
 	virtual ros::Time getTimestamp() const;
+	void writeToFile(rosbag::Bag &bag, ros::Time &time) const;
 
 	static PoseDataPoint* getStandingPose(void)
 	{

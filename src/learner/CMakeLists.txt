@@ -74,6 +74,9 @@ target_link_libraries(dataLoader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_executable(svm_node ${svm_node_SRCS})
 target_link_libraries(svm_node ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${LibSVM_LIBRARIES})
 
+add_executable(classification_listener src/classification/ClassificationListener.cpp)
+target_link_libraries(classification_listener ${catkin_LIBRARIES})
+
 add_executable(knn_node ${knn_node_SRCS} ${learner_HDRS})
 target_link_libraries(knn_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(knn_node learner_generate_msg_cpp)

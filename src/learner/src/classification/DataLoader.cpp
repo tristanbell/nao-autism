@@ -347,8 +347,6 @@ void classification::DataLoader::writeToFile(rosbag::Bag &bag,
 	BOOST_FOREACH(PoseDataPoint* pose, dataPoints){
 		int rnd = rand() % (_standingData.size() - 1);
 		DataPoint* pointToIgnore = _standingData[rnd];
-//		printf("Choosing point %d of %d:\n", rnd, ((int)_standingData.size()));
-//		printf("  Distance between points: %f        \n", pose->getDistance(*pointToIgnore));
 
 		// Only write this data point to file if it is far enough away from pointToIgnore
 		if (pose->getDistance(*pointToIgnore) > 10.0) {

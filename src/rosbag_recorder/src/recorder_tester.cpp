@@ -6,13 +6,13 @@
  */
 
 #include <ros/ros.h>
-#include <rosbag_recorder/Record.h>
+#include <nao_autism_messages/Record.h>
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "recorder_tester");
 
 	ros::NodeHandle nh;
-	ros::Publisher pub = nh.advertise<rosbag_recorder::Record>("record", 10);
+	ros::Publisher pub = nh.advertise<nao_autism_messages::Record>("record", 10);
 
 	ros::Rate rate(1);
 	int count = 0;

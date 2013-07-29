@@ -10,13 +10,13 @@
 
 #include <rosbag/recorder.h>
 #include <ros/ros.h>
-#include <rosbag_recorder/Record.h>
+#include <nao_autism_messages/Record.h>
 #include <vector>
 #include <string>
 
 class Recorder {
 public:
-	static void recordCallback(const rosbag_recorder::Record::ConstPtr& msg);
+	static void recordCallback(const nao_autism_messages::Record::ConstPtr& msg);
 	static void record(void);
 	void stop(void);
 	static const float RECORDING_DURATION;

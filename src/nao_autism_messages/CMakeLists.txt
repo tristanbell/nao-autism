@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(rosbag_recorder)
+project(nao_autism_messages)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf std_msgs message_generation)
-find_package(Boost REQUIRED)
+find_package(catkin REQUIRED COMPONENTS actionlib_msgs std_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -22,9 +21,14 @@ find_package(Boost REQUIRED)
 
 ## Generate messages in the 'msg' folder
 add_message_files(
-  FILES
-  Record.msg
+  	FILES
+   	PoseClassification.msg
+  	Record.msg
 )
+
+add_action_files(
+	FILES 
+	Behavior.action)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -34,10 +38,11 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs
- )
+generate_messages(
+	DEPENDENCIES
+	actionlib_msgs
+	std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -48,10 +53,9 @@ add_message_files(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-	INCLUDE_DIRS include
-	LIBRARIES ${PROJECT_NAME}
-#  LIBRARIES learning_tf
-   CATKIN_DEPENDS message_runtime
+#  INCLUDE_DIRS include
+#  LIBRARIES nao_autism_messages
+#  CATKIN_DEPENDS actionlib_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -61,25 +65,22 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include
-  ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-)
+# include_directories(include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
 ## Declare a cpp library
-# add_library(learning_tf
-#   src/${PROJECT_NAME}/learning_tf.cpp
+# add_library(nao_autism_messages
+#   src/${PROJECT_NAME}/nao_autism_messages.cpp
 # )
 
 ## Declare a cpp executable
-# add_executable(learning_tf_node src/learning_tf_node.cpp)
+# add_executable(nao_autism_messages_node src/nao_autism_messages_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(learning_tf_node learning_tf_generate_messages_cpp)
+# add_dependencies(nao_autism_messages_node nao_autism_messages_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(learning_tf_node
+# target_link_libraries(nao_autism_messages_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -98,7 +99,7 @@ include_directories(include
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS learning_tf learning_tf_node
+# install(TARGETS nao_autism_messages nao_autism_messages_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -112,8 +113,10 @@ include_directories(include
 # )
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(DIRECTORY include/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+# install(FILES
+#   # myfile1
+#   # myfile2
+#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
 
 #############
@@ -121,26 +124,10 @@ include_directories(include
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_learning_tf.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_nao_autism_messages.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-
-add_executable(run_rosbag_recorder src/recorder.cpp)
-target_link_libraries(run_rosbag_recorder ${catkin_LIBRARIES})
-add_dependencies(run_rosbag_recorder rosbag_recorder_generate_message_cpp)
-
-add_executable(recorder_test src/recorder_tester.cpp)
-target_link_libraries(recorder_test ${catkin_LIBRARIES})
-add_dependencies(recorder_test rosbag_recorder_generate_message_cpp)
-
-add_library(rosbag_recorder src/recorder.cpp include/recorder.h)
-target_link_libraries(rosbag_recorder ${catkin_LIBRARIES})
-
-install(DIRECTORY include/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
-

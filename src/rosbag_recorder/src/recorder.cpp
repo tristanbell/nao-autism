@@ -47,7 +47,7 @@ void Recorder::record(void)
 }
 
 
-void Recorder::recordCallback(const rosbag_recorder::Record::ConstPtr& msg)
+void Recorder::recordCallback(const nao_autism_messages::Record::ConstPtr& msg)
 {
 	if (msg->record && !currentlyRecording) {
 		ROS_INFO("Recording");

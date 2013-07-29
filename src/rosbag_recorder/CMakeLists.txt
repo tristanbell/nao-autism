@@ -132,11 +132,11 @@ include_directories(include
 
 add_executable(run_rosbag_recorder src/recorder.cpp)
 target_link_libraries(run_rosbag_recorder ${catkin_LIBRARIES})
-add_dependencies(run_rosbag_recorder rosbag_recorder_generate_message_cpp)
+add_dependencies(run_rosbag_recorder nao_autism_messages_generate_message_cpp)
 
 add_executable(recorder_test src/recorder_tester.cpp)
 target_link_libraries(recorder_test ${catkin_LIBRARIES})
-add_dependencies(recorder_test rosbag_recorder_generate_message_cpp)
+add_dependencies(recorder_test nao_autism_messages_generate_message_cpp)
 
 add_library(rosbag_recorder src/recorder.cpp include/recorder.h)
 target_link_libraries(rosbag_recorder ${catkin_LIBRARIES})

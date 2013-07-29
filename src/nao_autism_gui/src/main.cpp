@@ -10,7 +10,7 @@
 
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
-#include <rosbag_recorder/Record.h>
+#include <nao_autism_messages/Record.h>
 
 #include <recorder.h>
 
@@ -91,14 +91,14 @@ int main(int argc, char** argv)
 	if (record){
 		ROS_INFO("Starting to record data.");
 		ros::NodeHandle nh;
-		ros::Publisher pub = nh.advertise<rosbag_recorder::Record>("record", 10);
+		ros::Publisher pub = nh.advertise<nao_autism_messages::Record>("record", 10);
 
 		ros::Rate rate(10);
 		while (pub.getNumSubscribers() == 0){
 			rate.sleep();
 		}
 
-		rosbag_recorder::Record msg;
+		nao_autism_messages::Record msg;
 		msg.record = true;
 		pub.publish(msg);
 	}

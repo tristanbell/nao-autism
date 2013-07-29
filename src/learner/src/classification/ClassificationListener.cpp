@@ -6,13 +6,13 @@
  */
 
 #include <ros/ros.h>
-#include <learner/PoseClassification.h>
+#include <nao_autism_messages/PoseClassification.h>
 
 #include <vector>
 #include <map>
 #include <exception>
 
-std::vector<learner::PoseClassification> _poseQueue;
+std::vector<nao_autism_messages::PoseClassification> _poseQueue;
 short _classification;
 
 #define MAX_QUEUE_SIZE 15
@@ -50,7 +50,7 @@ void setOverallClass(void) {
 	_poseQueue.clear();
 }
 
-void classificationCallback(const learner::PoseClassification poseClass) {
+void classificationCallback(const nao_autism_messages::PoseClassification poseClass) {
 	if (_poseQueue.size() >= MAX_QUEUE_SIZE) {
 		setOverallClass();
 		printf("Current class: %d         \n", _classification);

@@ -16,7 +16,7 @@
 #include <classification/DataPoint.h>
 #include <classification/PoseDataPoint.h>
 
-#include <learner/PoseClassification.h>
+#include <nao_autism_messages/PoseClassification.h>
 
 #include <vector>
 #include <map>
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
 		_tf_subscriber = nh.subscribe("/tf", 15, tfCallback);
 
 		ROS_INFO("Creating classification advertiser");
-		_classification_publisher = nh.advertise<learner::PoseClassification>(
+		_classification_publisher = nh.advertise<nao_autism_messages::PoseClassification>(
 				"/classification", 1);
 
 		ROS_INFO("Setup complete, spinning");
@@ -266,7 +266,7 @@ void tfCallback(const tf::tfMessage msg)
 						double thisClass = ::svm_predict(_model, node);
 
 						//Create message and send classification
-						learner::PoseClassification pc;
+						nao_autism_messages::PoseClassification pc;
 
 						pc.user_number = val;
 						// Fill this with the actual value

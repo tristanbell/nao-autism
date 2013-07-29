@@ -8,14 +8,14 @@ find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf std_msgs message_
 find_package(Boost REQUIRED COMPONENTS system filesystem date_time)
 #find_package(LibSVM REQUIRED)
 
-add_message_files(
-	FILES
-	PoseClassification.msg
-)
+#add_message_files(
+#	FILES
+#	PoseClassification.msg
+#)
 
-generate_messages(
-	DEPENDENCIES
-	std_msgs)
+#generate_messages(
+#	DEPENDENCIES
+#	std_msgs)
 
 catkin_package(
 	INCLUDE_DIRS include
@@ -73,13 +73,15 @@ target_link_libraries(dataLoader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(svm_node ${svm_node_SRCS})
 target_link_libraries(svm_node ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${LibSVM_LIBRARIES})
+add_dependencies(svm_node nao_autism_messages_generate_msg_cpp)
 
 add_executable(classification_listener src/classification/ClassificationListener.cpp)
 target_link_libraries(classification_listener ${catkin_LIBRARIES})
+add_dependencies(classification_listener nao_autism_messages_generate_msg_cpp)
 
 add_executable(knn_node ${knn_node_SRCS} ${learner_HDRS})
 target_link_libraries(knn_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(knn_node learner_generate_msg_cpp)
+add_dependencies(knn_node nao_autism_messages_generate_msg_cpp)
 
 add_executable(svm_export ${svm_export_SRCS} ${learner_HDRS})
 target_link_libraries(svm_export ${catkin_LIBRARIES} ${Boost_LIBRARIES})

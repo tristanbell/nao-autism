@@ -7,6 +7,14 @@ project(emotion_game)
 find_package(catkin REQUIRED COMPONENTS nao_control roscpp std_msgs)
 find_package(Boost REQUIRED COMPONENTS system)
 
+set(test_SRCS
+	src/main.cpp
+	src/Phrase.cpp
+)
+
+set(test_HDRS
+	include/Phrase.h
+)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -15,16 +23,8 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
-set(test_SRCS
-	src/main.cpp
-	src/Phrase.cpp
-)
-
-set(test_HDRS
-	include/Phrase.h)
-
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+	include ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 )
 
 add_executable(test ${test_SRCS} ${test_HDRS})

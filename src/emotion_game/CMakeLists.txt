@@ -9,12 +9,23 @@ find_package(Boost REQUIRED COMPONENTS system)
 
 
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES emotion_game
 #  CATKIN_DEPENDS nao_control roscpp std_msgs
 #  DEPENDS system_lib
 )
 
+set(test_SRCS
+	src/main.cpp
+	src/Phrase.cpp
+)
+
+set(test_HDRS
+	include/Phrase.h)
+
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
+
+add_executable(test ${test_SRCS} ${test_HDRS})
+target_link_libraries(test ${catkin_LIBRARIES} ${Boost_LIBRARIES})

@@ -6,21 +6,18 @@
  */
 
 #include <Game.h>
+#include <MimicGame.h>
 
-class MimicGame : public Game {
+void MimicGame::perform(void) {
 
-	void MimicGame::perform(void) {
+}
 
-	}
+void MimicGame::startGame(void) {
 
-	void MimicGame::startGame(void) {
+}
 
-	}
+void MimicGame::endGame(void) {
 
-	void MimicGame::endGame(void) {
-
-	}
-
-};
+}
 
 

@@ -3,7 +3,7 @@
 #include <iostream>
 #include <sstream>
 
-Phrase::Phrase(std::string phrase) : phraseParts()
+Phrase::Phrase(std::string phrase) : _phraseParts()
 {
 	bool partFound = false;
 	int first = 0;
@@ -16,8 +16,8 @@ Phrase::Phrase(std::string phrase) : phraseParts()
 		if (c == PHRASE_PART_DELIM){
 			partFound = true;
 
-			phraseParts.push_back(phrase.substr(first, i));
-			phraseParts.push_back("%");
+			_phraseParts.push_back(phrase.substr(first, i));
+			_phraseParts.push_back(PHRASE_PART_DELIM_STR);
 
 			first = i + 1;
 		}
@@ -25,36 +25,36 @@ Phrase::Phrase(std::string phrase) : phraseParts()
 
 	if (first != phrase.size()){
 		//Push the remainder of the string onto list
-		phraseParts.push_back(phrase.substr(first));
+		_phraseParts.push_back(phrase.substr(first));
 	}else if (!partFound){
 		//No parts found, push whole string onto list
-		phraseParts.push_back(phrase);
+		_phraseParts.push_back(phrase);
 	}
 }
 
 std::string Phrase::getPhrase() const
 {
-	if (phraseParts.size() > 1){
+	if (_phraseParts.size() > 1){
 		//Parts are required
-		throw new MissingPhraseException(phraseParts.size() - 1, 0);
+		throw new MissingPhraseException(_phraseParts.size() - 1, 0);
 	}
 
-	return phraseParts.front();
+	return _phraseParts.front();
 }
 
 std::string Phrase::getPhrase(std::list<std::string> parts) const
 {
 	//Check whether we have enough parts
-	if (phraseParts.size() - 1 <= parts.size()){
+	if (_phraseParts.size() - 1 <= parts.size()){
 		std::stringstream ss;
 
 		//Retrieve relevant iterators
 		std::list<std::string>::iterator it = parts.begin();
-		std::list<std::string>::const_iterator _it = phraseParts.begin();
+		std::list<std::string>::const_iterator _it = _phraseParts.begin();
 
 		//Iterate through each phrase, if it is the delimiter then replace it with
 		//the next string in the parts list
-		while (_it != phraseParts.end()){
+		while (_it != _phraseParts.end()){
 			std::string str = *_it;
 
 			if (str == "%"){
@@ -70,6 +70,6 @@ std::string Phrase::getPhrase(std::list<std::string> parts) const
 		//Return the 'built' string
 		return ss.str();
 	}else{
-		throw new MissingPhraseException(phraseParts.size() - 1, parts.size());
+		throw new MissingPhraseException(_phraseParts.size() - 1, parts.size());
 	}
 }

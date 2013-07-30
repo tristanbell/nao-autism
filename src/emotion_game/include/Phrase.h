@@ -12,6 +12,7 @@
 #include <list>
 
 #define PHRASE_PART_DELIM '%'
+#define PHRASE_PART_DELIM_STR "%"
 
 class Phrase
 {
@@ -48,7 +49,7 @@ public:
 	bool requiresParts() const;
 
 private:
-	std::list<std::string> phraseParts;
+	std::list<std::string> _phraseParts;
 
 };
 
@@ -58,12 +59,12 @@ class MissingPhraseException
 public:
 	MissingPhraseException(int size, int given)
 	{
-		partsRequired = size;
-		partsGiven = given;
+		_partsRequired = size;
+		_partsGiven = given;
 	}
 
-	int partsRequired;
-	int partsGiven;
+	int _partsRequired;
+	int _partsGiven;
 
 };
 

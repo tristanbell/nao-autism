@@ -6,21 +6,18 @@
  */
 
 #include <Game.h>
+#include <GuessGame.h>
 
-class GuessGame : public Game {
+void GuessGame::perform(void) {
 
-	void GuessGame::perform(void) {
+}
 
-	}
+void GuessGame::startGame(void) {
 
-	void GuessGame::startGame(void) {
+}
 
-	}
+void GuessGame::endGame(void) {
 
-	void GuessGame::endGame(void) {
-
-	}
-
-};
+}
 
 

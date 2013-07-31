@@ -31,8 +31,8 @@ public:
 private:
 	int msWait;
 	int timeout;
-	std::map<std::string, Phrase> phraseMap;
 
+	std::map<std::string, Phrase> phraseMap;
 
 };
 

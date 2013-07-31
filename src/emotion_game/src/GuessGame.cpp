@@ -51,14 +51,47 @@ void GuessGame::perform(void) {
 	}
 
 	case WAITING_ANSWER_QUESTION:{
+		std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
+
 		//Wait until answer is given
+		while (it != _recognizedWords.end()){
+			std::pair<std::string, float>& pair = *it;
+
+			nao_control::NaoControl& cntrl = getNaoControl();
+
+			//Check for correct answer
+			if (pair.first == cntrl.getPreviousBehavior()){
+
+				_currentState = PERFORM_EMOTION;
+			}
+
+			it++;
+		}
 
 		break;
 	}
 
 	case WAITING_ANSWER_CONTINUE:{
-		//Wait until yes/no is 'heard'
+		std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
 
+		//Wait until yes/no is 'heard'
+		while (it != _recognizedWords.end()){
+			std::pair<std::string, float>& pair = *it;
+
+			if (pair.first == "yes"){
+				_currentState = PERFORM_EMOTION;
+
+				_recognizedWords.clear();
+				break;
+			}else if (pair.first == "no"){
+				isDone = false;
+
+				_recognizedWords.clear();
+				break;
+			}
+
+			it++;
+		}
 		break;
 	}
 
@@ -72,7 +105,7 @@ void GuessGame::endGame(void) {
 void GuessGame::onSpeechRecognized(const nao_msgs::WordRecognized msg)
 {
 	//Check to see if speech is needed, if so push onto list
-	if (!isDone && _waitingSpeech){
+	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)){
 		for (int i=0;i<msg.words.size();i++){
 			std::pair<std::string, float> pair(msg.words[i], msg.confidence_values[i]);
 

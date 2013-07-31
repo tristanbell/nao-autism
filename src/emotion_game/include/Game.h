@@ -16,6 +16,16 @@ public:
 	Game(GameSettings gs) : _settings(gs) { }
 	virtual ~Game() { }
 
+	GameSettings& getGameSettings()
+	{
+		return _settings;
+	}
+
+	nao_control::NaoControl& getNaoControl()
+	{
+		return _naoControl;
+	}
+
 	virtual void perform(void) = 0;
 	bool isDone;
 

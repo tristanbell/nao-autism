@@ -8,11 +8,11 @@
 #include <Game.h>
 #include <GuessGame.h>
 
-void GuessGame::perform(void) {
+void GuessGame::startGame(void) {
 
 }
 
-void GuessGame::startGame(void) {
+void GuessGame::perform(void) {
 
 }
 

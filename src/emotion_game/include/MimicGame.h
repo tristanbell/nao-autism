@@ -10,17 +10,12 @@
 
 class MimicGame : public Game {
 
-	void MimicGame::perform(void) {
+public:
+	void perform(void);
 
-	}
-
-	void MimicGame::startGame(void) {
-
-	}
-
-	void MimicGame::endGame(void) {
-
-	}
+protected:
+	void startGame(void);
+	void endGame(void);
 
 };
 

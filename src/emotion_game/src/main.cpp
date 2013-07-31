@@ -10,10 +10,14 @@
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
 
+#include <GameSettings.h>
+#include <Phrase.h>
+
 #include <iostream>
 
 #include <string>
 #include <vector>
+#include <map>
 
 #define NODE_NAME "emotion_game"
 #define OPENNI_TRACKER "/openni_tracker"
@@ -32,6 +36,49 @@ int main(int argc, char** argv)
 
 	std::vector<std::string> node_names;
 	ros::master::getNodes(node_names);
+
+	//Construct settings object
+	GameSettings settings;
+
+	settings.setWait(2);
+	settings.setTimeout(5);
+
+	//For now, hardcode the Phrases
+	std::map<std::string, Phrase> phraseMap;
+
+	//Game name phrase(s)
+	Phrase guess_start("Guess the emotion");
+	phraseMap.insert(std::pair<std::string, Phrase>("Guess game start", guess_start));
+
+	//Introduction phrase(s)
+	Phrase guess_intro("The robot will do an emotion and you will have to guess what it is");
+	phraseMap.insert(std::pair<std::string, Phrase>("Introduction", guess_intro));
+
+	//Next emotion
+	Phrase next_emotion("Next emotion");
+	phraseMap.insert(std::pair<std::string, Phrase>("Next emotion", next_emotion));
+
+	//Question phrase(s)
+	Phrase guess_game_question("Was the robot % or %?");
+	phraseMap.insert(std::pair<std::string, Phrase>("Question", guess_game_question));
+
+	//Correct answer phrase(s)
+	Phrase correct_answer_phrase("Well done, you guessed the robot was x");
+	phraseMap.insert(std::pair<std::string, Phrase>("Generic correct", correct_answer_phrase));
+
+	//Prompt phrase(s)
+	Phrase generic_prompt_phrase("Try again");
+	phraseMap.insert(std::pair<std::string, Phrase>("Generic prompt", generic_prompt_phrase));
+
+	//Incorrect answer phrase(s)
+	Phrase generic_incorrect_phrase("Lets try another emotion");
+	phraseMap.insert(std::pair<std::string, Phrase>("Generic incorrect", generic_incorrect_phrase));
+
+	//Game finished phrase(s)
+	Phrase guess_finished("Guess the emotion is finished");
+	phraseMap.insert(std::pair<std::string, Phrase>("Guess game finish", guess_finished));
+
+	settings.setPhraseMap(phraseMap);
 
 	while (!checkRunningNodes(node_names))
 		sleep(1);

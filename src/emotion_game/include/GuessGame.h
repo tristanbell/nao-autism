@@ -11,11 +11,11 @@
 class GuessGame : public Game {
 
 public:
-	void GuessGame::perform(void);
+	void perform(void);
 
 protected:
-	void GuessGame::startGame(void);
-	void GuessGame::endGame(void);
+	void startGame(void);
+	void endGame(void);
 
 };
 

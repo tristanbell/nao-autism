@@ -13,7 +13,7 @@
 
 class Game {
 public:
-	virtual Game(GameSettings gs) : _settings(gs) { }
+	Game(GameSettings gs) : _settings(gs) { }
 	virtual ~Game() { }
 
 	virtual void perform(void) = 0;

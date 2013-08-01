@@ -28,6 +28,16 @@ set(start_game_HDRS
 	include/GuessGame.h
 )
 
+set(gen_json_SRCS
+	src/GenerateJSONFile.cpp
+
+	src/jsoncpp.cpp
+)
+
+set(gen_json_HDRS
+	include/json/json.h
+)
+
 catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES emotion_game
@@ -41,3 +51,6 @@ include_directories(
 
 add_executable(start_game ${start_game_SRCS} ${start_game_HDRS})
 target_link_libraries(start_game ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(gen_json ${gen_json_SRCS} ${gen_json_HDRS})
+target_link_libraries(gen_json ${catkin_LIBRARIES} ${Boost_LIBRARIES})

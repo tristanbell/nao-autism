@@ -20,10 +20,8 @@ class GuessGame : public Game {
 public:
 	GuessGame(GameSettings& settings);
 
-	void perform(void);
-
-protected:
 	void startGame(void);
+	void perform(void);
 	void endGame(void);
 
 private:

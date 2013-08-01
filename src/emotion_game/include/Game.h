@@ -26,12 +26,13 @@ public:
 		return _naoControl;
 	}
 
+	virtual void startGame(void) = 0;
 	virtual void perform(void) = 0;
+	virtual void endGame(void) = 0;
+
 	bool isDone;
 
 protected:
-	virtual void startGame(void) = 0;
-	virtual void endGame(void) = 0;
 	nao_control::NaoControl _naoControl;
 
 private:

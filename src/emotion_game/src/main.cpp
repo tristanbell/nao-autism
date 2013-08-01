@@ -6,12 +6,18 @@
  */
 
 #include <ros/ros.h>
+#include <std_srvs/Empty.h>
 
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
 
+#include <Game.h>
+#include <GuessGame.h>
+
 #include <GameSettings.h>
 #include <Phrase.h>
+
+#include <XmlRpcValue.h>
 
 #include <iostream>
 
@@ -19,12 +25,16 @@
 #include <vector>
 #include <map>
 
+#define VOCABULARY_KEY "nao_speech/vocabulary"
+
 #define NODE_NAME "emotion_game"
 #define OPENNI_TRACKER "/openni_tracker"
 
 #define HEAD_TF "head_"
 
 bool tfReady;
+
+void startSpeechRecognition();
 
 bool checkRunningNodes(std::vector<std::string>&);
 void checkTfTransforms();
@@ -80,19 +90,60 @@ int main(int argc, char** argv)
 
 	settings.setPhraseMap(phraseMap);
 
-	while (!checkRunningNodes(node_names))
-		sleep(1);
+//	while (!checkRunningNodes(node_names))
+//		sleep(1);
+//
+//	//Check if the tf transform node is active and publishing
+//	checkTfTransforms();
 
-	//Check if the tf transform node is active and publishing
-	checkTfTransforms();
+	startSpeechRecognition();
+
+	Game* guessGame = new GuessGame(settings);
+
+	guessGame->startGame();
 
 	//All checks are done, start game
 	while (ros::ok()){
+		guessGame->perform();
 
 		ros::spinOnce();
 	}
 
 	return 0;
+}
+
+void startSpeechRecognition()
+{
+	ros::NodeHandle nh;
+
+	while (!nh.ok());
+
+	std::cout << "Sending parameters for speech recognition." << std::endl;
+
+	//Set vocabulary parameter
+	int offset = 0;
+	XmlRpc::XmlRpcValue val("<value><array><data><value><string>hello</string></value><value><string>bye</string></value></data></array></value>", &offset);
+	nh.setParam(VOCABULARY_KEY, val);
+
+	std::cout << "XML: " << (val.getType() == XmlRpc::XmlRpcValue::TypeInvalid) << std::endl;
+	std::cout << val.toXml() << std::endl;
+
+	ros::ServiceClient client = nh.serviceClient<std_srvs::Empty>("nao_speech/reconfigure");
+	std_srvs::Empty emptySrv;
+
+	if (client.exists())
+		std::cout << "Valid service." << "\n";
+
+	client.call(emptySrv);
+
+	client = nh.serviceClient<std_srvs::Empty>("nao_speech/start_recognition");
+
+	if (client.exists())
+		std::cout << "Valid service." << "\n";
+
+	client.call(emptySrv);
+
+	std::cout << "Speech recognition started." << std::endl;
 }
 
 void checkTfTransforms(){

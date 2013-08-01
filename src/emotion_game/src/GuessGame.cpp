@@ -36,6 +36,9 @@ void GuessGame::perform(void) {
 
 	case INTRODUCTION:{
 		//Perform introduction speeches/actions, etc
+
+		_currentState = PERFORM_EMOTION;
+
 		break;
 	}
 
@@ -46,6 +49,8 @@ void GuessGame::perform(void) {
 		}else{
 			_performedEmotion = true;
 		}
+
+		_currentState = WAITING_ANSWER_QUESTION;
 
 		break;
 	}
@@ -104,6 +109,8 @@ void GuessGame::endGame(void) {
 
 void GuessGame::onSpeechRecognized(const nao_msgs::WordRecognized msg)
 {
+	std::cout << "Called!" << std::endl;
+
 	//Check to see if speech is needed, if so push onto list
 	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)){
 		for (int i=0;i<msg.words.size();i++){

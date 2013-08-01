@@ -11,10 +11,8 @@
 class MimicGame : public Game {
 
 public:
-	void perform(void);
-
-protected:
 	void startGame(void);
+	void perform(void);
 	void endGame(void);
 
 };

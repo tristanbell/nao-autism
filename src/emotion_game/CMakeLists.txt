@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS nao_control nao_msgs roscpp std_msgs)
 find_package(Boost REQUIRED COMPONENTS system)
 
 set(start_game_SRCS
+	src/jsoncpp.cpp ## JSON C++ Library
 	src/main.cpp
 	src/Phrase.cpp
 	src/GameSettings.cpp
@@ -17,6 +18,8 @@ set(start_game_SRCS
 )
 
 set(start_game_HDRS
+	include/json/json.h ## JSON C++ Library
+	#include/json/json-forwards.h ## JSON C++ Library
 	include/Phrase.h
 	include/GameSettings.h
 	include/Game.h

@@ -70,16 +70,6 @@ int main(int argc, char** argv)
 	//Read in json file
 	char* fileName = argv[1];
 
-	/*
-	 *  std::string contents;
-    in.seekg(0, std::ios::end);
-    contents.resize(in.tellg());
-    in.seekg(0, std::ios::beg);
-    in.read(&contents[0], contents.size());
-    in.close();
-    return(contents);
-	 */
-
 	std::string jsonData;
 
 	std::fstream ifs;

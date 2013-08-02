@@ -18,7 +18,7 @@
 #include <Keys.h>
 
 #define DEFAULT_WAIT 3
-#define DEFAULT_TIMEOUT 5
+#define DEFAULT_TIMEOUT 15
 #define DEFAULT_PROMPTS 2
 
 #define HAPPY_BEHAVIOR_NAME "happy_1"

@@ -40,14 +40,10 @@ void GuessGame::perform(void) {
 	switch (_currentState){
 
 	case INTRODUCTION:{
-		//std::cout << "State: INTRODUCTION" << std::endl;
-
 		//Perform start and instruction phrases/actions, etc
 		std::vector<Phrase> phraseVector;
 		if (getGameSettings().getPhraseVector(START_KEY, phraseVector))
 			sayAny(phraseVector);
-
-		sleep(_settings.getWait());
 
 		if (getGameSettings().getPhraseVector(INSTRUCTION_KEY, phraseVector))
 			sayAny(phraseVector);
@@ -58,8 +54,6 @@ void GuessGame::perform(void) {
 	}
 
 	case PERFORM_EMOTION:{
-		//std::cout << "State: PERFORM_EMOTION" << std::endl;
-
 		//Inform child that a new emotion is being performed
 		if (_performedEmotion){
 			std::vector<Phrase> phraseVector;
@@ -160,44 +154,43 @@ void GuessGame::perform(void) {
 		time(&currentTime);
 
 		if (currentTime - _startWaitTime >= _settings.getTimeout()){
-			std::vector<Phrase> phraseVector;
-			if (_settings.getPhraseVector(PROMPT_KEY, phraseVector))
-				sayAny(phraseVector);
-
 			_timesPrompted++;
 
-			_currentState = ASK_QUESTION;
-		}
+			//Check to see if the number of prompts exceeds the max number
+			//if so, assume incorrect and perform another emotion
+			if (_timesPrompted > _settings.getMaxPromptAmount()){
+				//Collect last performed behaviors name, as incorrect phrase may require it
+				std::list<std::string> parts;
+				parts.push_back(_performedBehavior->getActualName());
 
-		//Check to see if the number of prompts exceeds the max number
-		//if so, assume incorrect and perform another emotion
-		if (_timesPrompted > _settings.getMaxPromptAmount()){
-			//Collect last performed behaviors name, as incorrect phrase may require it
-			std::list<std::string> parts;
-			parts.push_back(_performedBehavior->getActualName());
+				//Alert child
+				std::vector<Phrase> phraseVector;
+				if (_settings.getPhraseVector(INCORRECT_ANSWER_KEY, phraseVector))
+					sayAny(phraseVector, parts);
 
-			//Alert child
-			std::vector<Phrase> phraseVector;
-			if (_settings.getPhraseVector(INCORRECT_ANSWER_KEY, phraseVector))
-				sayAny(phraseVector, parts);
+				_currentState = PERFORM_EMOTION;
 
-			_currentState = PERFORM_EMOTION;
+				_recognizedWords.clear();
+				_timesPrompted = 0;
 
-			_recognizedWords.clear();
-			_timesPrompted = 0;
+				break;
+			}else{
+				std::vector<Phrase> phraseVector;
+				if (_settings.getPhraseVector(PROMPT_KEY, phraseVector))
+					sayAny(phraseVector);
 
-			break;
+				_currentState = ASK_QUESTION;
+			}
 		}
 
 		break;
 	}
 
+	//TODO: Integrate this with the rest of the 'game'
 	case WAITING_ANSWER_CONTINUE:{
-		//std::cout << "State: WAITING_ANSWER_CONTINUE" << std::endl;
+		//Wait until yes/no is 'heard'
 
 		std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
-
-		//Wait until yes/no is 'heard'
 		while (it != _recognizedWords.end()){
 			std::pair<std::string, float>& pair = *it;
 

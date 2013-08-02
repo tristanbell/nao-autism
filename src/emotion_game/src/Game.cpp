@@ -39,12 +39,15 @@ void Game::sayRandParts(const Phrase& phrase, std::list<std::string> parts)
 void Game::say(const Phrase& phrase)
 {
 	_naoControl.say(phrase.getPhrase());
+	sleep(_settings.getWait());
 }
 
 void Game::say(const Phrase& phrase, const std::list<std::string> parts)
 {
-	if (parts.size() >= phrase.amountOfParts())
+	if (parts.size() >= phrase.amountOfParts()){
 		_naoControl.say(phrase.getPhrase(parts));
+		sleep(_settings.getWait());
+	}
 }
 
 void Game::sayRandParts(const Phrase& phrase, const std::string& required, std::list<std::string> parts)
@@ -90,6 +93,7 @@ void Game::sayRandParts(const Phrase& phrase, const std::string& required, std::
 		}
 
 		_naoControl.say(phrase.getPhrase(usedParts));
+		sleep(_settings.getWait());
 	}
 }
 
@@ -100,6 +104,7 @@ void Game::sayAny(const std::vector<Phrase>& phraseVector)
 	const Phrase& actual = phraseVector[index];
 	if (actual.amountOfParts() == 0){
 		_naoControl.say(actual.getPhrase());
+		sleep(_settings.getWait());
 	}
 }
 
@@ -109,8 +114,10 @@ void Game::sayAny(const std::vector<Phrase>& phraseVector, const std::list<std::
 
 	const Phrase& actual = phraseVector[index];
 
-	if (actual.amountOfParts() <= parts.size())
+	if (actual.amountOfParts() <= parts.size()){
 		_naoControl.say(actual.getPhrase(parts));
+		sleep(_settings.getWait());
+	}
 }
 
 void Game::sayAnyRandParts(const std::vector<Phrase>& phraseVector, const std::list<std::string>& parts)

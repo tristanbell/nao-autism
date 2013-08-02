@@ -21,16 +21,17 @@ nao_control::NaoControl::NaoControl() :
 
 	speechPublisher = nodeHandle.advertise<std_msgs::String>(SPEECH_TOPIC_NAME, 1000);
 
-	ROS_INFO("Waiting until speech publisher is ready...");
 	ros::Rate loopRate(5);
-	while (speechPublisher.getNumSubscribers() == 0){
-		if (!ros::ok()){
-			return;
-		}
 
-		loopRate.sleep();
-	}
-	ROS_INFO("Speech publisher is ready.");
+//	ROS_INFO("Waiting until speech publisher is ready...");
+//	while (speechPublisher.getNumSubscribers() == 0){
+//		if (!ros::ok()){
+//			return;
+//		}
+//
+//		loopRate.sleep();
+//	}
+//	ROS_INFO("Speech publisher is ready.");
 
 	ROS_INFO("Waiting for behavior manager to start.");
 	while (!behaviorActionClient.isServerConnected()){
@@ -53,6 +54,7 @@ void nao_control::NaoControl::say(const std::string& message)
 	msg.data = message;
 
 	speechPublisher.publish(msg);
+	std::cout << "[NaoControl] Saying: " << message << std::endl;
 
 	if (previousSpeech != NULL)
 		delete previousSpeech;

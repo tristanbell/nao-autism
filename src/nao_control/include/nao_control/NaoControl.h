@@ -45,6 +45,7 @@ private:
 	{
 		nao_autism_messages::BehaviorGoal goal;
 
+		std::cout << "[NaoControl] Performing behavior: " << behavior << std::endl;
 		goal.behavior_name = behavior;
 		actionlib::SimpleClientGoalState state
 				= behaviorActionClient.sendGoalAndWait(goal, behaviorTimeout);

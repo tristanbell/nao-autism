@@ -9,9 +9,10 @@
 #define GAMESETTINGS_H_
 
 #include <Phrase.h>
+#include <Behavior.h>
 
 #include <map>
-#include <list>
+#include <vector>
 #include <string>
 
 class GameSettings
@@ -26,15 +27,23 @@ public:
 	void setTimeout(int timeout);
 	int getTimeout() const;
 
-	void setPhraseMap(std::map<std::string, std::list<Phrase> >& phraseMap);
-	const std::map<std::string, std::list<Phrase> >& getPhraseMap() const;
-	bool getPhraseList(const std::string& key, std::list<Phrase>& phraseList) const;
+	void setMaxPromptAmount(int amount);
+	int getMaxPromptAmount() const;
+
+	void setBehaviorVector(std::vector<Behavior>& behaviorVector);
+	const std::vector<Behavior>& getBehaviorVector() const;
+
+	void setPhraseMap(std::map<std::string, std::vector<Phrase> >& phraseMap);
+	const std::map<std::string, std::vector<Phrase> >& getPhraseMap() const;
+	bool getPhraseVector(const std::string& key, std::vector<Phrase>& phraseList) const;
 
 private:
 	int msWait;
 	int timeout;
+	int defaultPrompts;
 
-	std::map<std::string, std::list<Phrase> > phraseMap;
+	std::vector<Behavior> behaviorVector;
+	std::map<std::string, std::vector<Phrase> > phraseMap;
 
 };
 

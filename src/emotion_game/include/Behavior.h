@@ -14,14 +14,18 @@ class Behavior
 {
 
 public:
+	Behavior(std::string name);
 	Behavior(std::string name, std::string actual);
+	Behavior(std::string name, std::string actual, int classification);
 
 	const std::string& getName() const;
 	const std::string& getActualName() const;
+	int getClassification() const;
 
 private:
 	std::string name;
 	std::string actual;
+	int classification;
 
 };
 

@@ -16,7 +16,7 @@ Phrase::Phrase(std::string phrase) : _phraseParts()
 		if (c == PHRASE_PART_DELIM){
 			partFound = true;
 
-			_phraseParts.push_back(phrase.substr(first, i));
+			_phraseParts.push_back(phrase.substr(first, i-first));
 			_phraseParts.push_back(PHRASE_PART_DELIM_STR);
 
 			first = i + 1;
@@ -36,7 +36,7 @@ std::string Phrase::getPhrase() const
 {
 	if (_phraseParts.size() > 1){
 		//Parts are required
-		throw new MissingPhraseException(_phraseParts.size() - 1, 0);
+		throw new MissingPhraseException(amountOfParts(), 0);
 	}
 
 	return _phraseParts.front();
@@ -45,7 +45,7 @@ std::string Phrase::getPhrase() const
 std::string Phrase::getPhrase(std::list<std::string> parts) const
 {
 	//Check whether we have enough parts
-	if (_phraseParts.size() - 1 <= parts.size()){
+	if (amountOfParts() <= parts.size()){
 		std::stringstream ss;
 
 		//Retrieve relevant iterators
@@ -57,7 +57,7 @@ std::string Phrase::getPhrase(std::list<std::string> parts) const
 		while (_it != _phraseParts.end()){
 			std::string str = *_it;
 
-			if (str == "%"){
+			if (str == PHRASE_PART_DELIM_STR){
 				ss << *it;
 				it++;
 			}else{
@@ -70,13 +70,13 @@ std::string Phrase::getPhrase(std::list<std::string> parts) const
 		//Return the 'built' string
 		return ss.str();
 	}else{
-		throw new MissingPhraseException(_phraseParts.size() - 1, parts.size());
+		throw new MissingPhraseException(amountOfParts(), parts.size());
 	}
 }
 
 int Phrase::amountOfParts() const
 {
-	return (_phraseParts.size() != 0) ? _phraseParts.size() - 1 : 0;
+	return (_phraseParts.size() != 0) ? _phraseParts.size() / 2 : 0;
 }
 
 bool Phrase::requiresParts() const

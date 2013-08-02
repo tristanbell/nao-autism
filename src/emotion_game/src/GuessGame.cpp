@@ -21,29 +21,36 @@ GuessGame::GuessGame(GameSettings& settings) :  Game(settings),
 											   _currentState(INTRODUCTION),
 											   _performedEmotion(false)
 {
+	_performedBehavior = NULL;
+
 	_speechSubscriber = _guessNodeHandle.subscribe("word_recognized", 1000, &GuessGame::onSpeechRecognized, &*this);
 }
 
 void GuessGame::startGame(void) {
-	isDone = false;
-	_waitingSpeech = false;
-
 	//Reset state information
 	_currentState = INTRODUCTION;
+
+	isDone = false;
+	_waitingSpeech = false;
 	_performedEmotion = false;
+	_timesPrompted = 0;
 }
 
 void GuessGame::perform(void) {
 	switch (_currentState){
 
 	case INTRODUCTION:{
-		//Perform introduction speeches/actions, etc
-		std::list<Phrase> phraseList;
-		if (getGameSettings().getPhraseList(INTRODUCTION_KEY, phraseList))
-			sayAll(phraseList);
+		//std::cout << "State: INTRODUCTION" << std::endl;
 
-		if (getGameSettings().getPhraseList(INSTRUCTION_KEY, phraseList))
-			sayAll(phraseList);
+		//Perform start and instruction phrases/actions, etc
+		std::vector<Phrase> phraseVector;
+		if (getGameSettings().getPhraseVector(START_KEY, phraseVector))
+			sayAny(phraseVector);
+
+		sleep(_settings.getWait());
+
+		if (getGameSettings().getPhraseVector(INSTRUCTION_KEY, phraseVector))
+			sayAny(phraseVector);
 
 		_currentState = PERFORM_EMOTION;
 
@@ -51,14 +58,68 @@ void GuessGame::perform(void) {
 	}
 
 	case PERFORM_EMOTION:{
-		//Perform emotion and then ask the child a question
-		if (_performedEmotion){
+		//std::cout << "State: PERFORM_EMOTION" << std::endl;
 
+		//Inform child that a new emotion is being performed
+		if (_performedEmotion){
+			std::vector<Phrase> phraseVector;
+			if (getGameSettings().getPhraseVector(GUESS_NEXT_KEY, phraseVector)){
+				sayAny(phraseVector);
+			}
 		}else{
 			_performedEmotion = true;
 		}
 
+		const std::vector<Behavior>& behaviorVector = _settings.getBehaviorVector();
+
+		//Find a new random behavior to perform
+		int index = 0;
+		while (true){
+			index = rand() % behaviorVector.size();
+			const Behavior& ref = behaviorVector[index];
+
+			if (_performedBehavior == NULL || ref.getActualName() != _performedBehavior->getActualName())
+				break;
+		}
+
+		const Behavior& ref = behaviorVector[index];
+		_naoControl.perform(ref.getName());
+
+		if (_performedBehavior != NULL)
+			delete _performedBehavior;
+
+		_performedBehavior = new Behavior(ref);
+
+		_currentState = ASK_QUESTION;
+
+		break;
+	}
+
+	case ASK_QUESTION:{
+		//Collect all other behavior names into string
+		std::list<std::string> behaviorNames;
+
+		//Collect the other behaviors
+		const std::vector<Behavior>& behaviorVector = _settings.getBehaviorVector();
+		for (int i=0;i<behaviorVector.size();i++){
+			const std::string& current = behaviorVector[i].getActualName();
+
+			if (current != _performedBehavior->getActualName()){
+				behaviorNames.push_back(current);
+			}
+		}
+
+		std::vector<Phrase> questionVector;
+		if (_settings.getPhraseVector(QUESTION_KEY, questionVector))
+			sayAnyRandParts(questionVector, _performedBehavior->getActualName(), behaviorNames);
+
 		_currentState = WAITING_ANSWER_QUESTION;
+
+		//for testing...
+		//_recognizedWords.push_back(std::pair<std::string, float>(_performedBehavior->getActualName(), 0));
+
+		//Set the start time for waiting (used to calculate timeouts)
+		time(&_startWaitTime);
 
 		break;
 	}
@@ -70,21 +131,70 @@ void GuessGame::perform(void) {
 		while (it != _recognizedWords.end()){
 			std::pair<std::string, float>& pair = *it;
 
-			nao_control::NaoControl& cntrl = getNaoControl();
-
 			//Check for correct answer
-			if (pair.first == cntrl.getPreviousBehavior()){
+			if (pair.first == _performedBehavior->getActualName()){
+				std::list<std::string> parts;
+				parts.push_back(_performedBehavior->getActualName());
 
+				std::vector<Phrase> phraseVector;
+				if (_settings.getPhraseVector(CORRECT_ANSWER_KEY, phraseVector))
+					sayAny(phraseVector, parts);
+
+				//We shall ask the child here if they wish to continue with the current gamme
+
+				//for now, we shall go to the next emotion
 				_currentState = PERFORM_EMOTION;
+				_recognizedWords.clear();
+
+				_timesPrompted = 0;
+
+				break;
 			}
 
 			it++;
+		}
+
+		//Check to see if the duration of time has exceeded the maximum wait
+		//if so, prompt the child and ask the question again.
+		time_t currentTime;
+		time(&currentTime);
+
+		if (currentTime - _startWaitTime >= _settings.getTimeout()){
+			std::vector<Phrase> phraseVector;
+			if (_settings.getPhraseVector(PROMPT_KEY, phraseVector))
+				sayAny(phraseVector);
+
+			_timesPrompted++;
+
+			_currentState = ASK_QUESTION;
+		}
+
+		//Check to see if the number of prompts exceeds the max number
+		//if so, assume incorrect and perform another emotion
+		if (_timesPrompted > _settings.getMaxPromptAmount()){
+			//Collect last performed behaviors name, as incorrect phrase may require it
+			std::list<std::string> parts;
+			parts.push_back(_performedBehavior->getActualName());
+
+			//Alert child
+			std::vector<Phrase> phraseVector;
+			if (_settings.getPhraseVector(INCORRECT_ANSWER_KEY, phraseVector))
+				sayAny(phraseVector, parts);
+
+			_currentState = PERFORM_EMOTION;
+
+			_recognizedWords.clear();
+			_timesPrompted = 0;
+
+			break;
 		}
 
 		break;
 	}
 
 	case WAITING_ANSWER_CONTINUE:{
+		//std::cout << "State: WAITING_ANSWER_CONTINUE" << std::endl;
+
 		std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
 
 		//Wait until yes/no is 'heard'
@@ -92,14 +202,13 @@ void GuessGame::perform(void) {
 			std::pair<std::string, float>& pair = *it;
 
 			if (pair.first == "yes"){
-				_currentState = PERFORM_EMOTION;
+				isDone = true;
 
 				_recognizedWords.clear();
 				break;
 			}else if (pair.first == "no"){
-				isDone = false;
-
 				_recognizedWords.clear();
+
 				break;
 			}
 
@@ -111,27 +220,14 @@ void GuessGame::perform(void) {
 	}
 }
 
-void GuessGame::sayAll(const std::list<Phrase>& phraseList)
-{
-	std::list<Phrase>::const_iterator it = phraseList.begin();
-	while (it != phraseList.end()){
-		const Phrase& current = *it;
-
-		if (current.amountOfParts() == 0){
-			_naoControl.say(current.getPhrase());
-			sleep(_settings.getWait());
-		}
-	}
-}
-
 void GuessGame::endGame(void) {
-	_waitingSpeech = false;
+	//Clean up
+	if (_performedBehavior == NULL)
+		delete _performedBehavior;
 }
 
 void GuessGame::onSpeechRecognized(const nao_msgs::WordRecognized msg)
 {
-	std::cout << "Called!" << std::endl;
-
 	//Check to see if speech is needed, if so push onto list
 	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)){
 		for (int i=0;i<msg.words.size();i++){

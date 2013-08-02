@@ -13,7 +13,10 @@
 
 class Game {
 public:
-	Game(GameSettings gs) : _settings(gs) { }
+	Game(GameSettings gs) : _settings(gs),
+							_naoControl()
+	{ }
+
 	virtual ~Game() { }
 
 	GameSettings& getGameSettings()
@@ -35,6 +38,16 @@ public:
 protected:
 	nao_control::NaoControl _naoControl;
 	GameSettings _settings;
+
+	void say(const Phrase& phrase);
+	void say(const Phrase& phrase, const std::list<std::string> parts);
+	void sayRandParts(const Phrase& phrase, std::list<std::string> parts);
+	void sayRandParts(const Phrase& phrase, const std::string& required, std::list<std::string> parts);
+
+	void sayAny(const std::vector<Phrase>&);
+	void sayAny(const std::vector<Phrase>& phraseVector, const std::list<std::string>& parts);
+	void sayAnyRandParts(const std::vector<Phrase>& phraseVector, const std::list<std::string>& parts);
+	void sayAnyRandParts(const std::vector<Phrase>& phraseVector, const std::string& required, const std::list<std::string>& parts);
 };
 
 

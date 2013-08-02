@@ -13,6 +13,7 @@ set(start_game_SRCS
 	src/Phrase.cpp
 	src/GameSettings.cpp
 	src/Behavior.cpp
+	src/Game.cpp
 	src/GuessGame.cpp
 	src/MimicGame.cpp
 )

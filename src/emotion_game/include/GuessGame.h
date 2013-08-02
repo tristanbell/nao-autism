@@ -14,6 +14,7 @@
 #include <Phrase.h>
 
 #include <string>
+#include <vector>
 #include <list>
 
 class GuessGame : public Game {
@@ -30,7 +31,8 @@ private:
 	ros::Subscriber _speechSubscriber;
 
 	bool _waitingSpeech;
-	int currentWait;
+	time_t _startWaitTime;
+	int _timesPrompted;
 
 	std::list<std::pair<std::string, float> > _recognizedWords;
 
@@ -39,6 +41,7 @@ private:
 	{
 		INTRODUCTION,
 		PERFORM_EMOTION,
+		ASK_QUESTION,
 		WAITING_ANSWER_QUESTION,
 		WAITING_ANSWER_CONTINUE,
 	};
@@ -46,7 +49,7 @@ private:
 	State _currentState;
 	bool _performedEmotion;
 
-	void sayAll(const std::list<Phrase>&);
+	Behavior* _performedBehavior;
 
 	void onSpeechRecognized(const nao_msgs::WordRecognized msg);
 

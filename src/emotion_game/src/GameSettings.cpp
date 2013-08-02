@@ -24,20 +24,40 @@ int GameSettings::getTimeout() const
 	return timeout;
 }
 
-void GameSettings::setPhraseMap(std::map<std::string, std::list<Phrase> >& phraseMap)
+void GameSettings::setMaxPromptAmount(int amount)
+{
+	this->defaultPrompts = amount;
+}
+
+int GameSettings::getMaxPromptAmount() const
+{
+	return defaultPrompts;
+}
+
+void GameSettings::setBehaviorVector(std::vector<Behavior>& behaviorVector)
+{
+	this->behaviorVector = behaviorVector;
+}
+
+const std::vector<Behavior>& GameSettings::getBehaviorVector() const
+{
+	return behaviorVector;
+}
+
+void GameSettings::setPhraseMap(std::map<std::string, std::vector<Phrase> >& phraseMap)
 {
 	this->phraseMap = phraseMap;
 }
 
-const std::map<std::string, std::list<Phrase> >& GameSettings::getPhraseMap() const
+const std::map<std::string, std::vector<Phrase> >& GameSettings::getPhraseMap() const
 {
 	return phraseMap;
 }
 
-bool GameSettings::getPhraseList(const std::string& key, std::list<Phrase>& phraseList) const
+bool GameSettings::getPhraseVector(const std::string& key, std::vector<Phrase>& phraseVector) const
 {
 	try{
-		phraseList = phraseMap.at(key);
+		phraseVector = phraseMap.at(key);
 		return true;
 	}catch(std::out_of_range& ex){
 		return false;

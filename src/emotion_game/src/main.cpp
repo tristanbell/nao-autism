@@ -15,6 +15,7 @@
 #include <GuessGame.h>
 #include <MimicGame.h>
 #include <GameSettings.h>
+#include <Behavior.h>
 #include <Phrase.h>
 #include <Keys.h>
 
@@ -44,7 +45,8 @@ bool checkRunningNodes(std::vector<std::string>&);
 void checkTfTransforms();
 void tfCallback(const tf::tfMessage);
 
-std::map<std::string, std::list<Phrase> > getPhraseMap(Json::Value& phraseRoot);
+std::map<std::string, std::vector<Phrase> > getPhraseMap(Json::Value& phraseRoot);
+std::vector<Behavior> getBehaviorList(Json::Value& behaviorRoot);
 
 int main(int argc, char** argv)
 {
@@ -55,6 +57,9 @@ int main(int argc, char** argv)
 
 		return -1;
 	}
+
+	//Initialise random seed
+	srand (time(NULL));
 
 	ros::init(argc, argv, NODE_NAME);
 
@@ -91,14 +96,67 @@ int main(int argc, char** argv)
 
 		Json::Value nullValue(Json::nullValue);
 
-		std::map<std::string, std::list<Phrase> > genericPhraseMap;
-		std::map<std::string, std::list<Phrase> > guessGamePhraseMap;
-		std::map<std::string, std::list<Phrase> > mimicGamePhraseMap;
+		//All the required setting objects
+		int wait = 3;
+		int timeout = 5;
+		int maxPrompts = 2;
+
+		std::vector<Behavior> allBehaviorList;
+		std::vector<Behavior> rewardBehaviorList;
+
+		std::map<std::string, std::vector<Phrase> > genericPhraseMap;
+		std::map<std::string, std::vector<Phrase> > guessGamePhraseMap;
+		std::map<std::string, std::vector<Phrase> > mimicGamePhraseMap;
+
+		//Load speech/timeout wait variables
+		Json::Value baseSettings = doc.get(BASE_SETTINGS_KEY, nullValue);
+		if (baseSettings.type() != nullValue.type()){
+			Json::Value waitVal = baseSettings.get(SPEECH_WAIT_SETTING_KEY, nullValue);
+			if (waitVal.type() != nullValue.type()){
+				wait = waitVal.asInt();
+			}
+
+			Json::Value timeoutVal = baseSettings.get(TIMEOUT_SETTING_KEY, nullValue);
+			if (timeoutVal.type() != nullValue.type()){
+				timeout = timeoutVal.asInt();
+			}
+
+			Json::Value maxPromptVal = baseSettings.get(MAX_PROMPT_KEY, Json::Value::null);
+			if (maxPromptVal.type() != Json::Value::null.type()){
+				maxPrompts = maxPromptVal.asInt();
+			}
+		}else{
+			ROS_ERROR("Unable to find the base settings, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+			return 1;
+		}
+
+		//Load behavior list
+		Json::Value allBehaviorVal = doc.get(BEHAVIOR_LIST_KEY, Json::Value::null);
+		if (allBehaviorVal.type() != Json::Value::null.type()){
+			allBehaviorList = getBehaviorList(allBehaviorVal);
+		}else{
+			ROS_ERROR("Unable to find behaviors, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+		}
+
+		//Load reward behavior list
+		Json::Value rewardBehaviorVal = doc.get(REWARD_BEHAVIOR_LIST_KEY, Json::Value::null);
+		if (rewardBehaviorVal.type() != Json::Value::null.type()){
+			rewardBehaviorList = getBehaviorList(rewardBehaviorVal);
+		}else{
+			ROS_ERROR("Unable to find behaviors, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+		}
+
+		//Load phrase maps
 
 		//Generate generic phrase map
 		Json::Value genericPhrases = doc.get(PHRASE_KEY, nullValue);
 		if (genericPhrases.type() != nullValue.type()){
 			genericPhraseMap = getPhraseMap(genericPhrases);
+		}else{
+			ROS_ERROR("Unable to find generic phrases, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+			return 1;
 		}
 
 		//Generate guess game phrase map
@@ -137,11 +195,23 @@ int main(int argc, char** argv)
 			return -1;
 		}
 
+		ROS_INFO("JSON data loaded, creating game objects.");
+
 		//Create settings and instances of games
 		GameSettings guessGameSettings;
+
+		guessGameSettings.setWait(wait);
+		guessGameSettings.setTimeout(timeout);
+		guessGameSettings.setMaxPromptAmount(maxPrompts);
+		guessGameSettings.setBehaviorVector(allBehaviorList);
 		guessGameSettings.setPhraseMap(guessGamePhraseMap);
 
 		GameSettings mimicGameSettings;
+
+		mimicGameSettings.setWait(wait);
+		mimicGameSettings.setTimeout(timeout);
+		mimicGameSettings.setBehaviorVector(allBehaviorList);
+		mimicGameSettings.setMaxPromptAmount(maxPrompts);
 		mimicGameSettings.setPhraseMap(mimicGamePhraseMap);
 
 		Game* guessGame = new GuessGame(guessGameSettings);
@@ -150,6 +220,8 @@ int main(int argc, char** argv)
 		//Set current game and start it.
 		Game* currentGame = guessGame;
 		currentGame->startGame();
+
+		ROS_INFO("Game initialisation done, starting.");
 
 		//All checks are done, start game loop
 		while (ros::ok()){
@@ -301,9 +373,9 @@ bool checkRunningNodes(std::vector<std::string>& node_names)
 	return false;
 }
 
-std::map<std::string, std::list<Phrase> > getPhraseMap(Json::Value& phraseRoot)
+std::map<std::string, std::vector<Phrase> > getPhraseMap(Json::Value& phraseRoot)
 {
-	std::map<std::string, std::list<Phrase> > phraseMap;
+	std::map<std::string, std::vector<Phrase> > phraseMap;
 
 	Json::Value::Members mems = phraseRoot.getMemberNames();
 	Json::Value nullValue(Json::nullValue);
@@ -314,7 +386,7 @@ std::map<std::string, std::list<Phrase> > getPhraseMap(Json::Value& phraseRoot)
 		Json::Value val = phraseRoot.get(key, nullValue);
 		//Sanity check, this should always be true
 		if (val.type() != nullValue.type()){
-			std::list<Phrase> phraseList;
+			std::vector<Phrase> phraseVector;
 
 			Json::Value::ArrayIndex size = val.size();
 
@@ -325,13 +397,62 @@ std::map<std::string, std::list<Phrase> > getPhraseMap(Json::Value& phraseRoot)
 				if (phraseValue.type() != nullValue.type()){
 					Phrase phrase(phraseValue.asString());
 
-					phraseList.push_back(phrase);
+					phraseVector.push_back(phrase);
 				}
 			}
 
-			phraseMap.insert(std::pair<std::string, std::list<Phrase> >(key, phraseList));
+			phraseMap.insert(std::pair<std::string, std::vector<Phrase> >(key, phraseVector));
 		}
 	}
 
 	return phraseMap;
+}
+
+std::vector<Behavior> getBehaviorList(Json::Value& behaviorRoot)
+{
+	std::vector<Behavior> behaviorList;
+
+	Json::Value::ArrayIndex size = behaviorRoot.size();
+	for (int i=0;i<size;i++){
+		Json::Value behavior = behaviorRoot.get(i, Json::Value::null);
+
+		//Found behavior
+		if (behavior.type() != Json::Value::null.type()){
+			std::string name = "";
+			std::string actual = "";
+			int classification = 0;
+
+			Json::Value behaviorActual = behavior.get(BEHAVIOR_ACTUAL_KEY, Json::Value::null);
+			if (behaviorActual.type() != Json::Value::null.type()){
+				actual = behaviorActual.asString();
+			}
+
+			Json::Value behaviorClassification = behavior.get(BEHAVIOR_CLASSIFICATION_KEY, Json::Value::null);
+			if (behaviorClassification.type() != Json::Value::null.type()){
+				classification = behaviorClassification.asInt();
+			}
+
+			Json::Value behaviorNames = behavior.get(BEHAVIOR_NAME_KEY, Json::Value::null);
+			if (behaviorNames.type() != Json::Value::null.type()){
+				//Now to iterate through array
+				Json::Value::ArrayIndex innerSize = behaviorNames.size();
+
+				for (int j=0;j<innerSize;j++){
+					Json::Value val = behaviorNames.get(j, Json::Value::null);
+
+					if (val.type() != Json::Value::null.type()){
+						std::string name = val.asString();
+
+						std::cout << "Loaded behavior (name: " << name << ", actual: " << actual
+								<< ", classification: " << classification << ")\n";
+
+						Behavior behaviorObj(name, actual, classification);
+						behaviorList.push_back(behaviorObj);
+					}
+				}
+			}
+		}
+	}
+
+	return behaviorList;
 }

@@ -11,6 +11,7 @@
 #define BASE_SETTINGS_KEY "Base settings"
 #define SPEECH_WAIT_SETTING_KEY "Speech wait"
 #define TIMEOUT_SETTING_KEY "Timeout"
+#define MAX_PROMPT_KEY "Maxiumum prompts"
 
 #define BEHAVIOR_LIST_KEY "Available behaviors"
 #define REWARD_BEHAVIOR_LIST_KEY "Available reward behaviors"

@@ -19,6 +19,7 @@
 
 #define DEFAULT_WAIT 3
 #define DEFAULT_TIMEOUT 5
+#define DEFAULT_PROMPTS 2
 
 #define HAPPY_BEHAVIOR_NAME "happy_1"
 #define HAPPY_BEHAVIOR_ACTUAL "happy"
@@ -87,6 +88,9 @@ int main(int argc, char** argv)
 
 		Json::Value& timeoutSetting = baseSettings[TIMEOUT_SETTING_KEY];
 		timeoutSetting = DEFAULT_TIMEOUT;
+
+		Json::Value& maxTimesPrompted = baseSettings[MAX_PROMPT_KEY];
+		maxTimesPrompted = DEFAULT_PROMPTS;
 
 		//Generate generic phrases
 		Json::Value& genericPhrases = doc[PHRASE_KEY];
@@ -206,13 +210,6 @@ Json::Value generateRewardBehaviorsList()
 
 	return list;
 }
-
-#define KINECT_PROMPT_KEY "Kinect tracking prompt"
-#define KINECT_PROMPT_PHRASE "Copy the robot"
-#define POSITIVE_KEY "Positive phrases"
-#define POSITIVE_PHRASE "Well done"
-#define INTRODUCTION_KEY "Introduction"
-#define INTRODUCTION_PHRASE "Lets play"
 
 Json::Value generateGenericPhrases()
 {

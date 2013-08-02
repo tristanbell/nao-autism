@@ -24,9 +24,7 @@ nao_control::NaoControl::NaoControl() :
 	ROS_INFO("Waiting until speech publisher is ready...");
 	ros::Rate loopRate(5);
 	while (speechPublisher.getNumSubscribers() == 0){
-		if (!nodeHandle.ok()){
-			this->~NaoControl();
-
+		if (!ros::ok()){
 			return;
 		}
 
@@ -36,9 +34,7 @@ nao_control::NaoControl::NaoControl() :
 
 	ROS_INFO("Waiting for behavior manager to start.");
 	while (!behaviorActionClient.isServerConnected()){
-		if (!nodeHandle.ok()){
-			this->~NaoControl();
-
+		if (!ros::ok()){
 			return;
 		}
 

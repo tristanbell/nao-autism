@@ -11,6 +11,7 @@
 #include <Phrase.h>
 
 #include <map>
+#include <list>
 #include <string>
 
 class GameSettings
@@ -25,14 +26,14 @@ public:
 	void setTimeout(int timeout);
 	int getTimeout() const;
 
-	void setPhraseMap(std::map<std::string, Phrase> phraseMap);
-	const std::map<std::string, Phrase>& getPhraseMap() const;
+	void setPhraseMap(std::map<std::string, std::list<Phrase> >& phraseMap);
+	const std::map<std::string, std::list<Phrase> >& getPhraseMap() const;
 
 private:
 	int msWait;
 	int timeout;
 
-	std::map<std::string, Phrase> phraseMap;
+	std::map<std::string, std::list<Phrase> > phraseMap;
 
 };
 

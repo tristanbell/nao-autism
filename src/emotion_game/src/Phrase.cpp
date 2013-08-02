@@ -73,3 +73,13 @@ std::string Phrase::getPhrase(std::list<std::string> parts) const
 		throw new MissingPhraseException(_phraseParts.size() - 1, parts.size());
 	}
 }
+
+int Phrase::amountOfParts() const
+{
+	return (_phraseParts.size() != 0) ? _phraseParts.size() - 1 : 0;
+}
+
+bool Phrase::requiresParts() const
+{
+	return amountOfParts() > 0;
+}

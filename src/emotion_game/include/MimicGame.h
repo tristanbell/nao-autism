@@ -11,6 +11,8 @@
 class MimicGame : public Game {
 
 public:
+	MimicGame(GameSettings&);
+
 	void startGame(void);
 	void perform(void);
 	void endGame(void);

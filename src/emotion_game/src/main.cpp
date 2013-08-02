@@ -13,17 +13,21 @@
 
 #include <Game.h>
 #include <GuessGame.h>
-
+#include <MimicGame.h>
 #include <GameSettings.h>
 #include <Phrase.h>
+#include <Keys.h>
 
 #include <XmlRpcValue.h>
 
 #include <iostream>
+#include <fstream>
+#include <json/json.h>
 
 #include <string>
 #include <vector>
 #include <map>
+#include <list>
 
 #define VOCABULARY_KEY "nao_speech/vocabulary"
 
@@ -40,8 +44,18 @@ bool checkRunningNodes(std::vector<std::string>&);
 void checkTfTransforms();
 void tfCallback(const tf::tfMessage);
 
+std::map<std::string, std::list<Phrase> > getPhraseMap(Json::Value& phraseRoot);
+
 int main(int argc, char** argv)
 {
+	if (argc != 2){
+		std::cout << "Invalid arguments. The arguments should be as follows:\n"
+				<< "\t<file>\n"
+				<< "Where <file> is the location of the JSON data file.\n";
+
+		return -1;
+	}
+
 	ros::init(argc, argv, NODE_NAME);
 
 	std::vector<std::string> node_names;
@@ -53,42 +67,131 @@ int main(int argc, char** argv)
 	settings.setWait(2);
 	settings.setTimeout(5);
 
+	//Read in json file
+	char* fileName = argv[1];
+
+	/*
+	 *  std::string contents;
+    in.seekg(0, std::ios::end);
+    contents.resize(in.tellg());
+    in.seekg(0, std::ios::beg);
+    in.read(&contents[0], contents.size());
+    in.close();
+    return(contents);
+	 */
+
+	std::string jsonData;
+
+	std::fstream ifs;
+	ifs.open(fileName, std::fstream::in);
+
+	ifs.seekg(0, std::ios::end);
+	jsonData.resize(ifs.tellg());
+	ifs.seekg(0, std::ios::beg);
+
+	ifs.read(&jsonData[0], jsonData.size());
+	ifs.close();
+
+	Json::Reader jsonReader;
+
+	Json::Value doc;
+
+	if (jsonReader.parse(jsonData, doc)){
+		std::cout << "Parsed json data file, extracting data." << std::endl;
+
+		Json::Value nullValue(Json::nullValue);
+
+		std::map<std::string, std::list<Phrase> > genericPhraseMap;
+		std::map<std::string, std::list<Phrase> > guessGamePhraseMap;
+		std::map<std::string, std::list<Phrase> > mimicGamePhraseMap;
+
+		//Generate generic phrase map
+		Json::Value genericPhrases = doc.get(PHRASE_KEY, nullValue);
+		if (genericPhrases.type() != nullValue.type()){
+			genericPhraseMap = getPhraseMap(genericPhrases);
+		}
+
+		//Generate guess game phrase map
+		Json::Value guessGameVal = doc.get(GUESS_GAME_KEY, nullValue);
+		if (guessGameVal.type() != nullValue.type()){
+			Json::Value guessGamePhrases = guessGameVal.get(PHRASE_KEY, nullValue);
+
+			if (guessGamePhrases != nullValue.type()){
+				guessGamePhraseMap = getPhraseMap(guessGamePhrases);
+			}else{
+				ROS_ERROR("Unable to find phrases for the guessing game, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+				return 1;
+			}
+		}else{
+			ROS_ERROR("Unable to find the guessing game data, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+			return -1;
+		}
+
+		//Generate mimic game phrase map
+		Json::Value mimicGameVal = doc.get(MIMIC_GAME_KEY, nullValue);
+		if (mimicGameVal.type() != nullValue.type()){
+			Json::Value mimicGamePhrases = mimicGameVal.get(PHRASE_KEY, nullValue);
+
+			if (mimicGamePhrases != nullValue.type()){
+				mimicGamePhraseMap = getPhraseMap(mimicGamePhrases);
+			}else{
+				ROS_ERROR("Unable to find phrases for the mimic game, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+				return 1;
+			}
+		}else{
+			ROS_ERROR("Unable to find the mimic game data, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+			return -1;
+		}
+
+		//Create settings and instances of games
+		GameSettings guessGameSettings;
+		guessGameSettings.setPhraseMap(guessGamePhraseMap);
+
+		GameSettings mimicGameSettings;
+		mimicGameSettings.setPhraseMap(mimicGamePhraseMap);
+
+		Game* guessGame = new GuessGame(guessGameSettings);
+		Game* mimicGame = new MimicGame(mimicGameSettings);
+
+		//Set current game and start it.
+		Game* currentGame = guessGame;
+		currentGame->startGame();
+
+		//All checks are done, start game loop
+		while (ros::ok()){
+			if (!currentGame->isDone){
+				currentGame->perform();
+			}else{
+				//Clean up state of current game
+				currentGame->endGame();
+
+				//Swap games
+				if (currentGame == guessGame){
+					currentGame = mimicGame;
+				}else{
+					currentGame = guessGame;
+				}
+
+				//Start the new game
+				currentGame->startGame();
+			}
+
+			//Spin once to enable call backs, etc.
+			ros::spinOnce();
+		}
+	}else{
+		std::cout << "Invalid json data file." << std::endl;
+
+		return 1;
+	}
+
+
 	//For now, hardcode the Phrases
-	std::map<std::string, Phrase> phraseMap;
-
-	//Game name phrase(s)
-	Phrase guess_start("Guess the emotion");
-	phraseMap.insert(std::pair<std::string, Phrase>("Guess game start", guess_start));
-
-	//Introduction phrase(s)
-	Phrase guess_intro("The robot will do an emotion and you will have to guess what it is");
-	phraseMap.insert(std::pair<std::string, Phrase>("Introduction", guess_intro));
-
-	//Next emotion
-	Phrase next_emotion("Next emotion");
-	phraseMap.insert(std::pair<std::string, Phrase>("Next emotion", next_emotion));
-
-	//Question phrase(s)
-	Phrase guess_game_question("Was the robot % or %?");
-	phraseMap.insert(std::pair<std::string, Phrase>("Question", guess_game_question));
-
-	//Correct answer phrase(s)
-	Phrase correct_answer_phrase("Well done, you guessed the robot was x");
-	phraseMap.insert(std::pair<std::string, Phrase>("Generic correct", correct_answer_phrase));
-
-	//Prompt phrase(s)
-	Phrase generic_prompt_phrase("Try again");
-	phraseMap.insert(std::pair<std::string, Phrase>("Generic prompt", generic_prompt_phrase));
-
-	//Incorrect answer phrase(s)
-	Phrase generic_incorrect_phrase("Lets try another emotion");
-	phraseMap.insert(std::pair<std::string, Phrase>("Generic incorrect", generic_incorrect_phrase));
-
-	//Game finished phrase(s)
-	Phrase guess_finished("Guess the emotion is finished");
-	phraseMap.insert(std::pair<std::string, Phrase>("Guess game finish", guess_finished));
-
-	settings.setPhraseMap(phraseMap);
+	//std::map<std::string, Phrase> phraseMap;
 
 //	while (!checkRunningNodes(node_names))
 //		sleep(1);
@@ -96,18 +199,7 @@ int main(int argc, char** argv)
 //	//Check if the tf transform node is active and publishing
 //	checkTfTransforms();
 
-	startSpeechRecognition();
-
-	Game* guessGame = new GuessGame(settings);
-
-	guessGame->startGame();
-
-	//All checks are done, start game
-	while (ros::ok()){
-		guessGame->perform();
-
-		ros::spinOnce();
-	}
+//	startSpeechRecognition();
 
 	return 0;
 }
@@ -217,4 +309,39 @@ bool checkRunningNodes(std::vector<std::string>& node_names)
 	}
 
 	return false;
+}
+
+std::map<std::string, std::list<Phrase> > getPhraseMap(Json::Value& phraseRoot)
+{
+	std::map<std::string, std::list<Phrase> > phraseMap;
+
+	Json::Value::Members mems = phraseRoot.getMemberNames();
+	Json::Value nullValue(Json::nullValue);
+
+	for (int i=0;i<mems.size();i++){
+		std::string key = mems[i];
+
+		Json::Value val = phraseRoot.get(key, nullValue);
+		//Sanity check, this should always be true
+		if (val.type() != nullValue.type()){
+			std::list<Phrase> phraseList;
+
+			Json::Value::ArrayIndex size = val.size();
+
+			for (int i=0;i<size;i++){
+				Json::Value phraseValue = val.get(i, nullValue);
+
+				//Again, sanity check, this should always be true
+				if (phraseValue.type() != nullValue.type()){
+					Phrase phrase(phraseValue.asString());
+
+					phraseList.push_back(phrase);
+				}
+			}
+
+			phraseMap.insert(std::pair<std::string, std::list<Phrase> >(key, phraseList));
+		}
+	}
+
+	return phraseMap;
 }

@@ -41,6 +41,11 @@ public:
 	std::string getPhrase(std::list<std::string> parts) const;
 
 	/**
+	 * Returns the amount of phrase parts required.
+	 */
+	int amountOfParts() const;
+
+	/**
 	 * Returns whether the given Phrase requires any parts. If a phrase requires
 	 * parts then it must be given a list of strings in order to retrieve the phrase.
 	 *

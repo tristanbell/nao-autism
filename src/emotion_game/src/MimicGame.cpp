@@ -8,6 +8,11 @@
 #include <Game.h>
 #include <MimicGame.h>
 
+MimicGame::MimicGame(GameSettings& settings) : Game(settings)
+{
+
+}
+
 void MimicGame::perform(void) {
 
 }

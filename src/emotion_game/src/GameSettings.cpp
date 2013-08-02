@@ -22,12 +22,12 @@ int GameSettings::getTimeout() const
 	return timeout;
 }
 
-void GameSettings::setPhraseMap(std::map<std::string, Phrase> phraseMap)
+void GameSettings::setPhraseMap(std::map<std::string, std::list<Phrase> >& phraseMap)
 {
 	this->phraseMap = phraseMap;
 }
 
-const std::map<std::string, Phrase>& GameSettings::getPhraseMap() const
+const std::map<std::string, std::list<Phrase> >& GameSettings::getPhraseMap() const
 {
 	return phraseMap;
 }

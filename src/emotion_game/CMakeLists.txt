@@ -26,6 +26,7 @@ set(start_game_HDRS
 	include/Behavior.h
 	include/MimicGame.h
 	include/GuessGame.h
+	include/Keys.h
 )
 
 set(gen_json_SRCS
@@ -36,6 +37,7 @@ set(gen_json_SRCS
 
 set(gen_json_HDRS
 	include/json/json.h
+	include/Keys.h
 )
 
 catkin_package(

@@ -28,6 +28,7 @@ public:
 
 	void setPhraseMap(std::map<std::string, std::list<Phrase> >& phraseMap);
 	const std::map<std::string, std::list<Phrase> >& getPhraseMap() const;
+	bool getPhraseList(const std::string& key, std::list<Phrase>& phraseList) const;
 
 private:
 	int msWait;

@@ -11,6 +11,7 @@
 #include <ros/ros.h>
 
 #include <nao_msgs/WordRecognized.h>
+#include <Phrase.h>
 
 #include <string>
 #include <list>
@@ -44,6 +45,8 @@ private:
 
 	State _currentState;
 	bool _performedEmotion;
+
+	void sayAll(const std::list<Phrase>&);
 
 	void onSpeechRecognized(const nao_msgs::WordRecognized msg);
 

@@ -34,8 +34,6 @@ public:
 
 protected:
 	nao_control::NaoControl _naoControl;
-
-private:
 	GameSettings _settings;
 };
 

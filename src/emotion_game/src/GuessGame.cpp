@@ -8,6 +8,8 @@
 #include <Game.h>
 #include <GuessGame.h>
 
+#include <Keys.h>
+
 #define WORD_RECOGNIZED_TOPIC "word_recognized"
 
 #include <iostream>
@@ -36,6 +38,12 @@ void GuessGame::perform(void) {
 
 	case INTRODUCTION:{
 		//Perform introduction speeches/actions, etc
+		std::list<Phrase> phraseList;
+		if (getGameSettings().getPhraseList(INTRODUCTION_KEY, phraseList))
+			sayAll(phraseList);
+
+		if (getGameSettings().getPhraseList(INSTRUCTION_KEY, phraseList))
+			sayAll(phraseList);
 
 		_currentState = PERFORM_EMOTION;
 
@@ -100,6 +108,19 @@ void GuessGame::perform(void) {
 		break;
 	}
 
+	}
+}
+
+void GuessGame::sayAll(const std::list<Phrase>& phraseList)
+{
+	std::list<Phrase>::const_iterator it = phraseList.begin();
+	while (it != phraseList.end()){
+		const Phrase& current = *it;
+
+		if (current.amountOfParts() == 0){
+			_naoControl.say(current.getPhrase());
+			sleep(_settings.getWait());
+		}
 	}
 }
 

@@ -10,25 +10,32 @@
 #include <Keys.h>
 
 MimicGame::MimicGame(GameSettings& settings) : Game(settings),
-											   _mimicNodeHandle(),
-											   _currentState(INTRODUCTION),
-											   _performedEmotion(false)
+											   _mimicNodeHandle()
 {
 	_performedBehavior = NULL;
+	_currentState = INTRODUCTION;
+	_performedEmotion = false;
+	_classSubscriber = _mimicNodeHandle.subscribe("/classification", 15, &MimicGame::classificationCallback, this);
+}
+
+void MimicGame::startGame(void) {
+	_currentState = INTRODUCTION;
 }
 
 void MimicGame::perform(void) {
 	switch (_currentState) {
-		case INTRODUCTION:
+		case INTRODUCTION:{
 			introduction();
 			break;
+		}
 
-		case PERFORM_EMOTION:
+		case PERFORM_EMOTION:{
 			performEmotion();
 			_currentState = PROMPT_MIMIC;
 			break;
+		}
 
-		case PROMPT_MIMIC:
+		case PROMPT_MIMIC:{
 			std::vector<Phrase> questionVector;
 
 			std::list<std::string> parts;
@@ -40,27 +47,111 @@ void MimicGame::perform(void) {
 			_currentState = WAITING_MIMIC;
 
 			break;
+		}
 
-		case WAITING_MIMIC:
+		case WAITING_MIMIC:{
+			int desiredClassification = _performedBehavior->getClassification();
+
+			if (_currentPoseClassification == desiredClassification) {
+				// Say well done here, then ask to continue
+
+				_currentState = WAITING_ANSWER_CONTINUE;
+			}
 
 			break;
+		}
 
-		case WAITING_ANSWER_CONTINUE:
+		case WAITING_ANSWER_CONTINUE:{
 
 			break;
+		}
 
-		default:
+		default:{
 			break;
+		}
 	}
-
-}
-
-void MimicGame::startGame(void) {
 
 }
 
 void MimicGame::endGame(void) {
 
 }
+
+void MimicGame::setOverallClassification(void) {
+	std::map<short, int> votes;
+
+	// Get the number of times each pose appears in _poseQueue
+	for (int i = 0; i < _poseQueue.size(); i++) {
+		votes[_poseQueue[i].classification]++;
+	}
+
+	// Get the pose with the highest number of votes
+	std::map<short, int>::iterator it = votes.begin();
+	std::pair<short, int> pair = *it;
+
+	short highestPose = pair.first;
+	int highestNum = pair.second;
+
+	it++;
+
+	while (it != votes.end()) {
+		pair = *it;
+
+		if (pair.second > highestNum) {
+			highestPose = pair.first;
+			highestNum = pair.second;
+		}
+
+		it++;
+	}
+
+	_currentPoseClassification = highestPose;
+
+	_poseQueue.clear();
+}
+
+#define MAX_QUEUE_SIZE 15
+
+void MimicGame::classificationCallback(const nao_autism_messages::PoseClassification poseClass) {
+	if (_currentState == WAITING_MIMIC) {
+		if (_poseQueue.size() >= MAX_QUEUE_SIZE) {
+			setOverallClassification();
+			printf("Current class: %d         \n", _currentPoseClassification);
+		}
+
+		_poseQueue.push_back(poseClass);
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

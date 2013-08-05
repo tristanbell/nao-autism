@@ -12,6 +12,7 @@
 #include <ros/ros.h>
 
 #include <nao_msgs/WordRecognized.h>
+#include <nao_autism_messages/PoseClassification.h>
 #include <Phrase.h>
 
 #include <string>
@@ -29,6 +30,12 @@ public:
 
 private:
 	ros::NodeHandle _mimicNodeHandle;
+	ros::Subscriber _classSubscriber;
+	std::vector<nao_autism_messages::PoseClassification> _poseQueue;
+	short _currentPoseClassification;
+
+	void setOverallClassification(void);
+	void classificationCallback(const nao_autism_messages::PoseClassification poseClass);
 };
 
 #endif /* MIMICGAME_H_ */

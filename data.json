@@ -1,0 +1,62 @@
+{
+   "Available behaviors" : [
+      {
+         "Actual name" : "happy",
+         "Behavior names" : [ "happy_1" ],
+         "Classification" : 1
+      },
+      {
+         "Actual name" : "scared",
+         "Behavior names" : [ "scared_1" ],
+         "Classification" : 2
+      },
+      {
+         "Actual name" : "sad",
+         "Behavior names" : [ "sad_1" ],
+         "Classification" : 3
+      },
+      {
+         "Actual name" : "angry",
+         "Behavior names" : [ "angry_1" ],
+         "Classification" : 4
+      }
+   ],
+   "Available phrases" : {
+      "Introduction" : [ "Lets play" ],
+      "Kinect tracking prompt" : [ "Copy the robot" ],
+      "Positive phrases" : [ "Well done" ]
+   },
+   "Available reward behaviors" : [
+      {
+         "Behavior names" : [ "reward_1", "reward_2", "reward_3" ]
+      }
+   ],
+   "Base settings" : {
+      "Maxiumum prompts" : 2,
+      "Speech wait" : 3,
+      "Timeout" : 15
+   },
+   "Guess game" : {
+      "Available phrases" : {
+         "Correct answer phrases" : [ "Well done, you guessed the robot was %" ],
+         "Finish" : [ "Guess the emotion is finished" ],
+         "Incorrect answer phrases" : [ "Lets try another emotion" ],
+         "Instruction" : [ "The robot will do an emotion and you will have to guess what it is" ],
+         "Next question phrase" : [ "Next emotion" ],
+         "Prompts" : [ "Try again" ],
+         "Questions" : [ "Was the robot % or %?" ],
+         "Start" : [ "Guess the emotion" ]
+      }
+   },
+   "Mimic game" : {
+      "Available phrases" : {
+         "Correct answer phrases" : [ "Well done" ],
+         "Finish" : [ "Copy the robot is finished." ],
+         "Incorrect answer phrases" : [ "Better luck next time" ],
+         "Instruction" : [ "Instruction" ],
+         "Prompt to follow" : [ "Do the same" ],
+         "Say emotion" : [ "The robot is %" ],
+         "Start" : [ "Copy the robot" ]
+      }
+   }
+}

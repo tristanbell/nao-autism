@@ -36,21 +36,6 @@ private:
 
 	std::list<std::pair<std::string, float> > _recognizedWords;
 
-	//State information related variables/structures
-	enum State
-	{
-		INTRODUCTION,
-		PERFORM_EMOTION,
-		ASK_QUESTION,
-		WAITING_ANSWER_QUESTION,
-		WAITING_ANSWER_CONTINUE,
-	};
-
-	State _currentState;
-	bool _performedEmotion;
-
-	Behavior* _performedBehavior;
-
 	void onSpeechRecognized(const nao_msgs::WordRecognized msg);
 
 };

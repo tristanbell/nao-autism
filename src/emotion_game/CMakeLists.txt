@@ -54,6 +54,7 @@ include_directories(
 
 add_executable(start_game ${start_game_SRCS} ${start_game_HDRS})
 target_link_libraries(start_game ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(start_game nao_msgs_generate_msg_cpp)
 
 add_executable(gen_json ${gen_json_SRCS} ${gen_json_HDRS})
 target_link_libraries(gen_json ${catkin_LIBRARIES} ${Boost_LIBRARIES})

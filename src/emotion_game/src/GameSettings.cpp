@@ -62,4 +62,6 @@ bool GameSettings::getPhraseVector(const std::string& key, std::vector<Phrase>& 
 	}catch(std::out_of_range& ex){
 		return false;
 	}
+
+	return false;
 }

@@ -6,7 +6,7 @@
 #include <classification/PlainDataStore.h>
 #include <classification/DataPoint.h>
 
-#include <learner/PoseClassification.h>
+#include <nao_autism_messages/PoseClassification.h>
 
 #include <vector>
 #include <map>

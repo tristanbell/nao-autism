@@ -266,7 +266,7 @@ Json::Value generateMimicGamePhrases()
 	startPhrase.append(MIMIC_INTRODUCTION_PHRASE);
 
 	Json::Value& instructionPhrase = val[INSTRUCTION_KEY];
-	instructionPhrase.append(INSTRUCTION_KEY);
+	instructionPhrase.append(MIMIC_INSTRUCTION_PHRASE);
 
 	Json::Value& emotionPhrase = val[MIMIC_EMOTION_KEY];
 	emotionPhrase.append(MIMIC_EMOTION_PHRASE);

@@ -11,7 +11,7 @@
 #include <Keys.h>
 
 #define WORD_RECOGNIZED_TOPIC "word_recognized"
-#define confidenceThreshold 0.5f // TODO: Implement in GameSettings class
+#define confidenceThreshold 0.25f // TODO: Implement in GameSettings class
 
 #include <iostream>
 
@@ -107,15 +107,18 @@ void GuessGame::perform(void) {
 				if (_settings.getPhraseVector(CORRECT_ANSWER_KEY, phraseVector))
 					sayAny(phraseVector, parts);
 
+				_recognizedWords.clear();
+
 				//We shall ask the child here if they wish to continue with the current gamme
+				_currentState = WAITING_ANSWER_CONTINUE;
 
 				//for now, we shall go to the next emotion
-				_currentState = PERFORM_EMOTION;
-				_recognizedWords.clear();
+				//_currentState = PERFORM_EMOTION;
+				//_recognizedWords.clear();
 
 				_timesPrompted = 0;
 
-				break;
+				return;
 			}
 
 			it++;
@@ -162,17 +165,18 @@ void GuessGame::perform(void) {
 	//TODO: Integrate this with the rest of the 'game'
 	case WAITING_ANSWER_CONTINUE:{
 		//Wait until yes/no is 'heard'
-
 		std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
 		while (it != _recognizedWords.end()){
 			std::pair<std::string, float>& pair = *it;
 
 			if (pair.first == "yes" && pair.second >= confidenceThreshold){
-				isDone = true;
+				_currentState = PERFORM_EMOTION;
 
 				_recognizedWords.clear();
 				break;
 			}else if (pair.first == "no" && pair.second >= confidenceThreshold){
+				isDone = true;
+
 				_recognizedWords.clear();
 
 				break;
@@ -180,6 +184,7 @@ void GuessGame::perform(void) {
 
 			it++;
 		}
+
 		break;
 	}
 

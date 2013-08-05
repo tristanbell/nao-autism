@@ -7,7 +7,7 @@
 #include <actionlib/client/terminal_state.h>
 #include <actionlib/client/simple_action_client.h>
 
-#include <nao_autism_messages/BehaviorAction.h>
+#include <nao_msgs/RunBehaviorAction.h>
 
 #include <string>
 
@@ -36,17 +36,17 @@ private:
 	ros::Publisher speechPublisher;
 
 	ros::Duration behaviorTimeout;
-	actionlib::SimpleActionClient<nao_autism_messages::BehaviorAction> behaviorActionClient;
+	actionlib::SimpleActionClient<nao_msgs::RunBehaviorAction> behaviorActionClient;
 
 	std::string* previousBehavior;
 	std::string* previousSpeech;
 
 	bool performBehaviorInternal(const std::string& behavior)
 	{
-		nao_autism_messages::BehaviorGoal goal;
+		nao_msgs::RunBehaviorGoal goal;
 
 		std::cout << "[NaoControl] Performing behavior: " << behavior << std::endl;
-		goal.behavior_name = behavior;
+		goal.behavior = behavior;
 		actionlib::SimpleClientGoalState state
 				= behaviorActionClient.sendGoalAndWait(goal, behaviorTimeout);
 

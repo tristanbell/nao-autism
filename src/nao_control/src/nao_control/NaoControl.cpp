@@ -3,7 +3,7 @@
 const std::string NODE_NAME = "nao_control";
 
 const std::string SPEECH_TOPIC_NAME = "speech";
-const std::string BEHAVIOR_MANAGER_SERVER = "behavior_action";
+const std::string BEHAVIOR_MANAGER_SERVER = "nao_behaviors/run_behavior";
 
 /*
  * Sets up the required publishers/connections. This will wait until
@@ -23,15 +23,15 @@ nao_control::NaoControl::NaoControl() :
 
 	ros::Rate loopRate(5);
 
-//	ROS_INFO("Waiting until speech publisher is ready...");
-//	while (speechPublisher.getNumSubscribers() == 0){
-//		if (!ros::ok()){
-//			return;
-//		}
-//
-//		loopRate.sleep();
-//	}
-//	ROS_INFO("Speech publisher is ready.");
+	ROS_INFO("Waiting until speech publisher is ready...");
+	while (speechPublisher.getNumSubscribers() == 0){
+		if (!ros::ok()){
+			return;
+		}
+
+		loopRate.sleep();
+	}
+	ROS_INFO("Speech publisher is ready.");
 
 	ROS_INFO("Waiting for behavior manager to start.");
 	while (!behaviorActionClient.isServerConnected()){

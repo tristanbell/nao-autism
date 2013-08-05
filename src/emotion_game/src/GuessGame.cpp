@@ -11,6 +11,7 @@
 #include <Keys.h>
 
 #define WORD_RECOGNIZED_TOPIC "word_recognized"
+#define confidenceThreshold 0.5f // TODO: Implement in GameSettings class
 
 #include <iostream>
 
@@ -24,7 +25,7 @@ GuessGame::GuessGame(GameSettings& settings) :  Game(settings),
 	_currentState = INTRODUCTION;
 	_performedEmotion = false;
 
-	_speechSubscriber = _guessNodeHandle.subscribe("word_recognized", 1000, &GuessGame::onSpeechRecognized, &*this);
+	_speechSubscriber = _guessNodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 1000, &GuessGame::onSpeechRecognized, &*this);
 }
 
 void GuessGame::startGame(void) {
@@ -98,7 +99,7 @@ void GuessGame::perform(void) {
 			std::pair<std::string, float>& pair = *it;
 
 			//Check for correct answer
-			if (pair.first == _performedBehavior->getActualName()){
+			if (pair.first == _performedBehavior->getActualName() && pair.second >= confidenceThreshold){
 				std::list<std::string> parts;
 				parts.push_back(_performedBehavior->getActualName());
 
@@ -166,12 +167,12 @@ void GuessGame::perform(void) {
 		while (it != _recognizedWords.end()){
 			std::pair<std::string, float>& pair = *it;
 
-			if (pair.first == "yes"){
+			if (pair.first == "yes" && pair.second >= confidenceThreshold){
 				isDone = true;
 
 				_recognizedWords.clear();
 				break;
-			}else if (pair.first == "no"){
+			}else if (pair.first == "no" && pair.second >= confidenceThreshold){
 				_recognizedWords.clear();
 
 				break;
@@ -196,7 +197,6 @@ void GuessGame::endGame(void) {
 
 void GuessGame::onSpeechRecognized(const nao_msgs::WordRecognized msg)
 {
-	ROS_INFO("Got speech");
 	//Check to see if speech is needed, if so push onto list
 	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)){
 		for (int i=0;i<msg.words.size();i++){

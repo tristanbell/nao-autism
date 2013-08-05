@@ -24,8 +24,6 @@ add_message_files(
 	WordRecognized.msg
 )
 
-<<<<<<< HEAD
-=======
 add_action_files(
 	FILES 
 	RunBehavior.action)
@@ -37,7 +35,6 @@ add_action_files(
 #   Service2.srv
 # )
 
->>>>>>> ef1e4d82463dc8be1a0ebf6c3f4251cf4f3c49a3
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
 	DEPENDENCIES

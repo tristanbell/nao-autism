@@ -45,8 +45,12 @@ bool checkRunningNodes(std::vector<std::string>&);
 void checkTfTransforms();
 void tfCallback(const tf::tfMessage);
 
-std::map<std::string, std::vector<Phrase> > getPhraseMap(Json::Value& phraseRoot);
 std::vector<Behavior> getBehaviorList(Json::Value& behaviorRoot);
+
+std::map<std::string, std::vector<Phrase> > getPhraseMap(Json::Value& phraseRoot);
+bool loadPhraseMaps(Json::Value& doc, std::map<std::string, std::vector<Phrase> >& genericPhraseMap,
+		std::map<std::string, std::vector<Phrase> >& guessGamePhraseMap,
+		std::map<std::string, std::vector<Phrase> >& mimicGamePhraseMap);
 
 int main(int argc, char** argv)
 {
@@ -104,9 +108,9 @@ int main(int argc, char** argv)
 		std::vector<Behavior> allBehaviorList;
 		std::vector<Behavior> rewardBehaviorList;
 
-		std::map<std::string, std::vector<Phrase> > genericPhraseMap;
-		std::map<std::string, std::vector<Phrase> > guessGamePhraseMap;
-		std::map<std::string, std::vector<Phrase> > mimicGamePhraseMap;
+		std::map<std::string, std::vector<Phrase> > genericPhraseMap, guessGamePhraseMap, mimicGamePhraseMap;
+		if (!loadPhraseMaps(doc, genericPhraseMap, guessGamePhraseMap, mimicGamePhraseMap))
+			return 1;
 
 		//Load speech/timeout wait variables
 		Json::Value baseSettings = doc.get(BASE_SETTINGS_KEY, nullValue);
@@ -137,6 +141,7 @@ int main(int argc, char** argv)
 			allBehaviorList = getBehaviorList(allBehaviorVal);
 		}else{
 			ROS_ERROR("Unable to find behaviors, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+			return 1;
 		}
 
 		//Load reward behavior list
@@ -145,54 +150,7 @@ int main(int argc, char** argv)
 			rewardBehaviorList = getBehaviorList(rewardBehaviorVal);
 		}else{
 			ROS_ERROR("Unable to find behaviors, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
-		}
-
-		//Load phrase maps
-
-		//Generate generic phrase map
-		Json::Value genericPhrases = doc.get(PHRASE_KEY, nullValue);
-		if (genericPhrases.type() != nullValue.type()){
-			genericPhraseMap = getPhraseMap(genericPhrases);
-		}else{
-			ROS_ERROR("Unable to find generic phrases, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
-
 			return 1;
-		}
-
-		//Generate guess game phrase map
-		Json::Value guessGameVal = doc.get(GUESS_GAME_KEY, nullValue);
-		if (guessGameVal.type() != nullValue.type()){
-			Json::Value guessGamePhrases = guessGameVal.get(PHRASE_KEY, nullValue);
-
-			if (guessGamePhrases != nullValue.type()){
-				guessGamePhraseMap = getPhraseMap(guessGamePhrases);
-			}else{
-				ROS_ERROR("Unable to find phrases for the guessing game, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
-
-				return 1;
-			}
-		}else{
-			ROS_ERROR("Unable to find the guessing game data, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
-
-			return -1;
-		}
-
-		//Generate mimic game phrase map
-		Json::Value mimicGameVal = doc.get(MIMIC_GAME_KEY, nullValue);
-		if (mimicGameVal.type() != nullValue.type()){
-			Json::Value mimicGamePhrases = mimicGameVal.get(PHRASE_KEY, nullValue);
-
-			if (mimicGamePhrases != nullValue.type()){
-				mimicGamePhraseMap = getPhraseMap(mimicGamePhrases);
-			}else{
-				ROS_ERROR("Unable to find phrases for the mimic game, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
-
-				return 1;
-			}
-		}else{
-			ROS_ERROR("Unable to find the mimic game data, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
-
-			return -1;
 		}
 
 		ROS_INFO("JSON data loaded, creating game objects.");
@@ -455,4 +413,59 @@ std::vector<Behavior> getBehaviorList(Json::Value& behaviorRoot)
 	}
 
 	return behaviorList;
+}
+
+bool loadPhraseMaps(Json::Value& doc, std::map<std::string, std::vector<Phrase> >& genericPhraseMap,
+		std::map<std::string, std::vector<Phrase> >& guessGamePhraseMap,
+		std::map<std::string, std::vector<Phrase> >& mimicGamePhraseMap)
+{
+	//Load phrase maps
+
+	//Generate generic phrase map
+	Json::Value genericPhrases = doc.get(PHRASE_KEY, Json::Value::null);
+	if (genericPhrases.type() != Json::Value::null.type()){
+		genericPhraseMap = getPhraseMap(genericPhrases);
+	}else{
+		ROS_ERROR("Unable to find generic phrases, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+		return false;
+	}
+
+	//Generate guess game phrase map
+	Json::Value guessGameVal = doc.get(GUESS_GAME_KEY, Json::Value::null);
+	if (guessGameVal.type() != Json::Value::null.type()){
+		Json::Value guessGamePhrases = guessGameVal.get(PHRASE_KEY, Json::Value::null);
+
+		if (guessGamePhrases != Json::Value::null.type()){
+			guessGamePhraseMap = getPhraseMap(guessGamePhrases);
+		}else{
+			ROS_ERROR("Unable to find phrases for the guessing game, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+			return false;
+		}
+	}else{
+		ROS_ERROR("Unable to find the guessing game data, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+		return false;
+	}
+
+	//Generate mimic game phrase map
+	Json::Value mimicGameVal = doc.get(MIMIC_GAME_KEY, Json::Value::null);
+	if (mimicGameVal.type() != Json::Value::null.type()){
+		Json::Value mimicGamePhrases = mimicGameVal.get(PHRASE_KEY, Json::Value::null);
+
+		if (mimicGamePhrases != Json::Value::null.type()){
+			mimicGamePhraseMap = getPhraseMap(mimicGamePhrases);
+		}else{
+			ROS_ERROR("Unable to find phrases for the mimic game, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+			return false;
+		}
+	}else{
+		ROS_ERROR("Unable to find the mimic game data, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
+
+		return false;
+	}
+
+	return true;
 }

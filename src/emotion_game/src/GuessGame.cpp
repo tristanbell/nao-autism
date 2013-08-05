@@ -16,12 +16,13 @@
 
 GuessGame::GuessGame(GameSettings& settings) :  Game(settings),
 											   _guessNodeHandle(),
-											   _waitingSpeech(false),
-											   _recognizedWords(),
-											   _currentState(INTRODUCTION),
-											   _performedEmotion(false)
+											   _recognizedWords()
 {
 	_performedBehavior = NULL;
+
+	_waitingSpeech = false;
+	_currentState = INTRODUCTION;
+	_performedEmotion = false;
 
 	_speechSubscriber = _guessNodeHandle.subscribe("word_recognized", 1000, &GuessGame::onSpeechRecognized, &*this);
 }

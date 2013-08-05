@@ -4,7 +4,7 @@ project(nao_msgs)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS message_generation roscpp rospy std_msgs)
+find_package(catkin REQUIRED COMPONENTS message_generation roscpp rospy actionlib_msgs std_msgs)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -32,6 +32,10 @@ add_message_files(
 	WordRecognized.msg
 )
 
+add_action_files(
+	FILES 
+	RunBehavior.action)
+
 ## Generate services in the 'srv' folder
 # add_service_files(
 #   FILES
@@ -40,10 +44,11 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
- generate_messages(
-   DEPENDENCIES
-   std_msgs
- )
+generate_messages(
+	DEPENDENCIES
+	actionlib_msgs
+	std_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -54,7 +59,6 @@ add_message_files(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
 #  LIBRARIES nao_msgs
 #  CATKIN_DEPENDS message_generation roscpp rospy std_msgs
 #  DEPENDS system_lib

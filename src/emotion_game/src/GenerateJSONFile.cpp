@@ -52,6 +52,7 @@
 #define GUESS_CORRECT_ANSWER_1 "Well done, you guessed the robot was %"
 #define GUESS_PROMPT_ANSWER_1 "Try again"
 #define GUESS_INCORRECT_ANSWER_1 "Lets try another emotion"
+#define GUESS_CONTINUE_QUESTION_1 "Do you want to continue playing the guessing game?"
 #define GUESS_FINISH_PHRASE "Guess the emotion is finished"
 
 #define MIMIC_INTRODUCTION_PHRASE "Copy the robot"
@@ -61,7 +62,13 @@
 #define MIMIC_CORRECT_PHRASE "Well done"
 #define MIMIC_PROMPT_PHRASE "Try again"
 #define MIMIC_INCORRECT_PHRASE "Better luck next time"
+#define MIMIC_CONTINUE_QUESTION_1 "Do you want to continue playing the mimic game?"
 #define MIMIC_FINISH_PHRASE "Copy the robot is finished."
+
+#define QUESTION_PHRASE_BEHAVIOR_1 "prompt_1"
+#define INFORM_PHRASE_BEHAVIOR_1 "prompt_2"
+#define CORRECT_ANSWER_BEHAVIOR_1 "right_1"
+#define INCORRECT_ANSWER_BEHAVIOR_1 "incorrect_1"
 
 Json::Value generateBehaviorList();
 Json::Value generateRewardBehaviorsList();
@@ -111,7 +118,7 @@ int main(int argc, char** argv)
 		mimicGamePhrases = generateMimicGamePhrases();
 
 		//Generate behavior list
-		Json::Value& behaviorList = doc[BEHAVIOR_LIST_KEY];
+		Json::Value& behaviorList = doc[BEHAVIOR_KEY];
 		behaviorList = generateBehaviorList();
 
 		//Generate reward behavior list
@@ -133,7 +140,7 @@ int main(int argc, char** argv)
 		fs << result;
 		fs.flush();
 
-		std::cout << "Successfully wrote generated json data.";
+		std::cout << "Successfully wrote generated json data.\n";
 
 		//Close stream
 		fs.close();
@@ -216,13 +223,22 @@ Json::Value generateGenericPhrases()
 	Json::Value val(Json::objectValue);
 
 	Json::Value& promptPhrase = val[KINECT_PROMPT_KEY];
-	promptPhrase.append(KINECT_PROMPT_PHRASE);
+	Json::Value& promptPhrases = promptPhrase[PHRASE_KEY];
+	promptPhrases.append(KINECT_PROMPT_PHRASE);
+	Json::Value& promptBehaviors = promptPhrase[BEHAVIOR_KEY];
+	promptBehaviors.append(QUESTION_PHRASE_BEHAVIOR_1);
 
 	Json::Value& positivePhrase = val[POSITIVE_KEY];
-	positivePhrase.append(POSITIVE_PHRASE);
+	Json::Value& positivePhrases = positivePhrase[PHRASE_KEY];
+	positivePhrases.append(POSITIVE_PHRASE);
+	Json::Value& positiveBehaviors = positivePhrase[BEHAVIOR_KEY];
+	positiveBehaviors.append(CORRECT_ANSWER_BEHAVIOR_1);
 
 	Json::Value& introductionPhrase = val[INTRODUCTION_KEY];
-	introductionPhrase.append(INTRODUCTION_PHRASE);
+	Json::Value& introductionPhrases = introductionPhrase[PHRASE_KEY];
+	introductionPhrases.append(INTRODUCTION_PHRASE);
+	Json::Value& introductionBehaviors = introductionPhrase[BEHAVIOR_KEY];
+	introductionBehaviors.append(INFORM_PHRASE_BEHAVIOR_1);
 
 	return val;
 }
@@ -232,28 +248,58 @@ Json::Value generateGuessGamePhrases()
 	Json::Value val(Json::objectValue);
 
 	Json::Value& startPhrase = val[START_KEY];
-	startPhrase.append(GUESS_INTRODUCTION_PHRASE);
+	Json::Value& startPhrases = startPhrase[PHRASE_KEY];
+	startPhrases.append(GUESS_INTRODUCTION_PHRASE);
+	Json::Value& startBehaviors = startPhrase[BEHAVIOR_KEY];
+	startBehaviors.append(INFORM_PHRASE_BEHAVIOR_1);
 
 	Json::Value& instructionPhrase = val[INSTRUCTION_KEY];
-	instructionPhrase.append(GUESS_INSTRUCTION_PHRASE);
+	Json::Value& instructionPhrases = instructionPhrase[PHRASE_KEY];
+	instructionPhrases.append(GUESS_INSTRUCTION_PHRASE);
+	Json::Value& instructionBehaviors =	instructionPhrase[BEHAVIOR_KEY];
+	instructionBehaviors.append(INFORM_PHRASE_BEHAVIOR_1);
 
 	Json::Value& nextEmotionPhrase = val[GUESS_NEXT_KEY];
-	nextEmotionPhrase.append(GUESS_NEXT_PHRASE);
+	Json::Value& nextEmotionPhrases = nextEmotionPhrase[PHRASE_KEY];
+	nextEmotionPhrases.append(GUESS_NEXT_PHRASE);
+	Json::Value& nextEmotionBehaviors = nextEmotionPhrase[BEHAVIOR_KEY];
+	nextEmotionBehaviors.append(INFORM_PHRASE_BEHAVIOR_1);
 
-	Json::Value& questionPhrases = val[QUESTION_KEY];
+	Json::Value& questionPhrase = val[QUESTION_KEY];
+	Json::Value& questionPhrases = questionPhrase[PHRASE_KEY];
 	questionPhrases.append(GUESS_QUESTION_1);
+	Json::Value& questionBehaviors = questionPhrase[BEHAVIOR_KEY];
+	questionBehaviors.append(QUESTION_PHRASE_BEHAVIOR_1);
 
-	Json::Value& correctPhrases = val[CORRECT_ANSWER_KEY];
+	Json::Value& correctPhrase = val[CORRECT_ANSWER_KEY];
+	Json::Value& correctPhrases = correctPhrase[PHRASE_KEY];
 	correctPhrases.append(GUESS_CORRECT_ANSWER_1);
+	Json::Value& correctBehaviors = correctPhrase[BEHAVIOR_KEY];
+	correctBehaviors.append(CORRECT_ANSWER_BEHAVIOR_1);
 
-	Json::Value& promptPhrases = val[PROMPT_KEY];
+	Json::Value& promptPhrase = val[PROMPT_KEY];
+	Json::Value& promptPhrases = promptPhrase[PHRASE_KEY];
 	promptPhrases.append(GUESS_PROMPT_ANSWER_1);
+	Json::Value& promptBehaviors = promptPhrase[BEHAVIOR_KEY];
+	promptBehaviors.append(INFORM_PHRASE_BEHAVIOR_1);
 
-	Json::Value& incorrectPhrases = val[INCORRECT_ANSWER_KEY];
+	Json::Value& incorrectPhrase = val[INCORRECT_ANSWER_KEY];
+	Json::Value& incorrectPhrases = incorrectPhrase[PHRASE_KEY];
 	incorrectPhrases.append(GUESS_INCORRECT_ANSWER_1);
+	Json::Value& incorrectBehaviors = incorrectPhrase[BEHAVIOR_KEY];
+	incorrectBehaviors.append(INCORRECT_ANSWER_BEHAVIOR_1);
+
+	Json::Value& continueGameQuestionPhrase = val[CONTINUE_GAME_QUESTION_KEY];
+	Json::Value& continueGameQuestionPhrases = continueGameQuestionPhrase[PHRASE_KEY];
+	continueGameQuestionPhrases.append(MIMIC_CONTINUE_QUESTION_1);
+	Json::Value& continueGameQuestionBehavior = continueGameQuestionPhrase[BEHAVIOR_KEY];
+	continueGameQuestionBehavior.append(QUESTION_PHRASE_BEHAVIOR_1);
 
 	Json::Value& finishPhrase = val[FINISH_KEY];
-	finishPhrase.append(GUESS_FINISH_PHRASE);
+	Json::Value& finishPhrases = finishPhrase[PHRASE_KEY];
+	finishPhrases.append(GUESS_FINISH_PHRASE);
+	Json::Value& finishBehavior = finishPhrase[BEHAVIOR_KEY];
+	finishBehavior.append(INFORM_PHRASE_BEHAVIOR_1);
 
 	return val;
 }
@@ -263,25 +309,52 @@ Json::Value generateMimicGamePhrases()
 	Json::Value val(Json::objectValue);
 
 	Json::Value& startPhrase = val[START_KEY];
-	startPhrase.append(MIMIC_INTRODUCTION_PHRASE);
+	Json::Value& startPhrases = startPhrase[PHRASE_KEY];
+	startPhrases.append(MIMIC_INTRODUCTION_PHRASE);
+	Json::Value& startBehaviors = startPhrase[BEHAVIOR_KEY];
+	startBehaviors.append(QUESTION_PHRASE_BEHAVIOR_1);
 
 	Json::Value& instructionPhrase = val[INSTRUCTION_KEY];
-	instructionPhrase.append(MIMIC_INSTRUCTION_PHRASE);
+	Json::Value& instructionPhrases = instructionPhrase[PHRASE_KEY];
+	instructionPhrases.append(MIMIC_INSTRUCTION_PHRASE);
+	Json::Value& instructionBehaviors = instructionPhrase[BEHAVIOR_KEY];
+	instructionBehaviors.append(INFORM_PHRASE_BEHAVIOR_1);
 
 	Json::Value& emotionPhrase = val[MIMIC_EMOTION_KEY];
-	emotionPhrase.append(MIMIC_EMOTION_PHRASE);
+	Json::Value& emotionPhrases = emotionPhrase[PHRASE_KEY];
+	emotionPhrases.append(MIMIC_EMOTION_PHRASE);
+	Json::Value& emotionBehaviors = emotionPhrase[BEHAVIOR_KEY];
+	emotionBehaviors.append(INFORM_PHRASE_BEHAVIOR_1);
 
 	Json::Value& promptFollowPhrase = val[MIMIC_PROMPT_FOLLOW_KEY];
-	promptFollowPhrase.append(MIMIC_PROMPT_FOLLOW_PHRASE);
+	Json::Value& promptFollowPhrases = promptFollowPhrase[PHRASE_KEY];
+	promptFollowPhrases.append(MIMIC_PROMPT_FOLLOW_PHRASE);
+	Json::Value& promptFollowBehaviors = promptFollowPhrase[BEHAVIOR_KEY];
+	promptFollowBehaviors.append(QUESTION_PHRASE_BEHAVIOR_1);
 
 	Json::Value& correctPhrase = val[CORRECT_ANSWER_KEY];
-	correctPhrase.append(MIMIC_CORRECT_PHRASE);
+	Json::Value& correctPhrases = correctPhrase[PHRASE_KEY];
+	correctPhrases.append(MIMIC_CORRECT_PHRASE);
+	Json::Value& correctBehaviors = correctPhrase[BEHAVIOR_KEY];
+	correctBehaviors.append(CORRECT_ANSWER_BEHAVIOR_1);
 
 	Json::Value& incorrectPhrase = val[INCORRECT_ANSWER_KEY];
-	incorrectPhrase.append(MIMIC_INCORRECT_PHRASE);
+	Json::Value& incorrectPhrases = incorrectPhrase[PHRASE_KEY];
+	incorrectPhrases.append(MIMIC_INCORRECT_PHRASE);
+	Json::Value& incorrectBehaviors = incorrectPhrase[BEHAVIOR_KEY];
+	incorrectBehaviors.append(INCORRECT_ANSWER_BEHAVIOR_1);
+
+	Json::Value& continueGameQuestionPhrase = val[CONTINUE_GAME_QUESTION_KEY];
+	Json::Value& continueGameQuestionPhrases = continueGameQuestionPhrase[PHRASE_KEY];
+	continueGameQuestionPhrases.append(GUESS_CONTINUE_QUESTION_1);
+	Json::Value& continueGameQuestionBehavior = continueGameQuestionPhrase[BEHAVIOR_KEY];
+	continueGameQuestionBehavior.append(QUESTION_PHRASE_BEHAVIOR_1);
 
 	Json::Value& finishPhrase = val[FINISH_KEY];
-	finishPhrase.append(MIMIC_FINISH_PHRASE);
+	Json::Value& finishPhrases = finishPhrase[PHRASE_KEY];
+	finishPhrases.append(MIMIC_FINISH_PHRASE);
+	Json::Value& finishBehavior = finishPhrase[BEHAVIOR_KEY];
+	finishBehavior.append(INFORM_PHRASE_BEHAVIOR_1);
 
 	return val;
 }

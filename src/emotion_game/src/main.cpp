@@ -136,7 +136,7 @@ int main(int argc, char** argv)
 		}
 
 		//Load behavior list
-		Json::Value allBehaviorVal = doc.get(BEHAVIOR_LIST_KEY, Json::Value::null);
+		Json::Value allBehaviorVal = doc.get(BEHAVIOR_KEY, Json::Value::null);
 		if (allBehaviorVal.type() != Json::Value::null.type()){
 			allBehaviorList = getBehaviorList(allBehaviorVal);
 		}else{
@@ -346,16 +346,36 @@ std::map<std::string, std::vector<Phrase> > getPhraseMap(Json::Value& phraseRoot
 		if (val.type() != nullValue.type()){
 			std::vector<Phrase> phraseVector;
 
-			Json::Value::ArrayIndex size = val.size();
+			Json::Value phraseValues = val.get(PHRASE_KEY, nullValue);
+			if (phraseValues.type() != nullValue.type()){
+				//Load behaviors vector, if it is present in the file
+				std::vector<std::string> behaviorVector;
 
-			for (int i=0;i<size;i++){
-				Json::Value phraseValue = val.get(i, nullValue);
+				Json::Value behaviorValues = val.get(BEHAVIOR_KEY, nullValue);
+				if (behaviorValues.type() != Json::Value::null.type()){
+					Json::Value::ArrayIndex behaviorNum = behaviorValues.size();
 
-				//Again, sanity check, this should always be true
-				if (phraseValue.type() != nullValue.type()){
-					Phrase phrase(phraseValue.asString());
+						for (int j=0;j<behaviorNum;j++){
+							Json::Value currentBehavior = behaviorValues.get(j, nullValue);
 
-					phraseVector.push_back(phrase);
+							if (currentBehavior.type() != Json::Value::null.type()){
+								behaviorVector.push_back(currentBehavior.asString());
+							}
+						}
+				}
+
+				//Load all the possible phrases for the given phrase
+				Json::Value::ArrayIndex size = val.size();
+
+				for (int i=0;i<size;i++){
+					Json::Value phraseValue = phraseValues.get(i, nullValue);
+
+					//Again, sanity check, this should always be true
+					if (phraseValue.type() != nullValue.type()){
+						Phrase phrase(phraseValue.asString(), behaviorVector);
+
+						phraseVector.push_back(phrase);
+					}
 				}
 			}
 

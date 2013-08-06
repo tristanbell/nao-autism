@@ -13,14 +13,11 @@
 #define TIMEOUT_SETTING_KEY "Timeout"
 #define MAX_PROMPT_KEY "Maxiumum prompts"
 
-#define BEHAVIOR_LIST_KEY "Available behaviors"
 #define REWARD_BEHAVIOR_LIST_KEY "Available reward behaviors"
 
 #define BEHAVIOR_NAME_KEY "Behavior names"
 #define BEHAVIOR_ACTUAL_KEY "Actual name"
 #define BEHAVIOR_CLASSIFICATION_KEY "Classification"
-
-#define PHRASE_KEY "Available phrases"
 
 #define KINECT_PROMPT_KEY "Kinect tracking prompt"
 #define POSITIVE_KEY "Positive phrases"
@@ -32,6 +29,7 @@
 #define CORRECT_ANSWER_KEY "Correct answer phrases"
 #define PROMPT_KEY "Prompts"
 #define INCORRECT_ANSWER_KEY "Incorrect answer phrases"
+#define CONTINUE_GAME_QUESTION_KEY "Continue playing question"
 #define FINISH_KEY "Finish"
 
 #define GUESS_GAME_KEY "Guess game"
@@ -41,5 +39,7 @@
 #define MIMIC_EMOTION_KEY "Say emotion"
 #define MIMIC_PROMPT_FOLLOW_KEY "Prompt to follow"
 
+#define PHRASE_KEY "Phrases"
+#define BEHAVIOR_KEY "Behaviors"
 
 #endif /* KEYS_H_ */

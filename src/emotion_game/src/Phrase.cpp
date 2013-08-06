@@ -3,7 +3,21 @@
 #include <iostream>
 #include <sstream>
 
-Phrase::Phrase(std::string phrase) : _phraseParts()
+#include <cstdlib>
+
+Phrase::Phrase(std::string phrase) : _phraseParts(), _behaviorNames()
+{
+	init(phrase);
+}
+
+Phrase::Phrase(std::string phrase, std::vector<std::string>& behaviorVector) : _phraseParts()
+{
+	_behaviorNames = behaviorVector;
+
+	init(phrase);
+}
+
+void Phrase::init(std::string& phrase)
 {
 	bool partFound = false;
 	int first = 0;
@@ -72,6 +86,26 @@ std::string Phrase::getPhrase(std::list<std::string> parts) const
 	}else{
 		throw new MissingPhraseException(amountOfParts(), parts.size());
 	}
+}
+
+const std::vector<std::string>& Phrase::getBehaviorNames() const
+{
+	return _behaviorNames;
+}
+
+std::string Phrase::getRandomBehaviorName() const
+{
+	int amount = getNumberOfBehaviors();
+
+	if (amount == 0)
+		return "";
+
+	return _behaviorNames[rand() % amount];
+}
+
+int Phrase::getNumberOfBehaviors() const
+{
+	return _behaviorNames.size();
 }
 
 int Phrase::amountOfParts() const

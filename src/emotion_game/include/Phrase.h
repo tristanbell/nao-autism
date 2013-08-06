@@ -10,6 +10,7 @@
 
 #include <string>
 #include <list>
+#include <vector>
 
 #define PHRASE_PART_DELIM '%'
 #define PHRASE_PART_DELIM_STR "%"
@@ -19,6 +20,7 @@ class Phrase
 
 public:
 	Phrase(std::string phrase);
+	Phrase(std::string phrase, std::vector<std::string>& behaviorVector);
 
 	/**
 	 * Returns the phrase currently being stored. If there are parts that must be filled then
@@ -40,6 +42,12 @@ public:
 	 */
 	std::string getPhrase(std::list<std::string> parts) const;
 
+	const std::vector<std::string>& getBehaviorNames() const;
+
+	std::string getRandomBehaviorName() const;
+
+	int getNumberOfBehaviors() const;
+
 	/**
 	 * Returns the amount of phrase parts required.
 	 */
@@ -55,6 +63,9 @@ public:
 
 private:
 	std::list<std::string> _phraseParts;
+	std::vector<std::string> _behaviorNames;
+
+	void init(std::string& phrase);
 
 };
 

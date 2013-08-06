@@ -1,5 +1,41 @@
 #include <Game.h>
 
+void Game::introduction(void)
+{
+	//Perform start and instruction phrases/actions, etc
+	std::vector<Phrase> phraseVector;
+	if (getGameSettings().getPhraseVector(START_KEY, phraseVector))
+		sayAny(phraseVector);
+
+	if (getGameSettings().getPhraseVector(INSTRUCTION_KEY, phraseVector))
+		sayAny(phraseVector);
+
+	_currentState = PERFORM_EMOTION;
+}
+
+void Game::performEmotion(void)
+{
+	const std::vector<Behavior>& behaviorVector = _settings.getBehaviorVector();
+
+	//Find a new random behavior to perform
+	int index = 0;
+	while (true){
+		index = rand() % behaviorVector.size();
+		const Behavior& ref = behaviorVector[index];
+
+		if (_performedBehavior == NULL || ref.getActualName() != _performedBehavior->getActualName())
+			break;
+	}
+
+	const Behavior& ref = behaviorVector[index];
+	_naoControl.perform(ref.getName());
+
+	if (_performedBehavior != NULL)
+		delete _performedBehavior;
+
+	_performedBehavior = new Behavior(ref);
+}
+
 void Game::sayRandParts(const Phrase& phrase, std::list<std::string> parts)
 {
 	int numParts = phrase.amountOfParts();

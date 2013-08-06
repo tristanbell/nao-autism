@@ -24,18 +24,18 @@ void MimicGame::startGame(void) {
 
 void MimicGame::perform(void) {
 	switch (_currentState) {
-		case INTRODUCTION:{
+		case INTRODUCTION: {
 			introduction();
 			break;
 		}
 
-		case PERFORM_EMOTION:{
+		case PERFORM_EMOTION: {
 			performEmotion();
 			_currentState = PROMPT_MIMIC;
 			break;
 		}
 
-		case PROMPT_MIMIC:{
+		case PROMPT_MIMIC: {
 			std::vector<Phrase> questionVector;
 
 			std::list<std::string> parts;
@@ -49,7 +49,7 @@ void MimicGame::perform(void) {
 			break;
 		}
 
-		case WAITING_MIMIC:{
+		case WAITING_MIMIC: {
 			int desiredClassification = _performedBehavior->getClassification();
 
 			if (_currentPoseClassification == desiredClassification) {
@@ -58,15 +58,17 @@ void MimicGame::perform(void) {
 				_currentState = WAITING_ANSWER_CONTINUE;
 			}
 
-			break;
-		}
-
-		case WAITING_ANSWER_CONTINUE:{
+			// Include a timeout for incorrect poses
 
 			break;
 		}
 
-		default:{
+		case WAITING_ANSWER_CONTINUE: {
+
+			break;
+		}
+
+		default: {
 			break;
 		}
 	}

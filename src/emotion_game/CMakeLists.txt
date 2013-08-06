@@ -58,3 +58,6 @@ add_dependencies(start_game nao_msgs_generate_msg_cpp)
 
 add_executable(gen_json ${gen_json_SRCS} ${gen_json_HDRS})
 target_link_libraries(gen_json ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(mimicker src/NaoMimicker.cpp)
+target_link_libraries(mimicker ${catkin_LIBRARIES})

@@ -37,6 +37,8 @@ public:
 	bool isDone;
 
 protected:
+	static const Phrase NULL_PHRASE;
+
 	//State information related variables/structures
 	enum State
 	{
@@ -44,6 +46,7 @@ protected:
 		PERFORM_EMOTION,
 		ASK_QUESTION,
 		WAITING_ANSWER_QUESTION,
+		ASK_QUESTION_CONTINUE,
 		WAITING_ANSWER_CONTINUE,
 		PROMPT_MIMIC,
 		WAITING_MIMIC
@@ -59,15 +62,18 @@ protected:
 	void introduction(void);
 	void performEmotion(void);
 
-	void say(const Phrase& phrase);
-	void say(const Phrase& phrase, const std::list<std::string> parts);
-	void sayRandParts(const Phrase& phrase, std::list<std::string> parts);
-	void sayRandParts(const Phrase& phrase, const std::string& required, std::list<std::string> parts);
+	bool startSpeechRecognition();
+	bool stopSpeechRecognition();
 
-	void sayAny(const std::vector<Phrase>&);
-	void sayAny(const std::vector<Phrase>& phraseVector, const std::list<std::string>& parts);
-	void sayAnyRandParts(const std::vector<Phrase>& phraseVector, const std::list<std::string>& parts);
-	void sayAnyRandParts(const std::vector<Phrase>& phraseVector, const std::string& required, const std::list<std::string>& parts);
+	const Phrase& say(const Phrase& phrase);
+	const Phrase& say(const Phrase& phrase, const std::list<std::string> parts);
+	const Phrase& sayRandParts(const Phrase& phrase, std::list<std::string> parts);
+	const Phrase& sayRandParts(const Phrase& phrase, const std::string& required, std::list<std::string> parts);
+
+	const Phrase& sayAny(const std::vector<Phrase>&);
+	const Phrase& sayAny(const std::vector<Phrase>& phraseVector, const std::list<std::string>& parts);
+	const Phrase& sayAnyRandParts(const std::vector<Phrase>& phraseVector, const std::list<std::string>& parts);
+	const Phrase& sayAnyRandParts(const std::vector<Phrase>& phraseVector, const std::string& required, const std::list<std::string>& parts);
 };
 
 

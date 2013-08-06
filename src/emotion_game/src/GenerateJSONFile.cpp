@@ -52,7 +52,7 @@
 #define GUESS_CORRECT_ANSWER_1 "Well done, you guessed the robot was %"
 #define GUESS_PROMPT_ANSWER_1 "Try again"
 #define GUESS_INCORRECT_ANSWER_1 "Lets try another emotion"
-#define GUESS_CONTINUE_QUESTION_1 "Do you want to continue playing the guessing game?"
+#define GUESS_CONTINUE_QUESTION_1 "Shall we play the guessing game again?"
 #define GUESS_FINISH_PHRASE "Guess the emotion is finished"
 
 #define MIMIC_INTRODUCTION_PHRASE "Copy the robot"
@@ -62,7 +62,7 @@
 #define MIMIC_CORRECT_PHRASE "Well done"
 #define MIMIC_PROMPT_PHRASE "Try again"
 #define MIMIC_INCORRECT_PHRASE "Better luck next time"
-#define MIMIC_CONTINUE_QUESTION_1 "Do you want to continue playing the mimic game?"
+#define MIMIC_CONTINUE_QUESTION_1 "Shall we play the mimic game again?"
 #define MIMIC_FINISH_PHRASE "Copy the robot is finished."
 
 #define QUESTION_PHRASE_BEHAVIOR_1 "prompt_1"
@@ -291,7 +291,7 @@ Json::Value generateGuessGamePhrases()
 
 	Json::Value& continueGameQuestionPhrase = val[CONTINUE_GAME_QUESTION_KEY];
 	Json::Value& continueGameQuestionPhrases = continueGameQuestionPhrase[PHRASE_KEY];
-	continueGameQuestionPhrases.append(MIMIC_CONTINUE_QUESTION_1);
+	continueGameQuestionPhrases.append(GUESS_CONTINUE_QUESTION_1);
 	Json::Value& continueGameQuestionBehavior = continueGameQuestionPhrase[BEHAVIOR_KEY];
 	continueGameQuestionBehavior.append(QUESTION_PHRASE_BEHAVIOR_1);
 
@@ -346,7 +346,7 @@ Json::Value generateMimicGamePhrases()
 
 	Json::Value& continueGameQuestionPhrase = val[CONTINUE_GAME_QUESTION_KEY];
 	Json::Value& continueGameQuestionPhrases = continueGameQuestionPhrase[PHRASE_KEY];
-	continueGameQuestionPhrases.append(GUESS_CONTINUE_QUESTION_1);
+	continueGameQuestionPhrases.append(MIMIC_CONTINUE_QUESTION_1);
 	Json::Value& continueGameQuestionBehavior = continueGameQuestionPhrase[BEHAVIOR_KEY];
 	continueGameQuestionBehavior.append(QUESTION_PHRASE_BEHAVIOR_1);
 

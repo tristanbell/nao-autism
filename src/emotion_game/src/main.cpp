@@ -30,6 +30,8 @@
 #include <map>
 #include <list>
 
+#include <sstream>
+
 #define VOCABULARY_KEY "nao_speech/vocabulary"
 
 #define NODE_NAME "emotion_game"
@@ -39,7 +41,8 @@
 
 bool tfReady;
 
-void startSpeechRecognition();
+void initSpeechRecognition(std::vector<std::string>& vocabVector);
+std::string generateXMLRPCArray(std::vector<std::string> vector);
 
 bool checkRunningNodes(std::vector<std::string>&);
 void checkTfTransforms();
@@ -155,6 +158,20 @@ int main(int argc, char** argv)
 
 		ROS_INFO("JSON data loaded, creating game objects.");
 
+		//Create vocab vector
+		std::vector<std::string> vocabularyVector;
+		vocabularyVector.push_back("yes");
+		vocabularyVector.push_back("no");
+
+		for (int i=0;i<allBehaviorList.size();i++){
+			Behavior& current = allBehaviorList[i];
+
+			vocabularyVector.push_back(current.getActualName());
+		}
+
+		//Now everything is loaded, perform pre-game tests
+		initSpeechRecognition(vocabularyVector);
+
 		//Create settings and instances of games
 		GameSettings guessGameSettings;
 
@@ -224,38 +241,42 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-void startSpeechRecognition()
+void initSpeechRecognition(std::vector<std::string>& vocabVector)
 {
 	ros::NodeHandle nh;
 
-	while (!nh.ok());
-
-	std::cout << "Sending parameters for speech recognition." << std::endl;
+	std::cout << "Sending parameters for speech recognition.\n";
 
 	//Set vocabulary parameter
 	int offset = 0;
-	XmlRpc::XmlRpcValue val("<value><array><data><value><string>hello</string></value><value><string>bye</string></value></data></array></value>", &offset);
+	std::string behaviorStr = generateXMLRPCArray(vocabVector);
+	XmlRpc::XmlRpcValue val(behaviorStr, &offset);
 	nh.setParam(VOCABULARY_KEY, val);
 
-	std::cout << "XML: " << (val.getType() == XmlRpc::XmlRpcValue::TypeInvalid) << std::endl;
-	std::cout << val.toXml() << std::endl;
-
+	//Reconfigure the nao_speech node
 	ros::ServiceClient client = nh.serviceClient<std_srvs::Empty>("nao_speech/reconfigure");
 	std_srvs::Empty emptySrv;
 
-	if (client.exists())
-		std::cout << "Valid service." << "\n";
-
 	client.call(emptySrv);
 
-	client = nh.serviceClient<std_srvs::Empty>("nao_speech/start_recognition");
+	std::cout << "Speech recognition has been successfully configured.\n";
+}
 
-	if (client.exists())
-		std::cout << "Valid service." << "\n";
+std::string generateXMLRPCArray(std::vector<std::string> vector)
+{
+	std::ostringstream ss;
 
-	client.call(emptySrv);
+	ss << "<value><array><data>";
 
-	std::cout << "Speech recognition started." << std::endl;
+	for (int i=0;i<vector.size();i++){
+		std::string& current = vector[i];
+
+		ss << "<value><string>" << current << "</string></value>";
+	}
+
+	ss << "</value></array></data>";
+
+	return ss.str();
 }
 
 void checkTfTransforms(){

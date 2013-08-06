@@ -51,7 +51,13 @@ void GuessGame::perform(void) {
 		if (_performedEmotion){
 			std::vector<Phrase> phraseVector;
 			if (getGameSettings().getPhraseVector(GUESS_NEXT_KEY, phraseVector)){
-				sayAny(phraseVector);
+				const Phrase& phrase = sayAny(phraseVector);
+
+				if (phrase.getNumberOfBehaviors() != 0){
+					std::string behavior = phrase.getRandomBehaviorName();
+
+					_naoControl.perform(behavior);
+				}
 			}
 		}else{
 			_performedEmotion = true;
@@ -75,10 +81,18 @@ void GuessGame::perform(void) {
 				behaviorNames.push_back(current);
 			}
 		}
+		sleep(_settings.getWait());
 
 		std::vector<Phrase> questionVector;
-		if (_settings.getPhraseVector(QUESTION_KEY, questionVector))
-			sayAnyRandParts(questionVector, _performedBehavior->getActualName(), behaviorNames);
+		if (_settings.getPhraseVector(QUESTION_KEY, questionVector)){
+			const Phrase& phrase = sayAnyRandParts(questionVector, _performedBehavior->getActualName(), behaviorNames);
+
+			if (phrase.getNumberOfBehaviors() != 0){
+				std::string behavior = phrase.getRandomBehaviorName();
+
+				_naoControl.perform(behavior);
+			}
+		}
 
 		_currentState = WAITING_ANSWER_QUESTION;
 
@@ -86,6 +100,7 @@ void GuessGame::perform(void) {
 		//_recognizedWords.push_back(std::pair<std::string, float>(_performedBehavior->getActualName(), 0));
 
 		//Set the start time for waiting (used to calculate timeouts)
+		startSpeechRecognition();
 		time(&_startWaitTime);
 
 		break;
@@ -104,17 +119,21 @@ void GuessGame::perform(void) {
 				parts.push_back(_performedBehavior->getActualName());
 
 				std::vector<Phrase> phraseVector;
-				if (_settings.getPhraseVector(CORRECT_ANSWER_KEY, phraseVector))
-					sayAny(phraseVector, parts);
+				if (_settings.getPhraseVector(CORRECT_ANSWER_KEY, phraseVector)){
+					const Phrase& phrase = sayAny(phraseVector, parts);
+
+					if (phrase.getNumberOfBehaviors() != 0){
+						std::string behavior = phrase.getRandomBehaviorName();
+
+						_naoControl.perform(behavior);
+					}
+				}
+				sleep(_settings.getWait());
 
 				_recognizedWords.clear();
 
 				//We shall ask the child here if they wish to continue with the current gamme
-				_currentState = WAITING_ANSWER_CONTINUE;
-
-				//for now, we shall go to the next emotion
-				//_currentState = PERFORM_EMOTION;
-				//_recognizedWords.clear();
+				_currentState = ASK_QUESTION_CONTINUE;
 
 				_timesPrompted = 0;
 
@@ -141,10 +160,19 @@ void GuessGame::perform(void) {
 
 				//Alert child
 				std::vector<Phrase> phraseVector;
-				if (_settings.getPhraseVector(INCORRECT_ANSWER_KEY, phraseVector))
-					sayAny(phraseVector, parts);
+				if (_settings.getPhraseVector(INCORRECT_ANSWER_KEY, phraseVector)){
+					const Phrase& phrase = sayAny(phraseVector, parts);
+
+					if (phrase.getNumberOfBehaviors() != 0){
+						std::string behavior = phrase.getRandomBehaviorName();
+
+						_naoControl.perform(behavior);
+					}
+				}
+				sleep(_settings.getWait());
 
 				_currentState = PERFORM_EMOTION;
+				stopSpeechRecognition();
 
 				_recognizedWords.clear();
 				_timesPrompted = 0;
@@ -152,13 +180,38 @@ void GuessGame::perform(void) {
 				break;
 			}else{
 				std::vector<Phrase> phraseVector;
-				if (_settings.getPhraseVector(PROMPT_KEY, phraseVector))
-					sayAny(phraseVector);
+				if (_settings.getPhraseVector(PROMPT_KEY, phraseVector)){
+					const Phrase& phrase = sayAny(phraseVector);
+
+					if (phrase.getNumberOfBehaviors() != 0){
+						std::string behavior = phrase.getRandomBehaviorName();
+
+						_naoControl.perform(behavior);
+					}
+				}
+				sleep(_settings.getWait());
 
 				_currentState = ASK_QUESTION;
 			}
 		}
 
+		break;
+	}
+
+	case ASK_QUESTION_CONTINUE:{
+		std::vector<Phrase> phrases;
+		if (_settings.getPhraseVector(CONTINUE_GAME_QUESTION_KEY, phrases)){
+			const Phrase& current = sayAny(phrases);
+
+			if (current.getNumberOfBehaviors() == 0){
+				std::string behavior = current.getRandomBehaviorName();
+
+				_naoControl.perform(behavior);
+			}
+		}
+		sleep(_settings.getWait());
+
+		_currentState = WAITING_ANSWER_CONTINUE;
 		break;
 	}
 
@@ -171,15 +224,16 @@ void GuessGame::perform(void) {
 
 			if (pair.first == "yes" && pair.second >= confidenceThreshold){
 				_currentState = PERFORM_EMOTION;
+				stopSpeechRecognition();
 
 				_recognizedWords.clear();
-				break;
+				return;
 			}else if (pair.first == "no" && pair.second >= confidenceThreshold){
 				isDone = true;
+				stopSpeechRecognition();
 
 				_recognizedWords.clear();
-
-				break;
+				return;
 			}
 
 			it++;

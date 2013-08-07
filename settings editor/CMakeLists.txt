@@ -17,6 +17,7 @@ set(settings_editor_SOURCES
 	src/TextInputDialog.cpp
 	src/PhrasesWidget.cpp
 	src/Model.cpp
+	src/Controller.cpp
 	src/jsoncpp.cpp
 )
 
@@ -30,7 +31,8 @@ set(settings_editor_HEADERS
 	include/AddBehaviorDialog.h
 	include/TextInputDialog.h
 	include/PhrasesWidget.h
-	include/PhraseGroup.h
+	include/PhraseGroupData.h
+	include/BehaviorData.h
 	include/Controller.h
 	include/Model.h
 	include/Keys.h

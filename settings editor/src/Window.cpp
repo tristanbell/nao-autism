@@ -2,7 +2,7 @@
 
 #include <QGridLayout>
 
-void Window::init()
+void Window::init(Model* model)
 {
 	setWindowTitle(WINDOW_TITLE);
 	setVisible(true);
@@ -28,4 +28,8 @@ void Window::init()
 
 	_mimicGameTab = new MimicGameTab;
 	_tabs->addTab(_mimicGameTab, MimicGameTab::TAB_NAME);
+
+	//Connect required slots to model signals
+	QObject::connect(model, SIGNAL(generalPhraseGroupLoaded(std::map<QString, PhraseGroupData>&)),
+			_phraseTab, SLOT(onPhraseGroupLoaded(std::map<QString, PhraseGroupData>&)));
 }

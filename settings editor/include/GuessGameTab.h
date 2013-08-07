@@ -11,6 +11,8 @@
 #include <QTabWidget>
 #include <QString>
 
+#include <PhrasesWidget.h>
+
 class GuessGameTab : public QTabWidget
 {
 
@@ -23,6 +25,8 @@ public:
 	}
 
 private:
+	PhrasesWidget* _phrasesWidget;
+
 	void init();
 
 };

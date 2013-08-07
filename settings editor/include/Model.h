@@ -8,10 +8,35 @@
 #ifndef MODEL_H_
 #define MODEL_H_
 
-class Model
+#include <json/json.h>
+#include <PhraseGroup.h>
+
+#include <QObject>
+#include <QString>
+#include <map>
+
+class Model : public QObject
 {
 
+	Q_OBJECT
 
+public:
+	Model(){ }
+
+	void setData(Json::Value& doc);
+
+private:
+	Json::Value docRoot;
+
+	void update();
+
+signals:
+	void behaviorsCleared();
+	void generalPhrasesCleared();
+	void guessGamePhrasesCleared();
+	void mimicGamePhrasesCleared();
+
+	void generalPhraseGroupLoaded(std::map<QString, PhraseGroupData>&);
 
 };
 

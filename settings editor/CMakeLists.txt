@@ -14,6 +14,10 @@ set(settings_editor_SOURCES
 	src/GuessGameTab.cpp
 	src/MimicGameTab.cpp	
 	src/AddBehaviorDialog.cpp
+	src/TextInputDialog.cpp
+	src/PhrasesWidget.cpp
+	src/Model.cpp
+	src/jsoncpp.cpp
 )
 
 set(settings_editor_HEADERS
@@ -24,6 +28,13 @@ set(settings_editor_HEADERS
 	include/GuessGameTab.h
 	include/MimicGameTab.h
 	include/AddBehaviorDialog.h
+	include/TextInputDialog.h
+	include/PhrasesWidget.h
+	include/PhraseGroup.h
+	include/Controller.h
+	include/Model.h
+	include/Keys.h
+	include/json/json.h
 )
 
 include_directories(

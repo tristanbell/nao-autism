@@ -13,6 +13,7 @@
 #include <PhraseTab.h>
 #include <GuessGameTab.h>
 #include <MimicGameTab.h>
+#include <Model.h>
 
 #include <QWidget>
 #include <QTabWidget>
@@ -23,9 +24,9 @@ class Window : public QWidget
 {
 
 public:
-	Window() : QWidget()
+	Window(Model* model) : QWidget()
 	{
-		init();
+		init(model);
 	}
 
 private:
@@ -37,7 +38,7 @@ private:
 	GuessGameTab* _guessGameTab;
 	MimicGameTab* _mimicGameTab;
 
-	void init();
+	void init(Model* model);
 
 };
 

@@ -14,9 +14,12 @@
 #include <GuessGameTab.h>
 #include <MimicGameTab.h>
 #include <Model.h>
+#include <Controller.h>
 
 #include <QWidget>
 #include <QTabWidget>
+
+#include <boost/shared_ptr.hpp>
 
 #define WINDOW_TITLE "Settings editor"
 
@@ -24,9 +27,9 @@ class Window : public QWidget
 {
 
 public:
-	Window(Model* model) : QWidget()
+	Window(boost::shared_ptr<Controller> controller, boost::shared_ptr<Model> model) : QWidget()
 	{
-		init(model);
+		init(controller, model);
 	}
 
 private:
@@ -38,7 +41,7 @@ private:
 	GuessGameTab* _guessGameTab;
 	MimicGameTab* _mimicGameTab;
 
-	void init(Model* model);
+	void init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Model> model);
 
 };
 

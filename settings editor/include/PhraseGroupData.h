@@ -8,13 +8,13 @@
 #ifndef PHRASE_H_
 #define PHRASE_H_
 
-#include <QString>
+#include <string>
 #include <list>
 
 struct PhraseGroupData
 {
-	std::list<QString> phraseVector;
-	std::list<QString> behaviorVector;
+	std::list<std::string> phraseVector;
+	std::list<std::string> behaviorVector;
 };
 
 

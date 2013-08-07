@@ -2,7 +2,7 @@
 
 #include <QGridLayout>
 
-void Window::init(Model* model)
+void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Model> model)
 {
 	setWindowTitle(WINDOW_TITLE);
 	setVisible(true);
@@ -20,7 +20,7 @@ void Window::init(Model* model)
 	_behaviorTab = new BehaviorTab;
 	_tabs->addTab(_behaviorTab, BehaviorTab::TAB_NAME);
 
-	_phraseTab = new PhraseTab;
+	_phraseTab = new PhraseTab(controller);
 	_tabs->addTab(_phraseTab, PhraseTab::TAB_NAME);
 
 	_guessGameTab = new GuessGameTab;
@@ -30,6 +30,14 @@ void Window::init(Model* model)
 	_tabs->addTab(_mimicGameTab, MimicGameTab::TAB_NAME);
 
 	//Connect required slots to model signals
-	QObject::connect(model, SIGNAL(generalPhraseGroupLoaded(std::map<QString, PhraseGroupData>&)),
-			_phraseTab, SLOT(onPhraseGroupLoaded(std::map<QString, PhraseGroupData>&)));
+
+	//First connect phrase map load signals
+	QObject::connect(model.get(), SIGNAL(generalPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)),
+			_phraseTab, SLOT(onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)));
+
+	QObject::connect(model.get(), SIGNAL(guessGamePhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)),
+			_guessGameTab, SLOT(onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)));
+
+	QObject::connect(model.get(), SIGNAL(mimicGamePhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)),
+			_mimicGameTab, SLOT(onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)));
 }

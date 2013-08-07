@@ -10,9 +10,13 @@
 
 #include <AddBehaviorDialog.h>
 #include <PhrasesWidget.h>
+#include <Controller.h>
 
 #include <QTabWidget>
 #include <QString>
+
+#include <string>
+#include <boost/shared_ptr.hpp>
 
 class PhraseTab : public QTabWidget
 {
@@ -22,15 +26,19 @@ class PhraseTab : public QTabWidget
 public:
 	static const QString TAB_NAME;
 
-	PhraseTab() : QTabWidget()
+	PhraseTab(boost::shared_ptr<Controller> controller) : QTabWidget(),
+														  _controllerPtr(controller)
 	{
 		init();
 	}
 
 public slots:
-	void onPhraseGroupLoaded(std::map<QString, PhraseGroupData>&);
+	void onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&);
+	void onPhraseGroupBoxIndexChanged(const QString& text);
 
 private:
+	boost::shared_ptr<Controller> _controllerPtr;
+
 	PhrasesWidget* _phrasesWidget;
 
 	void init();

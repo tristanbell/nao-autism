@@ -77,6 +77,9 @@ void PhrasesWidget::init()
 	_addBehaviorDialog = new TextInputDialog(behaviorDialogTitle, behaviorDialogLabel);
 
 	//Connect signals to required slots
+	QObject::connect(_phraseGroupBox, SIGNAL(currentIndexChanged(const QString&)),
+			this, SLOT(phraseGroupBoxIndexChanged(const QString&)));
+
 	QObject::connect(_addPhraseBtn, SIGNAL(clicked()),
 			this, SLOT(addPhraseButtonClicked()));
 	QObject::connect(_removePhraseBtn, SIGNAL(clicked()),
@@ -88,28 +91,59 @@ void PhrasesWidget::init()
 			this, SLOT(removeBehaviorButtonClicked()));
 }
 
-void PhrasesWidget::setPhraseGroup(std::map<QString, PhraseGroupData>& phraseGroups)
+void PhrasesWidget::setPhraseGroup(std::map<std::string, PhraseGroupData>& phraseGroups)
 {
-	_phraseGroups = phraseGroups;
+	//Clear old phrases
 	_phraseGroupBox->clear();
 
-	std::map<QString, PhraseGroupData>::iterator it = phraseGroups.begin();
+	//Insert new phrases into box
+	std::map<std::string, PhraseGroupData>::iterator it = phraseGroups.begin();
 	while (it != phraseGroups.end()){
-		std::pair<QString, PhraseGroupData> current = *it;
+		std::pair<std::string, PhraseGroupData> pair = *it;
 
-		_phraseGroupBox->addItem(current.first);
+		QString qName = QString::fromStdString(pair.first);
+		_phraseGroupBox->addItem(qName);
 
 		it++;
 	}
-//	_phraseGroups = phraseGroups;
-//	std::list<PhraseGroup>::iterator it = phraseGroups.begin();
-//	while (it != phraseGroups.end()){
-//		PhraseGroup current = *it;
-//
-//		_phraseGroupBox->addItem(current.key);
-//
-//		it++;
-//	}
+}
+
+void PhrasesWidget::setCurrentPhraseGroup(const PhraseGroupData& data)
+{
+	loadIntoLists(data);
+}
+
+void PhrasesWidget::loadIntoLists(const PhraseGroupData& data)
+{
+	_phrasesList->clear();
+	_behaviorList->clear();
+
+	//Load phrases
+	std::list<std::string>::const_iterator it = data.phraseVector.begin();
+	while (it != data.phraseVector.end()){
+		const std::string& current = *it;
+
+		QString qString = QString::fromStdString(current);
+		_phrasesList->addItem(qString);
+
+		it++;
+	}
+
+	//Load behaviors
+	it = data.behaviorVector.begin();
+	while (it != data.behaviorVector.end()){
+		const std::string& current = *it;
+
+		QString qString = QString::fromStdString(current);
+		_behaviorList->addItem(qString);
+
+		it++;
+	}
+}
+
+void PhrasesWidget::phraseGroupBoxIndexChanged(const QString& text)
+{
+	emit currentPhraseGroupIndexChanged(text);
 }
 
 void PhrasesWidget::addPhraseButtonClicked()

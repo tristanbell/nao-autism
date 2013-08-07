@@ -7,6 +7,8 @@
 #include <json/json.h>
 #include <fstream>
 
+#include <boost/shared_ptr.hpp>
+
 Json::Value loadJson();
 
 int main(int argc, char** argv)
@@ -15,11 +17,14 @@ int main(int argc, char** argv)
 	app.setStyle(new QPlastiqueStyle);
 
 	Json::Value json = loadJson();
-	Model* model = new Model;
+	//Controller* controller = new Controller(model);
 
-	Window window(model);
+	boost::shared_ptr<Model> modelPtr(new Model);
+	boost::shared_ptr<Controller> controllerPtr(new Controller(modelPtr));
 
-	model->setData(json);
+	Window window(controllerPtr, modelPtr);
+
+	modelPtr.get()->loadData(json);
 
 	return app.exec();
 }

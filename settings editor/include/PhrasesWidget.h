@@ -10,7 +10,7 @@
 
 #include <AddBehaviorDialog.h>
 #include <TextInputDialog.h>
-#include <PhraseGroup.h>
+#include <PhraseGroupData.h>
 
 #include <QTabWidget>
 #include <QString>
@@ -18,6 +18,7 @@
 #include <QListWidget>
 #include <QPushButton>
 #include <list>
+#include <string>
 
 #include <QWidget>
 
@@ -32,11 +33,13 @@ public:
 		init();
 	}
 
-	void setPhraseGroup(std::map<QString, PhraseGroupData>&);
+	void setPhraseGroup(std::map<std::string, PhraseGroupData>&);
+	void setCurrentPhraseGroup(const PhraseGroupData&);
+
+public slots:
+	void phraseGroupBoxIndexChanged(const QString& text);
 
 private:
-	std::map<QString, PhraseGroupData> _phraseGroups;
-
 //	AddBehaviorDialog* _addBehaviorDialog;
 	TextInputDialog* _addPhraseDialog;
 	TextInputDialog* _addBehaviorDialog;
@@ -53,12 +56,18 @@ private:
 
 	void init();
 
+	void loadIntoLists(const PhraseGroupData&);
+
 private slots:
 	void addPhraseButtonClicked();
 	void removePhraseButtonClicked();
 
 	void addBehaviorButtonClicked();
 	void removeBehaviorButtonClicked();
+
+signals:
+	void currentPhraseGroupIndexChanged(const QString& text);
+
 };
 
 #endif /* PHRASESWIDGET_H_ */

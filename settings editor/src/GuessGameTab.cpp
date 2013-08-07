@@ -12,3 +12,8 @@ void GuessGameTab::init()
 	_phrasesWidget = new PhrasesWidget;
 	layout->addWidget(_phrasesWidget, 0, 0);
 }
+
+void GuessGameTab::onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>& phraseGroup)
+{
+	_phrasesWidget->setPhraseGroup(phraseGroup);
+}

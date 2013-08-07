@@ -10,17 +10,28 @@
 
 #include <Model.h>
 
+#include <boost/shared_ptr.hpp>
+
 class Controller
 {
 
 public:
-	Controller(Model* model)
+	Controller(boost::shared_ptr<Model> model) : _modelPtr(model)
 	{
-		this->model = model;
+
 	}
 
+	PhraseGroupData& getGeneralPhraseGroup(std::string key);
+	const PhraseGroupData& getGeneralPhraseGroup(std::string key) const;
+
+	PhraseGroupData& getGuessGamePhraseGroup(std::string key);
+	const PhraseGroupData& getGuessGamePhraseGroup(std::string key) const;
+
+	PhraseGroupData& getMimicGamePhraseGroup(std::string key);
+	const PhraseGroupData& getMimicGamePhraseGroup(std::string key) const;
+
 private:
-	Model* model;
+	boost::shared_ptr<Model> _modelPtr;
 
 };
 

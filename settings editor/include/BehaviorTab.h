@@ -32,7 +32,8 @@ public:
 		init();
 	}
 
-	virtual ~BehaviorTab(){ }
+public slots:
+	void onCreateBehaviorBtnClicked();
 
 private:
 	QComboBox* _behaviorNamesBox;
@@ -44,9 +45,6 @@ private:
 	AddBehaviorDialog* _addBehaviorDialog;
 
 	void init();
-
-public slots:
-	void onCreateBehaviorBtnClicked();
 
 };
 

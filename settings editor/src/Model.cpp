@@ -2,30 +2,87 @@
 
 #include <Keys.h>
 
-std::map<QString, PhraseGroupData> loadPhraseGroups(Json::Value& root);
+std::map<std::string, PhraseGroupData> loadPhraseGroups(Json::Value& root);
+std::list<BehaviorData> loadBehaviorData(Json::Value& root);
+std::string loadBehaviorActualName(Json::Value& root);
+std::list<std::string> loadBehaviorNames(Json::Value& root);
+int loadClassification(Json::Value& root);
 
-void Model::setData(Json::Value& doc){
-	docRoot = doc;
+PhraseGroupData& Model::getGeneralPhraseGroup(std::string key)
+{
+	return _generalPhraseMap.at(key);
+}
 
+const PhraseGroupData& Model::getGeneralPhraseGroup(std::string key) const
+{
+	return _generalPhraseMap.at(key);
+}
+
+PhraseGroupData& Model::getGuessGamePhraseGroup(std::string key)
+{
+	return _guessGamePhraseMap.at(key);
+}
+
+const PhraseGroupData& Model::getGuessGamePhraseGroup(std::string key) const
+{
+	return _guessGamePhraseMap.at(key);
+}
+
+PhraseGroupData& Model::getMimicGamePhraseGroup(std::string key)
+{
+	return _mimicGamePhraseMap.at(key);
+}
+
+const PhraseGroupData& Model::getMimicGamePhraseGroup(std::string key) const
+{
+	return _mimicGamePhraseMap.at(key);
+}
+
+void Model::loadData(Json::Value& docRoot){
+	//Load general phrase map
+	Json::Value& generalPhrases = docRoot[PHRASE_KEY];
+	if (generalPhrases != Json::Value::null){
+		//Found general phrases, load them into phrase groups
+		_generalPhraseMap = loadPhraseGroups(generalPhrases);
+	}
+
+	//Load guess game phrase map
+	Json::Value& guessGamePhrases = docRoot[GUESS_GAME_KEY][PHRASE_KEY];
+	if (guessGamePhrases != Json::Value::null){
+		_guessGamePhraseMap = loadPhraseGroups(guessGamePhrases);
+	}
+
+	//Load mimic game phrase map
+	Json::Value& mimicGamePhrases = docRoot[MIMIC_GAME_KEY][PHRASE_KEY];
+	if (mimicGamePhrases != Json::Value::null){
+		_mimicGamePhraseMap = loadPhraseGroups(mimicGamePhrases);
+	}
+
+	//Load reward behaviors
+	Json::Value& rewardBehaviors = docRoot[REWARD_BEHAVIOR_LIST_KEY][BEHAVIOR_NAME_KEY];
+	if (rewardBehaviors != Json::Value::null){
+		_rewardBehaviorDataList = loadBehaviorNames(rewardBehaviors);
+	}
+
+	//Load other behaviors
+	Json::Value& otherBehaviors = docRoot[BEHAVIOR_KEY];
+	if (otherBehaviors != Json::Value::null){
+		_behaviorDataList = loadBehaviorData(otherBehaviors);
+	}
+
+	//Fire all required signals for the new data
 	update();
 }
 
 void Model::update()
 {
-	//Load general phrase group
-	std::map<QString, PhraseGroupData> generalPhraseGroup;
-
-	Json::Value generalPhrases = docRoot.get(PHRASE_KEY, Json::Value::null);
-	if (generalPhrases != Json::Value::null){
-		//Found general phrases, load them into phrase groups
-		generalPhraseGroup = loadPhraseGroups(generalPhrases);
-	}
-
-	emit generalPhraseGroupLoaded(generalPhraseGroup);
+	emit generalPhraseGroupLoaded(_generalPhraseMap);
+	emit guessGamePhraseGroupLoaded(_guessGamePhraseMap);
+	emit mimicGamePhraseGroupLoaded(_mimicGamePhraseMap);
 }
 
-std::map<QString, PhraseGroupData> loadPhraseGroups(Json::Value& root){
-	std::map<QString, PhraseGroupData> loaded;
+std::map<std::string, PhraseGroupData> loadPhraseGroups(Json::Value& root){
+	std::map<std::string, PhraseGroupData> loaded;
 
 	Json::Value::Members memberNames = root.getMemberNames();
 	for (int i=0;i<memberNames.size();i++){
@@ -33,10 +90,10 @@ std::map<QString, PhraseGroupData> loadPhraseGroups(Json::Value& root){
 
 		Json::Value current = root.get(key, Json::Value::null);
 		if (current != Json::Value::null){
-			std::list<QString> phrases;
-			std::list<QString> behaviors;
+			std::list<std::string> phrases;
+			std::list<std::string> behaviors;
 
-			Json::Value phraseArray = root.get(PHRASE_KEY, Json::Value::null);
+			Json::Value phraseArray = current.get(PHRASE_KEY, Json::Value::null);
 			if (phraseArray != Json::Value::null){
 				Json::Value::ArrayIndex size = phraseArray.size();
 
@@ -44,14 +101,12 @@ std::map<QString, PhraseGroupData> loadPhraseGroups(Json::Value& root){
 					Json::Value phraseNameVal = phraseArray.get(j, Json::Value::null);
 
 					if (phraseNameVal != Json::Value::null){
-						QString name = QString::fromStdString(phraseNameVal.asString());
-
-						phrases.push_back(name);
+						phrases.push_back(phraseNameVal.asString());
 					}
 				}
 			}
 
-			Json::Value behaviorArray = root.get(BEHAVIOR_KEY, Json::Value::null);
+			Json::Value behaviorArray = current.get(BEHAVIOR_KEY, Json::Value::null);
 			if (behaviorArray != Json::Value::null){
 				Json::Value::ArrayIndex size = behaviorArray.size();
 
@@ -59,23 +114,82 @@ std::map<QString, PhraseGroupData> loadPhraseGroups(Json::Value& root){
 					Json::Value behaviorNameVal = behaviorArray.get(j, Json::Value::null);
 
 					if (behaviorNameVal != Json::Value::null){
-						QString name = QString::fromStdString(behaviorNameVal.asString());
-
-						behaviors.push_back(name);
+						behaviors.push_back(behaviorNameVal.asString());
 					}
 				}
 			}
-
-			QString qKey = QString::fromStdString(key);
 
 			PhraseGroupData group;
 
 			group.phraseVector = phrases;
 			group.behaviorVector = behaviors;
 
-			loaded.insert(std::pair<QString, PhraseGroupData>(qKey, group));
+			loaded.insert(std::pair<std::string, PhraseGroupData>(key, group));
 		}
 	}
 
 	return loaded;
+}
+
+std::list<BehaviorData> loadBehaviorData(Json::Value& root){
+	std::list<BehaviorData> loaded;
+
+	Json::Value::ArrayIndex size = root.size();
+	for (int i=0;i<size;i++){
+		Json::Value& val = root[i];
+
+		//Sanity check
+		if (val != Json::Value::null){
+			Json::Value& actualVal = val[BEHAVIOR_ACTUAL_KEY];
+			std::string actual = loadBehaviorActualName(actualVal);
+
+			Json::Value& namesVal = val[BEHAVIOR_NAME_KEY];
+			std::list<std::string> names = loadBehaviorNames(namesVal);
+
+			Json::Value& classificationVal = val[BEHAVIOR_CLASSIFICATION_KEY];
+			int classification = loadClassification(classificationVal);
+
+			BehaviorData data;
+			data._actualName = actual;
+			data._behaviorNames = names;
+			data._classification = classification;
+
+			loaded.push_back(data);
+		}
+	}
+
+	return loaded;
+}
+
+std::string loadBehaviorActualName(Json::Value& root){
+	if (root != Json::Value::null){
+		return root.asString();
+	}
+
+	return "";
+}
+
+std::list<std::string> loadBehaviorNames(Json::Value& root){
+	std::list<std::string> loaded;
+
+	if (root != Json::Value::null){
+		Json::Value::ArrayIndex size = root.size();
+		for (int i=0;i<size;i++){
+			Json::Value& current = root[i];
+
+			if (current != Json::Value::null){
+				loaded.push_back(current.asString());
+			}
+		}
+	}
+
+	return loaded;
+}
+
+int loadClassification(Json::Value& root){
+	if (root != Json::Value::null){
+		return root.asInt();
+	}
+
+	return -1;
 }

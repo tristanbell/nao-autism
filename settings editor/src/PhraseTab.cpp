@@ -17,20 +17,18 @@ void PhraseTab::init()
 			this, SLOT(onPhraseGroupBoxIndexChanged(const QString&)));
 }
 
-void PhraseTab::onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>& group)
+void PhraseTab::onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>& group)
 {
 	_phrasesWidget->setPhraseGroup(group);
 }
 
+void PhraseTab::onPhraseGroupRetrieved(const PhraseGroupData& data)
+{
+	_phrasesWidget->setCurrentPhraseGroup(data);
+}
+
 void PhraseTab::onPhraseGroupBoxIndexChanged(const QString& text)
 {
-	Controller* cntrl = _controllerPtr.get();
-
-	//Sanity check
-	if (cntrl != NULL){
-		std::string key = text.toStdString();
-
-		const PhraseGroupData& data = cntrl->getGeneralPhraseGroup(key);
-		_phrasesWidget->setCurrentPhraseGroup(data);
-	}
+	std::string key = text.toStdString();
+	emit onPhraseGroupRequired(key);
 }

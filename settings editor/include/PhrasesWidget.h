@@ -33,7 +33,7 @@ public:
 		init();
 	}
 
-	void setPhraseGroup(std::map<std::string, PhraseGroupData>&);
+	void setPhraseGroup(const std::map<std::string, PhraseGroupData>&);
 	void setCurrentPhraseGroup(const PhraseGroupData&);
 
 public slots:

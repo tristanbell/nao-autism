@@ -2,32 +2,17 @@
 
 #include <stdexcept>
 
-PhraseGroupData& Controller::getGeneralPhraseGroup(std::string key)
+void Controller::onRequestGeneralPhraseGroup(const std::string& key)
 {
-	return _modelPtr.get()->getGeneralPhraseGroup(key);
+	_modelPtr.get()->retrieveGeneralPhraseGroup(key);
 }
 
-const PhraseGroupData& Controller::getGeneralPhraseGroup(std::string key) const
+void Controller::onRequestGuessGamePhraseGroup(const std::string& key)
 {
-	return _modelPtr.get()->getGeneralPhraseGroup(key);
+	_modelPtr.get()->retrieveGuessGamePhraseGroup(key);
 }
 
-PhraseGroupData& Controller::getGuessGamePhraseGroup(std::string key)
+void Controller::onRequestMimicGamePhraseGroup(const std::string& key)
 {
-	return _modelPtr.get()->getGuessGamePhraseGroup(key);
-}
-
-const PhraseGroupData& Controller::getGuessGamePhraseGroup(std::string key) const
-{
-	return _modelPtr.get()->getGuessGamePhraseGroup(key);
-}
-
-PhraseGroupData& Controller::getMimicGamePhraseGroup(std::string key)
-{
-	return _modelPtr.get()->getMimicGamePhraseGroup(key);
-}
-
-const PhraseGroupData& Controller::getMimicGamePhraseGroup(std::string key) const
-{
-	return _modelPtr.get()->getMimicGamePhraseGroup(key);
+	_modelPtr.get()->retrieveMimicGamePhraseGroup(key);
 }

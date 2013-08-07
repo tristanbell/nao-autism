@@ -10,25 +10,26 @@
 
 #include <Model.h>
 
+#include <QObject>
+
 #include <boost/shared_ptr.hpp>
 
-class Controller
+class Controller : public QObject
 {
 
+	Q_OBJECT
+
 public:
-	Controller(boost::shared_ptr<Model> model) : _modelPtr(model)
+	Controller(boost::shared_ptr<Model> model) : QObject(),
+												_modelPtr(model)
 	{
 
 	}
 
-	PhraseGroupData& getGeneralPhraseGroup(std::string key);
-	const PhraseGroupData& getGeneralPhraseGroup(std::string key) const;
-
-	PhraseGroupData& getGuessGamePhraseGroup(std::string key);
-	const PhraseGroupData& getGuessGamePhraseGroup(std::string key) const;
-
-	PhraseGroupData& getMimicGamePhraseGroup(std::string key);
-	const PhraseGroupData& getMimicGamePhraseGroup(std::string key) const;
+public slots:
+	void onRequestGeneralPhraseGroup(const std::string& key);
+	void onRequestGuessGamePhraseGroup(const std::string& key);
+	void onRequestMimicGamePhraseGroup(const std::string& key);
 
 private:
 	boost::shared_ptr<Model> _modelPtr;

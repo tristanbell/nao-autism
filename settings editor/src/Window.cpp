@@ -20,7 +20,7 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	_behaviorTab = new BehaviorTab;
 	_tabs->addTab(_behaviorTab, BehaviorTab::TAB_NAME);
 
-	_phraseTab = new PhraseTab(controller);
+	_phraseTab = new PhraseTab;
 	_tabs->addTab(_phraseTab, PhraseTab::TAB_NAME);
 
 	_guessGameTab = new GuessGameTab;
@@ -31,13 +31,28 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 
 	//Connect required slots to model signals
 
-	//First connect phrase map load signals
-	QObject::connect(model.get(), SIGNAL(generalPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)),
-			_phraseTab, SLOT(onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)));
+	//Connect signals and slots so phrase tab can request the controller for a new PhraseGroup
+	QObject::connect(_phraseTab, SIGNAL(onPhraseGroupRequired(const std::string&)),
+			controller.get(), SLOT(onRequestGeneralPhraseGroup(const std::string&)));
+	QObject::connect(model.get(), SIGNAL(generalPhraseGroupRetrieved(const PhraseGroupData&)),
+			_phraseTab, SLOT(onPhraseGroupRetrieved(const PhraseGroupData&)));
 
-	QObject::connect(model.get(), SIGNAL(guessGamePhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)),
-			_guessGameTab, SLOT(onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)));
+	QObject::connect(_guessGameTab, SIGNAL(onPhraseGroupRequired(const std::string&)),
+			controller.get(), SLOT(onRequestGuessGamePhraseGroup(const std::string&)));
+	QObject::connect(model.get(), SIGNAL(guessGamePhraseGroupRetrieved(const PhraseGroupData&)),
+			_guessGameTab, SLOT(onPhraseGroupRetrieved(const PhraseGroupData&)));
 
-	QObject::connect(model.get(), SIGNAL(mimicGamePhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)),
-			_mimicGameTab, SLOT(onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&)));
+	QObject::connect(_mimicGameTab, SIGNAL(onPhraseGroupRequired(const std::string&)),
+			controller.get(), SLOT(onRequestMimicGamePhraseGroup(const std::string&)));
+	QObject::connect(model.get(), SIGNAL(mimicGamePhraseGroupRetrieved(const PhraseGroupData&)),
+			_mimicGameTab, SLOT(onPhraseGroupRetrieved(const PhraseGroupData&)));
+
+	QObject::connect(model.get(), SIGNAL(generalPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)),
+			_phraseTab, SLOT(onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)));
+
+	QObject::connect(model.get(), SIGNAL(guessGamePhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)),
+			_guessGameTab, SLOT(onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)));
+
+	QObject::connect(model.get(), SIGNAL(mimicGamePhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)),
+			_mimicGameTab, SLOT(onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)));
 }

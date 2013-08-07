@@ -11,9 +11,24 @@ void GuessGameTab::init()
 
 	_phrasesWidget = new PhrasesWidget;
 	layout->addWidget(_phrasesWidget, 0, 0);
+
+	//Connect signals to the required slots
+	QObject::connect(_phrasesWidget, SIGNAL(currentPhraseGroupIndexChanged(const QString&)),
+			this, SLOT(onPhraseGroupBoxIndexChanged(const QString&)));
 }
 
-void GuessGameTab::onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>& phraseGroup)
+void GuessGameTab::onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>& phraseGroup)
 {
 	_phrasesWidget->setPhraseGroup(phraseGroup);
+}
+
+void GuessGameTab::onPhraseGroupRetrieved(const PhraseGroupData& data)
+{
+	_phrasesWidget->setCurrentPhraseGroup(data);
+}
+
+void GuessGameTab::onPhraseGroupBoxIndexChanged(const QString& text)
+{
+	std::string key = text.toStdString();
+	emit onPhraseGroupRequired(key);
 }

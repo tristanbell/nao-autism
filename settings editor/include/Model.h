@@ -25,14 +25,9 @@ class Model : public QObject
 public:
 	Model(){ }
 
-	PhraseGroupData& getGeneralPhraseGroup(std::string key);
-	const PhraseGroupData& getGeneralPhraseGroup(std::string key) const;
-
-	PhraseGroupData& getGuessGamePhraseGroup(std::string key);
-	const PhraseGroupData& getGuessGamePhraseGroup(std::string key) const;
-
-	PhraseGroupData& getMimicGamePhraseGroup(std::string key);
-	const PhraseGroupData& getMimicGamePhraseGroup(std::string key) const;
+	void retrieveGeneralPhraseGroup(const std::string& key) const;
+	void retrieveGuessGamePhraseGroup(const std::string& key) const;
+	void retrieveMimicGamePhraseGroup(const std::string& key) const;
 
 	void loadData(Json::Value& docRoot);
 
@@ -52,12 +47,16 @@ signals:
 	void guessGamePhrasesCleared();
 	void mimicGamePhrasesCleared();
 
-	void behaviorsLoaded(std::list<BehaviorData> behaviorData);
-	void rewardBehaviorsLoaded(std::list<std::string> rewardBehaviors);
+	void behaviorsLoaded(const std::list<BehaviorData> behaviorData);
+	void rewardBehaviorsLoaded(const std::list<std::string> rewardBehaviors);
 
-	void generalPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&);
-	void guessGamePhraseGroupLoaded(std::map<std::string, PhraseGroupData>&);
-	void mimicGamePhraseGroupLoaded(std::map<std::string, PhraseGroupData>&);
+	void generalPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&);
+	void guessGamePhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&);
+	void mimicGamePhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&);
+
+	void generalPhraseGroupRetrieved(const PhraseGroupData&) const;
+	void guessGamePhraseGroupRetrieved(const PhraseGroupData&) const;
+	void mimicGamePhraseGroupRetrieved(const PhraseGroupData&) const;
 
 };
 

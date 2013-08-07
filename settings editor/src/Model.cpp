@@ -1,6 +1,7 @@
 #include <Model.h>
-
 #include <Keys.h>
+
+#include <stdexcept>
 
 std::map<std::string, PhraseGroupData> loadPhraseGroups(Json::Value& root);
 std::list<BehaviorData> loadBehaviorData(Json::Value& root);
@@ -8,34 +9,31 @@ std::string loadBehaviorActualName(Json::Value& root);
 std::list<std::string> loadBehaviorNames(Json::Value& root);
 int loadClassification(Json::Value& root);
 
-PhraseGroupData& Model::getGeneralPhraseGroup(std::string key)
+void Model::retrieveGeneralPhraseGroup(const std::string& key) const
 {
-	return _generalPhraseMap.at(key);
+	try{
+		const PhraseGroupData& data = _generalPhraseMap.at(key);
+
+		emit generalPhraseGroupRetrieved(data);
+	}catch(std::out_of_range& ex){  }
 }
 
-const PhraseGroupData& Model::getGeneralPhraseGroup(std::string key) const
+void Model::retrieveGuessGamePhraseGroup(const std::string& key) const
 {
-	return _generalPhraseMap.at(key);
+	try{
+		const PhraseGroupData& data = _guessGamePhraseMap.at(key);
+
+		emit guessGamePhraseGroupRetrieved(data);
+	}catch(std::out_of_range& ex){  }
 }
 
-PhraseGroupData& Model::getGuessGamePhraseGroup(std::string key)
+void Model::retrieveMimicGamePhraseGroup(const std::string& key) const
 {
-	return _guessGamePhraseMap.at(key);
-}
+	try{
+		const PhraseGroupData& data = _mimicGamePhraseMap.at(key);
 
-const PhraseGroupData& Model::getGuessGamePhraseGroup(std::string key) const
-{
-	return _guessGamePhraseMap.at(key);
-}
-
-PhraseGroupData& Model::getMimicGamePhraseGroup(std::string key)
-{
-	return _mimicGamePhraseMap.at(key);
-}
-
-const PhraseGroupData& Model::getMimicGamePhraseGroup(std::string key) const
-{
-	return _mimicGamePhraseMap.at(key);
+		emit mimicGamePhraseGroupRetrieved(data);
+	}catch(std::out_of_range& ex){  }
 }
 
 void Model::loadData(Json::Value& docRoot){

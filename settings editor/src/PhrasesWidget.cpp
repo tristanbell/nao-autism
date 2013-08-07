@@ -91,15 +91,15 @@ void PhrasesWidget::init()
 			this, SLOT(removeBehaviorButtonClicked()));
 }
 
-void PhrasesWidget::setPhraseGroup(std::map<std::string, PhraseGroupData>& phraseGroups)
+void PhrasesWidget::setPhraseGroup(const std::map<std::string, PhraseGroupData>& phraseGroups)
 {
 	//Clear old phrases
 	_phraseGroupBox->clear();
 
 	//Insert new phrases into box
-	std::map<std::string, PhraseGroupData>::iterator it = phraseGroups.begin();
+	std::map<std::string, PhraseGroupData>::const_iterator it = phraseGroups.begin();
 	while (it != phraseGroups.end()){
-		std::pair<std::string, PhraseGroupData> pair = *it;
+		const std::pair<std::string, PhraseGroupData>& pair = *it;
 
 		QString qName = QString::fromStdString(pair.first);
 		_phraseGroupBox->addItem(qName);

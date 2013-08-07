@@ -31,12 +31,18 @@ public:
 	}
 
 public slots:
-		void onPhraseGroupLoaded(std::map<std::string, PhraseGroupData>&);
+	void onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&);
+	void onPhraseGroupBoxIndexChanged(const QString& text);
+
+	void onPhraseGroupRetrieved(const PhraseGroupData&);
 
 private:
 	PhrasesWidget* _phrasesWidget;
 
 	void init();
+
+signals:
+	void onPhraseGroupRequired(const std::string& key);
 
 };
 

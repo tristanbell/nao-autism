@@ -1,3 +1,6 @@
+## Qt4 related files
+include/moc_* # moc headers
+
 ## Build/devel/install folders
 
 build

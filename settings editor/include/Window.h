@@ -10,9 +10,7 @@
 
 #include <BaseSettingsTab.h>
 #include <BehaviorTab.h>
-#include <PhraseTab.h>
-#include <GuessGameTab.h>
-#include <MimicGameTab.h>
+#include <AllPhrasesTab.h>
 #include <Model.h>
 #include <Controller.h>
 
@@ -37,9 +35,11 @@ private:
 
 	BaseSettingsTab* _baseSettingsTab;
 	BehaviorTab* _behaviorTab;
-	PhraseTab* _phraseTab;
-	GuessGameTab* _guessGameTab;
-	MimicGameTab* _mimicGameTab;
+	AllPhrasesTab* _phrasesTab;
+
+//	PhraseTab* _phraseTab;
+//	GuessGameTab* _guessGameTab;
+//	MimicGameTab* _mimicGameTab;
 
 	void init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Model> model);
 

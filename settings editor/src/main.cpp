@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 	//Controller* controller = new Controller(model);
 
 	boost::shared_ptr<Model> modelPtr(new Model);
-	boost::shared_ptr<Controller> controllerPtr(new Controller(modelPtr));
+	boost::shared_ptr<Controller> controllerPtr(new Controller(modelPtr.get()));
 
 	Window window(controllerPtr, modelPtr);
 

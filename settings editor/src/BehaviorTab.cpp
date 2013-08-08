@@ -3,7 +3,7 @@
 #include <QGridLayout>
 #include <QPushButton>
 
-const QString BehaviorTab::TAB_NAME = "Behaviors";
+const QString BehaviorTab::TAB_NAME = "Game behaviors";
 
 void BehaviorTab::init()
 {

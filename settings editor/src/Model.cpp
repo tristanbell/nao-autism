@@ -36,6 +36,33 @@ void Model::retrieveMimicGamePhraseGroup(const std::string& key) const
 	}catch(std::out_of_range& ex){  }
 }
 
+void Model::addGeneralPhrase(std::string& key, std::string& phrase)
+{
+	try{
+		PhraseGroupData& data = _generalPhraseMap.at(key);
+
+		data.phraseVector.push_back(phrase);
+	}catch(std::out_of_range& ex){  }
+}
+
+void Model::addGuessGamePhrase(const std::string& key, std::string& phrase)
+{
+	try{
+		PhraseGroupData& data = _guessGamePhraseMap.at(key);
+
+		data.phraseVector.push_back(phrase);
+	}catch(std::out_of_range& ex){  }
+}
+
+void Model::addMimicGamePhrase(const std::string& key, std::string& phrase)
+{
+	try{
+		PhraseGroupData& data = _mimicGamePhraseMap.at(key);
+
+		data.phraseVector.push_back(phrase);
+	}catch(std::out_of_range& ex){  }
+}
+
 void Model::loadData(Json::Value& docRoot){
 	//Load general phrase map
 	Json::Value& generalPhrases = docRoot[PHRASE_KEY];

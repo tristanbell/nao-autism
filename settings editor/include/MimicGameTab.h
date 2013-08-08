@@ -17,32 +17,18 @@
 #include <map>
 #include <string>
 
-class MimicGameTab : public QTabWidget
+class MimicGameTab
 {
-
-	Q_OBJECT
 
 public:
 	static const QString TAB_NAME;
 
-	MimicGameTab() : QTabWidget()
+	MimicGameTab()
 	{
-		init();
+
 	}
 
-public slots:
-	void onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&);
-	void onPhraseGroupBoxIndexChanged(const QString& text);
-
-	void onPhraseGroupRetrieved(const PhraseGroupData&);
-
-private:
-	PhrasesWidget* _phrasesWidget;
-
-	void init();
-
-signals:
-	void onPhraseGroupRequired(const std::string& key);
+	QString getTabName() const;
 
 };
 

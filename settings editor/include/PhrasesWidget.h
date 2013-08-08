@@ -68,6 +68,9 @@ private slots:
 signals:
 	void currentPhraseGroupIndexChanged(const QString& text);
 
+	void newPhraseCreated(std::string& key, std::string& phrase);
+	void newPhraseBehaviorCreated(std::string& key, std::string behaviorName);
+
 };
 
 #endif /* PHRASESWIDGET_H_ */

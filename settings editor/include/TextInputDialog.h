@@ -16,21 +16,39 @@
 class TextInputDialog : public QDialog
 {
 
+	Q_OBJECT
+
 public:
+	enum Result{
+
+		CREATED, CLOSED, UNKNOWN
+
+	};
+
 	TextInputDialog(QString& title, QString& labelName) : QDialog()
 	{
 		init(title, labelName);
 	}
 
+	virtual int exec();
+
+	Result getResult() const;
+	QString getQInput() const;
 	std::string getInput() const;
 
 private:
+	Result _result;
+
 	QLineEdit* _lineEdit;
 
 	QPushButton* _submitBtn;
 	QPushButton* _cancelBtn;
 
 	void init(QString& title, QString& labelName);
+
+private slots:
+	void onSubmitButtonClicked();
+	void onCancelButtonClicked();
 
 };
 

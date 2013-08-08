@@ -10,7 +10,8 @@ set(settings_editor_SOURCES
 	src/Window.cpp
 	src/BaseSettingsTab.cpp
 	src/BehaviorTab.cpp
-	src/PhraseTab.cpp
+	src/AllPhrasesTab.cpp
+	src/GenericPhraseTab.cpp
 	src/GuessGameTab.cpp
 	src/MimicGameTab.cpp	
 	src/AddBehaviorDialog.cpp
@@ -25,7 +26,8 @@ set(settings_editor_HEADERS
 	include/Window.h
 	include/BaseSettingsTab.h
 	include/BehaviorTab.h
-	include/PhraseTab.h
+	include/AllPhrasesTab.h
+	include/GenericPhraseTab.h
 	include/GuessGameTab.h
 	include/MimicGameTab.h
 	include/AddBehaviorDialog.h

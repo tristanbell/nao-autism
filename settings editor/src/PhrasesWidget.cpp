@@ -149,6 +149,18 @@ void PhrasesWidget::phraseGroupBoxIndexChanged(const QString& text)
 void PhrasesWidget::addPhraseButtonClicked()
 {
 	_addPhraseDialog->exec();
+
+	if (_addPhraseDialog->getResult() == TextInputDialog::CREATED){
+		QString qKey = _phraseGroupBox->currentText();
+
+		std::string key = qKey.toStdString();
+		std::string phrase = _addPhraseDialog->getInput();
+
+		//Add to the phrase list
+		_phrasesList->addItem(_addPhraseDialog->getQInput());
+
+		emit newPhraseCreated(key, phrase);
+	}
 }
 
 void PhrasesWidget::removePhraseButtonClicked()
@@ -159,6 +171,18 @@ void PhrasesWidget::removePhraseButtonClicked()
 void PhrasesWidget::addBehaviorButtonClicked()
 {
 	_addBehaviorDialog->exec();
+
+	if (_addBehaviorDialog->getResult() == TextInputDialog::CREATED){
+		QString qKey = _phraseGroupBox->currentText();
+
+		std::string key = qKey.toStdString();
+		std::string behavior = _addBehaviorDialog->getInput();
+
+		//Add to the behavior list
+		_behaviorList->addItem(_addBehaviorDialog->getQInput());
+
+		emit newPhraseBehaviorCreated(key, behavior);
+	}
 }
 
 void PhrasesWidget::removeBehaviorButtonClicked()

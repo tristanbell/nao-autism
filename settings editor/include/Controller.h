@@ -12,27 +12,32 @@
 
 #include <QObject>
 
-#include <boost/shared_ptr.hpp>
-
 class Controller : public QObject
 {
 
 	Q_OBJECT
 
 public:
-	Controller(boost::shared_ptr<Model> model) : QObject(),
-												_modelPtr(model)
+	Controller(Model* model) : QObject()
 	{
-
+		this->_model = model;
 	}
 
 public slots:
+	void onGeneralPhraseCreated(std::string& key, std::string& phrase);
+	void onGuessGamePhraseCreated(std::string& key, std::string& phrase);
+	void onMimicGamePhraseCreated(std::string& key, std::string& phrase);
+
+	void onGeneralPhraseBehaviorCreated(std::string& key, std::string& behavior);
+	void onGuessGamePhraseBehaviorCreated(std::string& key, std::string& behavior);
+	void onMimicGamePhraseBehaviorCreated(std::string& key, std::string& behavior);
+
 	void onRequestGeneralPhraseGroup(const std::string& key);
 	void onRequestGuessGamePhraseGroup(const std::string& key);
 	void onRequestMimicGamePhraseGroup(const std::string& key);
 
 private:
-	boost::shared_ptr<Model> _modelPtr;
+	Model* _model;
 
 };
 

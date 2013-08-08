@@ -29,6 +29,10 @@ public:
 	void retrieveGuessGamePhraseGroup(const std::string& key) const;
 	void retrieveMimicGamePhraseGroup(const std::string& key) const;
 
+	void addGeneralPhrase(std::string& key, std::string& phrase);
+	void addGuessGamePhrase(const std::string& key, std::string& phrase);
+	void addMimicGamePhrase(const std::string& key, std::string& phrase);
+
 	void loadData(Json::Value& docRoot);
 
 private:

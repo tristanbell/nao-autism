@@ -49,6 +49,10 @@ public:
 private:
 	std::string _fileLocation;
 
+	int _maxPrompts;
+	int _timeout;
+	int _wait;
+
 	std::map<std::string, PhraseGroupData> _generalPhraseMap;
 	std::map<std::string, PhraseGroupData> _guessGamePhraseMap;
 	std::map<std::string, PhraseGroupData> _mimicGamePhraseMap;
@@ -57,6 +61,7 @@ private:
 	std::list<std::string> _rewardBehaviorDataList;
 
 	void update();
+	void saveData(const std::string& location);
 
 signals:
 	void behaviorsCleared();

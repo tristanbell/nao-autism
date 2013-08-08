@@ -38,9 +38,11 @@ void GenericPhraseTab::init()
 	QGridLayout* phraseBtnLayout = new QGridLayout;
 
 	_addPhraseBtn = new QPushButton("Add phrase");
+	_addPhraseBtn->setEnabled(false);
 	phraseBtnLayout->addWidget(_addPhraseBtn, 0, 0);
 
 	_removePhraseBtn = new QPushButton("Remove phrase");
+	_removePhraseBtn->setEnabled(false);
 	phraseBtnLayout->addWidget(_removePhraseBtn, 0, 1);
 
 	//Add the button layout to the main phrase layout
@@ -62,9 +64,11 @@ void GenericPhraseTab::init()
 	QGridLayout* behaviorBtnLayout = new QGridLayout;
 
 	_addBehaviorBtn = new QPushButton("Add behavior");
+	_addBehaviorBtn->setEnabled(false);
 	behaviorBtnLayout->addWidget(_addBehaviorBtn, 0, 0);
 
 	_removeBehaviorBtn = new QPushButton("Remove behavior");
+	_removeBehaviorBtn->setEnabled(false);
 	behaviorBtnLayout->addWidget(_removeBehaviorBtn, 0, 1);
 
 	//Add behavior add/remove button layout to the main behavior layout
@@ -136,25 +140,30 @@ void GenericPhraseTab::loadIntoLists(const PhraseGroupData& data)
 	_behaviorList->clear();
 
 	//Load phrases
-	std::list<std::string>::const_iterator it = data.phraseVector.begin();
-	while (it != data.phraseVector.end()){
-		const std::string& current = *it;
+	if (data.phraseVector.size() > 0){
+		std::list<std::string>::const_iterator it = data.phraseVector.begin();
+		while (it != data.phraseVector.end()){
+			const std::string& current = *it;
 
-		QString qString = QString::fromStdString(current);
-		_phrasesList->addItem(qString);
+			QString qString = QString::fromStdString(current);
+			_phrasesList->addItem(qString);
 
-		it++;
-	}
+			it++;
+		}
 
-	//Load behaviors
-	it = data.behaviorVector.begin();
-	while (it != data.behaviorVector.end()){
-		const std::string& current = *it;
+		//Load behaviors
+		it = data.behaviorVector.begin();
+		while (it != data.behaviorVector.end()){
+			const std::string& current = *it;
 
-		QString qString = QString::fromStdString(current);
-		_behaviorList->addItem(qString);
+			QString qString = QString::fromStdString(current);
+			_behaviorList->addItem(qString);
 
-		it++;
+			it++;
+		}
+
+		_addPhraseBtn->setEnabled(true);
+		_addBehaviorBtn->setEnabled(true);
 	}
 }
 

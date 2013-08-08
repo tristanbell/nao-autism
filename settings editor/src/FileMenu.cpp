@@ -33,7 +33,7 @@ void FileMenu::openTriggered()
 
 void FileMenu::saveTriggered()
 {
-
+	emit onSaveRequested();
 }
 
 void FileMenu::saveAsTriggered()

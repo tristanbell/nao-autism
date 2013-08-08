@@ -1,7 +1,10 @@
 #include <FileMenu.h>
 
 #include <iostream>
+
 #include <QFileDialog>
+#include <QErrorMessage>
+#include <QMessageBox>
 
 #define FILE_FILTER "JSON Data (*.json)"
 
@@ -42,4 +45,35 @@ void FileMenu::saveAsTriggered()
 
 	std::string location = name.toStdString();
 	emit onSaveAsRequested(location);
+}
+
+void FileMenu::onSuccessfulOpen(const std::string& location)
+{
+	QString qMessage = QString::fromStdString("Successfully opened the following file: " + location);
+
+	QMessageBox::information(this, "Successfully opened", qMessage);
+}
+
+void FileMenu::onUnsuccessfulOpen(const std::string& reason)
+{
+	QString qReason = QString::fromStdString(reason);
+
+	QMessageBox::critical(this, "Error", qReason);
+}
+
+void FileMenu::onSuccessfulSave(const std::string& location)
+{
+	QString qMessage = QString::fromStdString("Successfully saved to the following file: " + location);
+
+	QMessageBox::information(this, "Successfully saved", qMessage);
+}
+
+void FileMenu::onUnsuccessfulSave(const std::string& reason)
+{
+	QErrorMessage* errorMessage = new QErrorMessage(this);
+
+	QString qReason = QString::fromStdString(reason);
+	errorMessage->showMessage(qReason);
+
+	delete errorMessage;
 }

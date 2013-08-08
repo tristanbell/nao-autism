@@ -36,6 +36,12 @@ private slots:
 	void saveTriggered();
 	void saveAsTriggered();
 
+	void onSuccessfulOpen(const std::string& location);
+	void onUnsuccessfulOpen(const std::string& reason);
+
+	void onSuccessfulSave(const std::string& location);
+	void onUnsuccessfulSave(const std::string& reason);
+
 signals:
 	void onOpenRequested(const std::string& location);
 	void onSaveRequested();

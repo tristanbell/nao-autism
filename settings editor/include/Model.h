@@ -60,10 +60,22 @@ private:
 	std::list<BehaviorData> _gameBehaviorsDataList;
 	std::list<std::string> _rewardBehaviorDataList;
 
+	struct MissingDataException{
+
+		std::string what;
+
+	};
+
 	void update();
 	void saveData(const std::string& location);
 
 signals:
+	void successfulSave(const std::string& location);
+	void unsuccessfulSave(const std::string& reason);
+
+	void successfulOpen(const std::string& location);
+	void unsuccessfulOpen(const std::string& reason);
+
 	void behaviorsCleared();
 	void generalPhrasesCleared();
 	void guessGamePhrasesCleared();

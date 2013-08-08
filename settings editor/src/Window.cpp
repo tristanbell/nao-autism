@@ -50,10 +50,20 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	QObject::connect(_fileMenu, SIGNAL(onOpenRequested(const std::string&)),
 			controller.get(), SLOT(onOpenRequested(const std::string&)));
 
+	QObject::connect(model.get(), SIGNAL(successfulOpen(const std::string&)),
+			_fileMenu, SLOT(onSuccessfulOpen(const std::string&)));
+	QObject::connect(model.get(), SIGNAL(unsuccessfulOpen(const std::string&)),
+			_fileMenu, SLOT(onUnsuccessfulOpen(const std::string&)));
+
 	QObject::connect(_fileMenu, SIGNAL(onSaveRequested()),
 			controller.get(), SLOT(onSaveRequested()));
 	QObject::connect(_fileMenu, SIGNAL(onSaveAsRequested(const std::string&)),
 			controller.get(), SLOT(onSaveAsRequested(const std::string&)));
+
+	QObject::connect(model.get(), SIGNAL(successfulSave(const std::string&)),
+			_fileMenu, SLOT(onSuccessfulSave(const std::string&)));
+	QObject::connect(model.get(), SIGNAL(unsuccessfulSave(const std::string&)),
+			_fileMenu, SLOT(onUnsuccessfulSave(const std::string&)));
 
 	//Connect signals and slots so phrase tab can request the controller to retrieve a particular PhraseGroup
 	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseGroupRequired(const std::string&)),

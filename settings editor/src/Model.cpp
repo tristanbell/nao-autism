@@ -34,9 +34,19 @@ void Model::open(const std::string& location)
 
 		Json::Value doc;
 		if (jsonReader.parse(jsonData, doc)){
-			loadData(doc);
+			try{
+				loadData(doc);
 
-			_fileLocation = location;
+				_fileLocation = location;
+
+				//Alert slots about successful open
+				emit successfulOpen(location);
+			}catch(MissingDataException& missingData){
+				emit unsuccessfulOpen(missingData.what);
+			}
+		}else{
+			//Alert slots about unsuccessful open
+			emit unsuccessfulOpen("The file: " + location + " is not a valid JSON file.");
 		}
 	}
 }
@@ -95,6 +105,9 @@ void Model::saveData(const std::string& location)
 
 	//Close stream
 	fs.close();
+
+	//Alert slots about successful save
+	emit successfulSave(location);
 }
 
 void addPhraseMapToDoc(Json::Value& root, std::map<std::string, PhraseGroupData>& map){
@@ -274,6 +287,11 @@ void Model::loadData(Json::Value& docRoot){
 
 		Json::Value& waitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
 		_wait = waitVal.asInt();
+	}else{
+		MissingDataException missing;
+		missing.what = "Missing base settings.";
+
+		throw missing;
 	}
 
 	//Load general phrase map
@@ -281,30 +299,55 @@ void Model::loadData(Json::Value& docRoot){
 	if (generalPhrases != Json::Value::null){
 		//Found general phrases, load them into phrase groups
 		_generalPhraseMap = loadPhraseGroups(generalPhrases);
+	}else{
+		MissingDataException missing;
+		missing.what = "Missing general phrases.";
+
+		throw missing;
 	}
 
 	//Load guess game phrase map
 	Json::Value& guessGamePhrases = docRoot[GUESS_GAME_KEY][PHRASE_KEY];
 	if (guessGamePhrases != Json::Value::null){
 		_guessGamePhraseMap = loadPhraseGroups(guessGamePhrases);
+	}else{
+		MissingDataException missing;
+		missing.what = "Missing guessing game settings.";
+
+		throw missing;
 	}
 
 	//Load mimic game phrase map
 	Json::Value& mimicGamePhrases = docRoot[MIMIC_GAME_KEY][PHRASE_KEY];
 	if (mimicGamePhrases != Json::Value::null){
 		_mimicGamePhraseMap = loadPhraseGroups(mimicGamePhrases);
+	}else{
+		MissingDataException missing;
+		missing.what = "Missing mimic game settings.";
+
+		throw missing;
 	}
 
 	//Load reward behaviors
 	Json::Value& rewardBehaviors = docRoot[REWARD_BEHAVIOR_LIST_KEY][BEHAVIOR_NAME_KEY];
 	if (rewardBehaviors != Json::Value::null){
 		_rewardBehaviorDataList = loadBehaviorNames(rewardBehaviors);
+	}else{
+		MissingDataException missing;
+		missing.what = "Missing reward behaviors.";
+
+		throw missing;
 	}
 
 	//Load other behaviors
 	Json::Value& otherBehaviors = docRoot[BEHAVIOR_KEY];
 	if (otherBehaviors != Json::Value::null){
 		_gameBehaviorsDataList = loadBehaviorData(otherBehaviors);
+	}else{
+		MissingDataException missing;
+		missing.what = "Missing general behaviors.";
+
+		throw missing;
 	}
 
 	//Fire all required signals for the new data

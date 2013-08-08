@@ -2,6 +2,21 @@
 
 #include <stdexcept>
 
+void Controller::onOpenRequested(const std::string& location)
+{
+	_model->open(location);
+}
+
+void Controller::onSaveRequested()
+{
+	_model->save();
+}
+
+void Controller::onSaveAsRequested(const std::string& location)
+{
+	_model->saveAs(location);
+}
+
 void Controller::onRequestGeneralPhraseGroup(const std::string& key)
 {
 	_model->retrieveGeneralPhraseGroup(key);
@@ -34,15 +49,20 @@ void Controller::onMimicGamePhraseCreated(std::string& key, std::string& phrase)
 
 void Controller::onGeneralPhraseBehaviorCreated(std::string& key, std::string& behavior)
 {
-
+	_model->addGeneralPhraseBehavior(key, behavior);
 }
 
 void Controller::onGuessGamePhraseBehaviorCreated(std::string& key, std::string& behavior)
 {
-
+	_model->addGuessGamePhraseBehavior(key, behavior);
 }
 
 void Controller::onMimicGamePhraseBehaviorCreated(std::string& key, std::string& behavior)
 {
+	_model->addMimicGamePhraseBehavior(key, behavior);
+}
 
+void Controller::onRequestGameBehaviors(const std::string& name)
+{
+	_model->retrieveGameBehavior(name);
 }

@@ -8,34 +8,37 @@
 #ifndef WINDOW_H_
 #define WINDOW_H_
 
+#include <FileMenu.h>
 #include <BaseSettingsTab.h>
-#include <BehaviorTab.h>
-#include <AllPhrasesTab.h>
+#include <BehaviorsTab.h>
+#include <PhrasesTab.h>
 #include <Model.h>
 #include <Controller.h>
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QTabWidget>
 
 #include <boost/shared_ptr.hpp>
 
 #define WINDOW_TITLE "Settings editor"
 
-class Window : public QWidget
+class Window : public QMainWindow
 {
 
 public:
-	Window(boost::shared_ptr<Controller> controller, boost::shared_ptr<Model> model) : QWidget()
+	Window(boost::shared_ptr<Controller> controller, boost::shared_ptr<Model> model) : QMainWindow()
 	{
 		init(controller, model);
 	}
 
 private:
+	FileMenu* _fileMenu;
+
 	QTabWidget* _tabs;
 
 	BaseSettingsTab* _baseSettingsTab;
-	BehaviorTab* _behaviorTab;
-	AllPhrasesTab* _phrasesTab;
+	BehaviorsTab* _behaviorsTab;
+	PhrasesTab* _phrasesTab;
 
 //	PhraseTab* _phraseTab;
 //	GuessGameTab* _guessGameTab;

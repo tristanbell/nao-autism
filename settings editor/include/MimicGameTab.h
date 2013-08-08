@@ -8,7 +8,6 @@
 #ifndef MIMICGAMETAB_H_
 #define MIMICGAMETAB_H_
 
-#include <PhrasesWidget.h>
 #include <PhraseGroupData.h>
 
 #include <QTabWidget>

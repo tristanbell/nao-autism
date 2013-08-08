@@ -9,14 +9,16 @@ set(settings_editor_SOURCES
 	src/main.cpp
 	src/Window.cpp
 	src/BaseSettingsTab.cpp
-	src/BehaviorTab.cpp
-	src/AllPhrasesTab.cpp
+	src/BehaviorsTab.cpp
+	src/GameBehaviorsTab.cpp
+	#src/RewardBehaviorsTab.cpp
+	src/PhrasesTab.cpp
 	src/GenericPhraseTab.cpp
 	src/GuessGameTab.cpp
 	src/MimicGameTab.cpp	
 	src/AddBehaviorDialog.cpp
 	src/TextInputDialog.cpp
-	src/PhrasesWidget.cpp
+	src/FileMenu.cpp
 	src/Model.cpp
 	src/Controller.cpp
 	src/jsoncpp.cpp
@@ -25,14 +27,16 @@ set(settings_editor_SOURCES
 set(settings_editor_HEADERS
 	include/Window.h
 	include/BaseSettingsTab.h
-	include/BehaviorTab.h
-	include/AllPhrasesTab.h
+	include/BehaviorsTab.h
+	include/GameBehaviorsTab.h
+	#include/RewardBehaviorsTab.h
+	include/PhrasesTab.h
 	include/GenericPhraseTab.h
 	include/GuessGameTab.h
 	include/MimicGameTab.h
 	include/AddBehaviorDialog.h
 	include/TextInputDialog.h
-	include/PhrasesWidget.h
+	include/FileMenu.h
 	include/PhraseGroupData.h
 	include/BehaviorData.h
 	include/Controller.h

@@ -1,25 +1,25 @@
 /*
- * AllPhrasesTab.h
+ * PhrasesTab.h
  *
  *  Created on: 8 Aug 2013
  *      Author: rapid
  */
 
-#ifndef ALLPHRASESTAB_H_
-#define ALLPHRASESTAB_H_
+#ifndef PHRASESTAB_H_
+#define PHRASESTAB_H_
 
 #include <GenericPhraseTab.h>
 
 #include <QTabWidget>
 #include <QString>
 
-class AllPhrasesTab : public QTabWidget
+class PhrasesTab : public QTabWidget
 {
 
 public:
 	static const QString TAB_NAME;
 
-	AllPhrasesTab()
+	PhrasesTab()
 	{
 		init();
 	}

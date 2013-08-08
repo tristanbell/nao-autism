@@ -1,7 +1,10 @@
 #include <Window.h>
 
 #include <GenericPhraseTab.h>
+#include <GameBehaviorsTab.h>
 
+#include <QMenuBar>
+#include <QMenu>
 #include <QGridLayout>
 
 void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Model> model)
@@ -9,8 +12,19 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	setWindowTitle(WINDOW_TITLE);
 	setVisible(true);
 
+	QWidget* layoutWidget = new QWidget;
+
 	QGridLayout* layout = new QGridLayout;
-	setLayout(layout);
+	layoutWidget->setLayout(layout);
+
+	setCentralWidget(layoutWidget);
+
+	//Setup menu bar
+	QMenuBar* menuBar = new QMenuBar(this);
+	setMenuBar(menuBar);
+
+	_fileMenu = new FileMenu;
+	menuBar->addMenu(_fileMenu);
 
 	_tabs = new QTabWidget;
 	layout->addWidget(_tabs);
@@ -19,18 +33,29 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	_baseSettingsTab = new BaseSettingsTab;
 	_tabs->addTab(_baseSettingsTab, BaseSettingsTab::TAB_NAME);
 
-	_behaviorTab = new BehaviorTab;
-	_tabs->addTab(_behaviorTab, BehaviorTab::TAB_NAME);
+	_behaviorsTab = new BehaviorsTab;
+	_tabs->addTab(_behaviorsTab, BehaviorsTab::TAB_NAME);
 
-	_phrasesTab = new AllPhrasesTab;
+	GameBehaviorsTab* gameBehaviorTab = _behaviorsTab->getGameBehaviorsTab();
+
+	_phrasesTab = new PhrasesTab;
 
 	GenericPhraseTab* _generalPhraseTab = _phrasesTab->getGeneralPhraseTab();
 	GenericPhraseTab* _guessGamePhraseTab = _phrasesTab->getGuessGamePhraseTab();
 	GenericPhraseTab* _mimicGamePhraseTab = _phrasesTab->getMimicGamePhraseTab();
 
-	_tabs->addTab(_phrasesTab, AllPhrasesTab::TAB_NAME);
+	_tabs->addTab(_phrasesTab, PhrasesTab::TAB_NAME);
 
-	//Connect signals and slots so phrase tab can request the controller for a new PhraseGroup
+	//Connect signals to allow saving and loading of data
+	QObject::connect(_fileMenu, SIGNAL(onOpenRequested(const std::string&)),
+			controller.get(), SLOT(onOpenRequested(const std::string&)));
+
+	QObject::connect(_fileMenu, SIGNAL(onSaveRequested()),
+			controller.get(), SLOT(onSaveRequested()));
+	QObject::connect(_fileMenu, SIGNAL(onSaveAsRequested(const std::string&)),
+			controller.get(), SLOT(onSaveAsRequested(const std::string&)));
+
+	//Connect signals and slots so phrase tab can request the controller to retrieve a particular PhraseGroup
 	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseGroupRequired(const std::string&)),
 			controller.get(), SLOT(onRequestGeneralPhraseGroup(const std::string&)));
 	QObject::connect(model.get(), SIGNAL(generalPhraseGroupRetrieved(const PhraseGroupData&)),
@@ -46,7 +71,13 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	QObject::connect(model.get(), SIGNAL(mimicGamePhraseGroupRetrieved(const PhraseGroupData&)),
 			_mimicGamePhraseTab, SLOT(onPhraseGroupRetrieved(const PhraseGroupData&)));
 
-	//COnnect signals and slots so that new phrases/phrase behaviors can be added to the model
+	//Connect signals and slots so behavior tab can request the controller for a particular BehaviorData
+	QObject::connect(gameBehaviorTab, SIGNAL(behaviorDataRequired(const std::string&)),
+			controller.get(), SLOT(onRequestGameBehaviors(const std::string&)));
+	QObject::connect(model.get(), SIGNAL(gameBehaviorRetrieved(const BehaviorData&)),
+			gameBehaviorTab, SLOT(onBehaviorDataRetrieved(const BehaviorData&)));
+
+	//Connect signals and slots so that new phrases/phrase behaviors can be added to the model
 	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseCreated(std::string&, std::string&)),
 			controller.get(), SLOT(onGeneralPhraseCreated(std::string&, std::string&)));
 	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseBehaviorCreated(std::string&, std::string&)),
@@ -71,4 +102,8 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 
 	QObject::connect(model.get(), SIGNAL(mimicGamePhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)),
 			_mimicGamePhraseTab, SLOT(onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)));
+
+	//Connect signals and slots so the model can alert the view(s) when new BehaviorData is loaded
+	QObject::connect(model.get(), SIGNAL(gameBehaviorsLoaded(const std::list<BehaviorData>&)),
+			gameBehaviorTab, SLOT(onBehaviorListLoaded(const std::list<BehaviorData>&)));
 }

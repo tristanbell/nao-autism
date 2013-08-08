@@ -9,12 +9,18 @@
 #define GENERICPHRASETAB_H_
 
 #include <AddBehaviorDialog.h>
-#include <PhrasesWidget.h>
+#include <TextInputDialog.h>
+#include <PhraseGroupData.h>
 
 #include <QTabWidget>
 #include <QString>
-
+#include <QComboBox>
+#include <QListWidget>
+#include <QPushButton>
+#include <list>
 #include <string>
+
+#include <QWidget>
 
 class GenericPhraseTab : public QTabWidget
 {
@@ -33,19 +39,40 @@ public:
 	QString getTabName() const;
 
 public slots:
-	void phraseCreated(std::string& key, std::string& phrase);
-	void phraseBehaviorCreated(std::string& key, std::string& phrase);
-
-	void onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&);
-	void onPhraseGroupBoxIndexChanged(const QString& text);
-
-	void onPhraseGroupRetrieved(const PhraseGroupData&);
+	void phraseGroupBoxIndexChanged(const QString& text);
 
 private:
 	QString _tabName;
-	PhrasesWidget* _phrasesWidget;
+
+	TextInputDialog* _addPhraseDialog;
+	TextInputDialog* _addBehaviorDialog;
+
+	QComboBox* _phraseGroupBox;
+
+	QListWidget* _phrasesList;
+	QPushButton* _addPhraseBtn;
+	QPushButton* _removePhraseBtn;
+
+	QListWidget* _behaviorList;
+	QPushButton* _addBehaviorBtn;
+	QPushButton* _removeBehaviorBtn;
 
 	void init();
+
+	void loadIntoLists(const PhraseGroupData&);
+
+	void setPhraseGroup(const std::map<std::string, PhraseGroupData>&);
+	void setCurrentPhraseGroup(const PhraseGroupData&);
+
+private slots:
+	void addPhraseButtonClicked();
+	void removePhraseButtonClicked();
+
+	void addBehaviorButtonClicked();
+	void removeBehaviorButtonClicked();
+
+	void onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&);
+	void onPhraseGroupRetrieved(const PhraseGroupData&);
 
 signals:
 	void onPhraseGroupRequired(const std::string& key);

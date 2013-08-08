@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
 	Window window(controllerPtr, modelPtr);
 
-	modelPtr.get()->loadData(json);
+	//modelPtr.get()->loadData(json);
 
 	return app.exec();
 }

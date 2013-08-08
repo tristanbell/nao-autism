@@ -1,8 +1,8 @@
-#include <AllPhrasesTab.h>
+#include <PhrasesTab.h>
 
-const QString AllPhrasesTab::TAB_NAME = "Phrases";
+const QString PhrasesTab::TAB_NAME = "Phrases";
 
-void AllPhrasesTab::init()
+void PhrasesTab::init()
 {
 	_generalPhraseTab = new GenericPhraseTab("General phrases");
 	_guessGamePhraseTab = new GenericPhraseTab("Guess game phrases");
@@ -13,17 +13,17 @@ void AllPhrasesTab::init()
 	addTab(_mimicGamePhraseTab, _mimicGamePhraseTab->getTabName());
 }
 
-GenericPhraseTab* AllPhrasesTab::getGeneralPhraseTab()
+GenericPhraseTab* PhrasesTab::getGeneralPhraseTab()
 {
 	return _generalPhraseTab;
 }
 
-GenericPhraseTab* AllPhrasesTab::getGuessGamePhraseTab()
+GenericPhraseTab* PhrasesTab::getGuessGamePhraseTab()
 {
 	return _guessGamePhraseTab;
 }
 
-GenericPhraseTab* AllPhrasesTab::getMimicGamePhraseTab()
+GenericPhraseTab* PhrasesTab::getMimicGamePhraseTab()
 {
 	return _mimicGamePhraseTab;
 }

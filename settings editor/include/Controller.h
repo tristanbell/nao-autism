@@ -24,6 +24,10 @@ public:
 	}
 
 public slots:
+	void onOpenRequested(const std::string& location);
+	void onSaveRequested();
+	void onSaveAsRequested(const std::string& location);
+
 	void onGeneralPhraseCreated(std::string& key, std::string& phrase);
 	void onGuessGamePhraseCreated(std::string& key, std::string& phrase);
 	void onMimicGamePhraseCreated(std::string& key, std::string& phrase);
@@ -35,6 +39,8 @@ public slots:
 	void onRequestGeneralPhraseGroup(const std::string& key);
 	void onRequestGuessGamePhraseGroup(const std::string& key);
 	void onRequestMimicGamePhraseGroup(const std::string& key);
+
+	void onRequestGameBehaviors(const std::string& name);
 
 private:
 	Model* _model;

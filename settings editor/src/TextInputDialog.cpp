@@ -34,7 +34,9 @@ void TextInputDialog::init(QString& title, QString& labelName)
 
 int TextInputDialog::exec()
 {
+	//Reset state
 	_result = UNKNOWN;
+	_lineEdit->clear();
 
 	return QDialog::exec();
 }

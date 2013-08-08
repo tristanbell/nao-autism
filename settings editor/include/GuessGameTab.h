@@ -8,7 +8,6 @@
 #ifndef GUESSGAMETAB_H_
 #define GUESSGAMETAB_H_
 
-#include <PhrasesWidget.h>
 #include <PhraseGroupData.h>
 
 #include <QTabWidget>

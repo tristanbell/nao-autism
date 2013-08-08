@@ -1,6 +1,7 @@
 #include <Model.h>
 #include <Keys.h>
 
+#include <fstream>
 #include <stdexcept>
 
 std::map<std::string, PhraseGroupData> loadPhraseGroups(Json::Value& root);
@@ -8,6 +9,43 @@ std::list<BehaviorData> loadBehaviorData(Json::Value& root);
 std::string loadBehaviorActualName(Json::Value& root);
 std::list<std::string> loadBehaviorNames(Json::Value& root);
 int loadClassification(Json::Value& root);
+
+void Model::open(const std::string& location)
+{
+	if (location != ""){
+		//Load file into 'buffer'
+		std::string jsonData;
+
+		std::fstream ifs;
+		ifs.open(location.c_str(), std::fstream::in);
+
+		ifs.seekg(0, std::ios::end);
+		jsonData.resize(ifs.tellg());
+		ifs.seekg(0, std::ios::beg);
+
+		ifs.read(&jsonData[0], jsonData.size());
+		ifs.close();
+
+		Json::Reader jsonReader;
+
+		Json::Value doc;
+		if (jsonReader.parse(jsonData, doc)){
+			loadData(doc);
+
+			_fileLocation = location;
+		}
+	}
+}
+
+void Model::save()
+{
+
+}
+
+void Model::saveAs(const std::string& location)
+{
+
+}
 
 void Model::retrieveGeneralPhraseGroup(const std::string& key) const
 {
@@ -36,7 +74,7 @@ void Model::retrieveMimicGamePhraseGroup(const std::string& key) const
 	}catch(std::out_of_range& ex){  }
 }
 
-void Model::addGeneralPhrase(std::string& key, std::string& phrase)
+void Model::addGeneralPhrase(const std::string& key, const std::string& phrase)
 {
 	try{
 		PhraseGroupData& data = _generalPhraseMap.at(key);
@@ -61,6 +99,48 @@ void Model::addMimicGamePhrase(const std::string& key, std::string& phrase)
 
 		data.phraseVector.push_back(phrase);
 	}catch(std::out_of_range& ex){  }
+}
+
+void Model::addGeneralPhraseBehavior(const std::string& key, const std::string& behavior)
+{
+	try{
+		PhraseGroupData& data = _generalPhraseMap.at(key);
+
+		data.behaviorVector.push_back(behavior);
+	}catch(std::out_of_range& ex){  }
+}
+
+void Model::addGuessGamePhraseBehavior(const std::string& key, const std::string& behavior)
+{
+	try{
+		PhraseGroupData& data = _guessGamePhraseMap.at(key);
+
+		data.behaviorVector.push_back(behavior);
+	}catch(std::out_of_range& ex){  }
+}
+
+void Model::addMimicGamePhraseBehavior(const std::string& key, const std::string& behavior)
+{
+	try{
+		PhraseGroupData& data = _mimicGamePhraseMap.at(key);
+
+		data.behaviorVector.push_back(behavior);
+	}catch(std::out_of_range& ex){  }
+}
+
+void Model::retrieveGameBehavior(const std::string& name) const
+{
+	std::list<BehaviorData>::const_iterator it = _gameBehaviorsDataList.begin();
+	while (it != _gameBehaviorsDataList.end()){
+		const BehaviorData& data = *it;
+
+		if (data._actualName == name){
+			emit gameBehaviorRetrieved(data);
+			return;
+		}
+
+		it++;
+	}
 }
 
 void Model::loadData(Json::Value& docRoot){
@@ -92,7 +172,7 @@ void Model::loadData(Json::Value& docRoot){
 	//Load other behaviors
 	Json::Value& otherBehaviors = docRoot[BEHAVIOR_KEY];
 	if (otherBehaviors != Json::Value::null){
-		_behaviorDataList = loadBehaviorData(otherBehaviors);
+		_gameBehaviorsDataList = loadBehaviorData(otherBehaviors);
 	}
 
 	//Fire all required signals for the new data
@@ -104,6 +184,9 @@ void Model::update()
 	emit generalPhraseGroupLoaded(_generalPhraseMap);
 	emit guessGamePhraseGroupLoaded(_guessGamePhraseMap);
 	emit mimicGamePhraseGroupLoaded(_mimicGamePhraseMap);
+
+	emit gameBehaviorsLoaded(_gameBehaviorsDataList);
+	emit rewardBehaviorsLoaded(_rewardBehaviorDataList);
 }
 
 std::map<std::string, PhraseGroupData> loadPhraseGroups(Json::Value& root){

@@ -2,6 +2,7 @@
 
 #include <QGridLayout>
 #include <QPushButton>
+#include <QMessageBox>
 
 const QString GameBehaviorsTab::TAB_NAME = "Game behaviors";
 
@@ -24,15 +25,22 @@ void GameBehaviorsTab::init()
 	_availableBehaviorList = new QListWidget;
 	layout->addWidget(_availableBehaviorList, 3, 0);
 
+	QObject::connect(_availableBehaviorList, SIGNAL(itemSelectionChanged()),
+			this, SLOT(onBehaviorListItemChanged()));
+
 	QGridLayout* addRemoveBtnLayout = new QGridLayout;
 
 	_addBtn = new QPushButton("Add behavior");
+	_addBtn->setEnabled(false);
 	addRemoveBtnLayout->addWidget(_addBtn, 0, 0);
 
 	QObject::connect(_addBtn, SIGNAL(clicked()), this, SLOT(onCreateBehaviorBtnClicked()));
 
 	_removeBtn = new QPushButton("Remove behavior");
+	_removeBtn->setEnabled(false);
 	addRemoveBtnLayout->addWidget(_removeBtn, 0, 1);
+
+	QObject::connect(_removeBtn, SIGNAL(clicked()), this, SLOT(onRemoveBehaviorBtnClicked()));
 
 	layout->addLayout(addRemoveBtnLayout, 4, 0);
 
@@ -55,12 +63,20 @@ void GameBehaviorsTab::fillList(const BehaviorData& data)
 
 		it++;
 	}
+
+	_addBtn->setEnabled(true);
+	_removeBtn->setEnabled(false);
 }
 
 void GameBehaviorsTab::onBehaviorBoxIndexChanged(const QString& name)
 {
 	std::string behaviorName = name.toStdString();
 	emit behaviorDataRequired(behaviorName);
+}
+
+void GameBehaviorsTab::onBehaviorListItemChanged()
+{
+	_removeBtn->setEnabled(true);
 }
 
 void GameBehaviorsTab::onCreateBehaviorBtnClicked()
@@ -78,10 +94,28 @@ void GameBehaviorsTab::onCreateBehaviorBtnClicked()
 	}
 }
 
+void GameBehaviorsTab::onRemoveBehaviorBtnClicked()
+{
+	QMessageBox::StandardButton btn = QMessageBox::question(this, "Remove behavior", "Do you really want to remove this behavior?",
+			QMessageBox::Yes | QMessageBox::No);
+
+	if (btn == QMessageBox::Yes){
+		//Remove behavior from list and emit signal to alert model of change
+		std::string key = _behaviorNamesBox->currentText().toStdString();
+		std::string behavior = _availableBehaviorList->currentItem()->text().toStdString();
+
+		_availableBehaviorList->takeItem(_availableBehaviorList->currentIndex().row());
+
+		emit onBehaviorRemoved(key, behavior);
+	}
+}
+
 void GameBehaviorsTab::onBehaviorListLoaded(const std::list<BehaviorData>& data)
 {
 	QObject::disconnect(_behaviorNamesBox, SIGNAL(currentIndexChanged(const QString&)),
 			this, SLOT(onBehaviorBoxIndexChanged(const QString&)));
+
+	_behaviorNamesBox->clear();
 
 	if (data.size() > 0){
 		std::list<BehaviorData>::const_iterator it = data.begin();

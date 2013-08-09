@@ -35,7 +35,10 @@ public:
 
 public slots:
 	void onBehaviorBoxIndexChanged(const QString&);
+	void onBehaviorListItemChanged();
+
 	void onCreateBehaviorBtnClicked();
+	void onRemoveBehaviorBtnClicked();
 
 	void onBehaviorListLoaded(const std::list<BehaviorData>&);
 	void onBehaviorDataRetrieved(const BehaviorData&);
@@ -54,6 +57,7 @@ private:
 
 signals:
 	void onBehaviorCreated(const std::string& key, const std::string& behaviorName);
+	void onBehaviorRemoved(const std::string& key, const std::string& behaviorName);
 
 	void behaviorDataRequired(const std::string& name);
 

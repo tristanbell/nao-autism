@@ -4,6 +4,12 @@
 #include <fstream>
 #include <stdexcept>
 
+inline void addPhraseToPhraseGroup(std::map<std::string, PhraseGroupData>& map, const std::string& key, const std::string& phrase);
+inline void addBehaviorToPhraseGroup(std::map<std::string, PhraseGroupData>& map, const std::string& key, const std::string& phrase);
+
+inline void removePhraseFromPhraseGroup(std::map<std::string, PhraseGroupData>& map, const std::string& key, const std::string& phrase);
+inline void removeBehaviorFromPhraseGroup(std::map<std::string, PhraseGroupData>& map, const std::string& key, const std::string& behavior);
+
 void addPhraseMapToDoc(Json::Value& root, std::map<std::string, PhraseGroupData>& map);
 void addBehaviorListToDoc(Json::Value& root, std::list<BehaviorData>& behaviorData);
 void addStringArrayToDoc(Json::Value& root, std::list<std::string>& list);
@@ -13,6 +19,11 @@ std::list<BehaviorData> loadBehaviorData(Json::Value& root);
 std::string loadBehaviorActualName(Json::Value& root);
 std::list<std::string> loadBehaviorNames(Json::Value& root);
 int loadClassification(Json::Value& root);
+
+void Model::setBaseSettingsData(const BaseSettingsData& data)
+{
+	_settingsData = data;
+}
 
 void Model::open(const std::string& location)
 {
@@ -53,13 +64,11 @@ void Model::open(const std::string& location)
 
 void Model::save()
 {
-	std::cout << "Save..." << std::endl;
 	saveData(_fileLocation);
 }
 
 void Model::saveAs(const std::string& location)
 {
-	std::cout << "Save..." << std::endl;
 	saveData(location);
 }
 
@@ -74,13 +83,13 @@ void Model::saveData(const std::string& location)
 	//Add base settings to JSON document
 	Json::Value& baseSettings = doc[BASE_SETTINGS_KEY];
 	Json::Value& maxPromptVal = baseSettings[MAX_PROMPT_KEY];
-	maxPromptVal = _maxPrompts;
+	maxPromptVal = _settingsData._tries;
 
 	Json::Value& timeoutVal = baseSettings[TIMEOUT_SETTING_KEY];
-	timeoutVal = _timeout;
+	timeoutVal = _settingsData._timeout;
 
 	Json::Value& speechWaitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
-	speechWaitVal = _wait;
+	speechWaitVal = _settingsData._wait;
 
 	Json::Value& rewardBehavior = doc[REWARD_BEHAVIOR_LIST_KEY];
 	Json::Value& rewardBehaviorNames = rewardBehavior[BEHAVIOR_NAME_KEY];
@@ -208,56 +217,127 @@ void Model::retrieveMimicGamePhraseGroup(const std::string& key) const
 
 void Model::addGeneralPhrase(const std::string& key, const std::string& phrase)
 {
-	try{
-		PhraseGroupData& data = _generalPhraseMap.at(key);
-
-		data.phraseVector.push_back(phrase);
-	}catch(std::out_of_range& ex){  }
+	addPhraseToPhraseGroup(_generalPhraseMap, key, phrase);
 }
 
 void Model::addGuessGamePhrase(const std::string& key, std::string& phrase)
 {
-	try{
-		PhraseGroupData& data = _guessGamePhraseMap.at(key);
-
-		data.phraseVector.push_back(phrase);
-	}catch(std::out_of_range& ex){  }
+	addPhraseToPhraseGroup(_guessGamePhraseMap, key, phrase);
 }
 
 void Model::addMimicGamePhrase(const std::string& key, std::string& phrase)
 {
+	addPhraseToPhraseGroup(_mimicGamePhraseMap, key, phrase);
+}
+
+inline void addPhraseToPhraseGroup(std::map<std::string, PhraseGroupData>& map, const std::string& key, const std::string& phrase)
+{
 	try{
-		PhraseGroupData& data = _mimicGamePhraseMap.at(key);
+		PhraseGroupData& data = map.at(key);
 
 		data.phraseVector.push_back(phrase);
 	}catch(std::out_of_range& ex){  }
 }
 
-void Model::addGeneralPhraseBehavior(const std::string& key, const std::string& behavior)
+void Model::removeGeneralPhrase(const std::string& key, const std::string& phrase)
+{
+	removePhraseFromPhraseGroup(_generalPhraseMap, key, phrase);
+}
+
+void Model::removeGuessGamePhrase(const std::string& key, const std::string& phrase)
+{
+	removePhraseFromPhraseGroup(_guessGamePhraseMap, key, phrase);
+}
+
+void Model::removeMimicGamePhrase(const std::string& key, const std::string& phrase)
+{
+	removePhraseFromPhraseGroup(_mimicGamePhraseMap, key, phrase);
+}
+
+void removePhraseFromPhraseGroup(std::map<std::string, PhraseGroupData>& map, const std::string& key, const std::string& phrase)
 {
 	try{
-		PhraseGroupData& data = _generalPhraseMap.at(key);
+		PhraseGroupData& data = map.at(key);
 
-		data.behaviorVector.push_back(behavior);
-	}catch(std::out_of_range& ex){  }
+		data.phraseVector.remove(phrase);
+	}catch (std::out_of_range& ex){  }
+}
+
+void Model::addGeneralPhraseBehavior(const std::string& key, const std::string& behavior)
+{
+	addBehaviorToPhraseGroup(_generalPhraseMap, key, behavior);
 }
 
 void Model::addGuessGamePhraseBehavior(const std::string& key, const std::string& behavior)
 {
+	addBehaviorToPhraseGroup(_guessGamePhraseMap, key, behavior);
+}
+
+void Model::addMimicGamePhraseBehavior(const std::string& key, const std::string& behavior)
+{
+	addBehaviorToPhraseGroup(_mimicGamePhraseMap, key, behavior);
+}
+
+inline void addBehaviorToPhraseGroup(std::map<std::string, PhraseGroupData>& map, const std::string& key, const std::string& behavior)
+{
 	try{
-		PhraseGroupData& data = _guessGamePhraseMap.at(key);
+		PhraseGroupData& data = map.at(key);
 
 		data.behaviorVector.push_back(behavior);
 	}catch(std::out_of_range& ex){  }
 }
 
-void Model::addMimicGamePhraseBehavior(const std::string& key, const std::string& behavior)
+void Model::removeGeneralPhraseBehavior(const std::string& key, const std::string& behavior)
+{
+	removeBehaviorFromPhraseGroup(_generalPhraseMap, key, behavior);
+}
+
+void Model::removeGuessGamePhraseBehavior(const std::string& key, const std::string& behavior)
+{
+	removeBehaviorFromPhraseGroup(_guessGamePhraseMap, key, behavior);
+}
+
+void Model::removeMimicGamePhraseBehavior(const std::string& key, const std::string& behavior)
+{
+	removeBehaviorFromPhraseGroup(_mimicGamePhraseMap, key, behavior);
+}
+
+void removeBehaviorFromPhraseGroup(std::map<std::string, PhraseGroupData>& map, const std::string& key, const std::string& behavior)
 {
 	try{
-		PhraseGroupData& data = _mimicGamePhraseMap.at(key);
+		PhraseGroupData& data = map.at(key);
 
-		data.behaviorVector.push_back(behavior);
-	}catch(std::out_of_range& ex){  }
+		data.behaviorVector.remove(behavior);
+	}catch (std::out_of_range& ex){  }
+}
+
+void Model::addGameBehavior(const std::string& actualName, const std::string& behaviorName)
+{
+	std::list<BehaviorData>::iterator it = _gameBehaviorsDataList.begin();
+	while (it != _gameBehaviorsDataList.end()){
+		BehaviorData& data = *it;
+
+		if (data._actualName == actualName){
+			data._behaviorNames.push_back(behaviorName);
+		}
+
+		it++;
+	}
+}
+
+void Model::removeGameBehavior(const std::string& actualName, const std::string& behaviorName)
+{
+	std::cout << "Removing...\n";
+	std::list<BehaviorData>::iterator it = _gameBehaviorsDataList.begin();
+	while (it != _gameBehaviorsDataList.end()){
+		BehaviorData& data = *it;
+
+		if (data._actualName == actualName){
+			data._behaviorNames.remove(behaviorName);
+		}
+
+		it++;
+	}
 }
 
 void Model::retrieveGameBehavior(const std::string& name) const
@@ -280,13 +360,13 @@ void Model::loadData(Json::Value& docRoot){
 	Json::Value& baseSettings = docRoot[BASE_SETTINGS_KEY];
 	if (baseSettings != Json::Value::null){
 		Json::Value& timeoutVal = baseSettings[TIMEOUT_SETTING_KEY];
-		_timeout = timeoutVal.asInt();
+		_settingsData._timeout = timeoutVal.asInt();
 
 		Json::Value& maxPromptVal = baseSettings[MAX_PROMPT_KEY];
-		_maxPrompts = maxPromptVal.asInt();
+		_settingsData._tries = maxPromptVal.asInt();
 
 		Json::Value& waitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
-		_wait = waitVal.asInt();
+		_settingsData._wait = waitVal.asInt();
 	}else{
 		MissingDataException missing;
 		missing.what = "Missing base settings.";
@@ -356,6 +436,8 @@ void Model::loadData(Json::Value& docRoot){
 
 void Model::update()
 {
+	emit baseSettingsLoaded(_settingsData);
+
 	emit generalPhraseGroupLoaded(_generalPhraseMap);
 	emit guessGamePhraseGroupLoaded(_guessGamePhraseMap);
 	emit mimicGamePhraseGroupLoaded(_mimicGamePhraseMap);

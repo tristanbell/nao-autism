@@ -65,6 +65,14 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	QObject::connect(model.get(), SIGNAL(unsuccessfulSave(const std::string&)),
 			_fileMenu, SLOT(onUnsuccessfulSave(const std::string&)));
 
+	//Connect signals and slots to allow for loading of settings
+	QObject::connect(model.get(), SIGNAL(baseSettingsLoaded(const BaseSettingsData&)),
+			_baseSettingsTab, SLOT(onSettingsLoaded(const BaseSettingsData&)));
+
+	//Connect signals and slots to allow for updating of settings
+	QObject::connect(_baseSettingsTab, SIGNAL(onSettingsUpdated(const BaseSettingsData&)),
+			controller.get(), SLOT(onBaseSettingsUpdated(const BaseSettingsData&)));
+
 	//Connect signals and slots so phrase tab can request the controller to retrieve a particular PhraseGroup
 	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseGroupRequired(const std::string&)),
 			controller.get(), SLOT(onRequestGeneralPhraseGroup(const std::string&)));
@@ -102,6 +110,18 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 			controller.get(), SLOT(onMimicGamePhraseCreated(std::string&, std::string&)));
 	QObject::connect(_mimicGamePhraseTab, SIGNAL(onPhraseBehaviorCreated(std::string&, std::string&)),
 			controller.get(), SLOT(onMimicGamePhraseBehaviorCreated(std::string&, std::string&)));
+
+	//Connect signals and slots so that new phrases/phrase behaviors can be removed from the model
+	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseRemoved(const std::string&, const std::string&)),
+			controller.get(), SLOT(onGeneralPhraseRemoved(const std::string&, const std::string&)));
+	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseBehaviorRemoved(const std::string&, const std::string&)),
+			controller.get(), SLOT(onGeneralPhraseBehaviorRemoved(const std::string&, const std::string&)));
+
+	//Connect signals and slots so that new behaviors can be added to the model
+	QObject::connect(gameBehaviorTab, SIGNAL(onBehaviorCreated(const std::string&, const std::string&)),
+			controller.get(), SLOT(onGameBehaviorCreated(const std::string&, const std::string&)));
+	QObject::connect(gameBehaviorTab, SIGNAL(onBehaviorRemoved(const std::string&, const std::string&)),
+			controller.get(), SLOT(onGameBehaviorRemoved(const std::string&, const std::string&)));
 
 	//Connect signals and slots so the model can alert the view(s) when new PhraseGroupData is loaded
 	QObject::connect(model.get(), SIGNAL(generalPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)),

@@ -65,9 +65,11 @@ private:
 	void setCurrentPhraseGroup(const PhraseGroupData&);
 
 private slots:
+	void onPhraseListItemChanged();
 	void addPhraseButtonClicked();
 	void removePhraseButtonClicked();
 
+	void onBehaviorListItemChanged();
 	void addBehaviorButtonClicked();
 	void removeBehaviorButtonClicked();
 
@@ -78,7 +80,10 @@ signals:
 	void onPhraseGroupRequired(const std::string& key);
 
 	void onPhraseCreated(std::string& key, std::string& phrase);
-	void onPhraseBehaviorCreated(std::string& key, std::string& phrase);
+	void onPhraseRemoved(const std::string& key, const std::string& phrase);
+
+	void onPhraseBehaviorCreated(std::string& key, std::string& behavior);
+	void onPhraseBehaviorRemoved(const std::string& key, const std::string& behavior);
 
 };
 

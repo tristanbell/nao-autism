@@ -1,10 +1,11 @@
 #include <GenericPhraseTab.h>
 
 #include <QGridLayout>
+#include <QMessageBox>
 #include <QLabel>
-#include <iostream>
-
 #include <QString>
+
+#include <iostream>
 
 const QString GenericPhraseTab::TAB_NAME = "General phrases";
 
@@ -88,14 +89,15 @@ void GenericPhraseTab::init()
 	_addBehaviorDialog = new TextInputDialog(behaviorDialogTitle, behaviorDialogLabel);
 
 	//Connect signals to required slots
-	QObject::connect(_phraseGroupBox, SIGNAL(currentIndexChanged(const QString&)),
-			this, SLOT(phraseGroupBoxIndexChanged(const QString&)));
-
+	QObject::connect(_phrasesList, SIGNAL(itemSelectionChanged()),
+			this, SLOT(onPhraseListItemChanged()));
 	QObject::connect(_addPhraseBtn, SIGNAL(clicked()),
 			this, SLOT(addPhraseButtonClicked()));
 	QObject::connect(_removePhraseBtn, SIGNAL(clicked()),
 			this, SLOT(removePhraseButtonClicked()));
 
+	QObject::connect(_behaviorList, SIGNAL(itemSelectionChanged()),
+			this, SLOT(onBehaviorListItemChanged()));
 	QObject::connect(_addBehaviorBtn, SIGNAL(clicked()),
 			this, SLOT(addBehaviorButtonClicked()));
 	QObject::connect(_removeBehaviorBtn, SIGNAL(clicked()),
@@ -104,19 +106,36 @@ void GenericPhraseTab::init()
 
 void GenericPhraseTab::setPhraseGroup(const std::map<std::string, PhraseGroupData>& phraseGroups)
 {
+	//Stop request for data when we are loading as we don't require it
+	QObject::disconnect(_phraseGroupBox, SIGNAL(currentIndexChanged(const QString&)),
+			this, SLOT(phraseGroupBoxIndexChanged(const QString&)));
+
 	//Clear old phrases
 	_phraseGroupBox->clear();
 
-	//Insert new phrases into box
-	std::map<std::string, PhraseGroupData>::const_iterator it = phraseGroups.begin();
-	while (it != phraseGroups.end()){
-		const std::pair<std::string, PhraseGroupData>& pair = *it;
+	if (phraseGroups.size() > 0){
+		//Insert new phrases into box
+		std::map<std::string, PhraseGroupData>::const_iterator it = phraseGroups.begin();
 
+		const std::pair<std::string, PhraseGroupData>& pair = *it;
+		loadIntoLists(pair.second); // Load data into the list for given 'key'
 		QString qName = QString::fromStdString(pair.first);
 		_phraseGroupBox->addItem(qName);
-
 		it++;
+
+		while (it != phraseGroups.end()){
+			const std::pair<std::string, PhraseGroupData>& pair = *it;
+
+			QString qName = QString::fromStdString(pair.first);
+			_phraseGroupBox->addItem(qName);
+
+			it++;
+		}
 	}
+
+	//Reconnect combobox to allow for requests when index is changed
+	QObject::connect(_phraseGroupBox, SIGNAL(currentIndexChanged(const QString&)),
+			this, SLOT(phraseGroupBoxIndexChanged(const QString&)));
 }
 
 void GenericPhraseTab::setCurrentPhraseGroup(const PhraseGroupData& data)
@@ -127,11 +146,20 @@ void GenericPhraseTab::setCurrentPhraseGroup(const PhraseGroupData& data)
 void GenericPhraseTab::onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>& group)
 {
 	setPhraseGroup(group);
+
+	_addPhraseBtn->setEnabled(true);
+	_removePhraseBtn->setEnabled(false);
+
+	_addBehaviorBtn->setEnabled(true);
+	_removeBehaviorBtn->setEnabled(false);
 }
 
 void GenericPhraseTab::onPhraseGroupRetrieved(const PhraseGroupData& data)
 {
 	setCurrentPhraseGroup(data);
+
+	_removePhraseBtn->setEnabled(false);
+	_removeBehaviorBtn->setEnabled(false);
 }
 
 void GenericPhraseTab::loadIntoLists(const PhraseGroupData& data)
@@ -150,9 +178,11 @@ void GenericPhraseTab::loadIntoLists(const PhraseGroupData& data)
 
 			it++;
 		}
+	}
 
-		//Load behaviors
-		it = data.behaviorVector.begin();
+	//Load behaviors
+	if (data.behaviorVector.size() > 0){
+		std::list<std::string>::const_iterator it = data.behaviorVector.begin();
 		while (it != data.behaviorVector.end()){
 			const std::string& current = *it;
 
@@ -161,9 +191,6 @@ void GenericPhraseTab::loadIntoLists(const PhraseGroupData& data)
 
 			it++;
 		}
-
-		_addPhraseBtn->setEnabled(true);
-		_addBehaviorBtn->setEnabled(true);
 	}
 }
 
@@ -171,6 +198,11 @@ void GenericPhraseTab::phraseGroupBoxIndexChanged(const QString& text)
 {
 	std::string key = text.toStdString();
 	emit onPhraseGroupRequired(key);
+}
+
+void GenericPhraseTab::onPhraseListItemChanged()
+{
+	_removePhraseBtn->setEnabled(true);
 }
 
 void GenericPhraseTab::addPhraseButtonClicked()
@@ -192,7 +224,22 @@ void GenericPhraseTab::addPhraseButtonClicked()
 
 void GenericPhraseTab::removePhraseButtonClicked()
 {
+	QMessageBox::StandardButton btn = QMessageBox::question(this, "Delete phrase", "Are you sure you want to delete this phrase?"
+			,QMessageBox::Yes | QMessageBox::No);
 
+	if (btn == QMessageBox::Yes){
+		std::string key = _phraseGroupBox->currentText().toStdString();
+		std::string phrase = _phrasesList->currentItem()->text().toStdString();
+
+		QListWidgetItem* item = _phrasesList->takeItem(_phrasesList->currentIndex().row());
+
+		emit onPhraseRemoved(key, phrase);
+	}
+}
+
+void GenericPhraseTab::onBehaviorListItemChanged()
+{
+	_removeBehaviorBtn->setEnabled(true);
 }
 
 void GenericPhraseTab::addBehaviorButtonClicked()
@@ -214,32 +261,17 @@ void GenericPhraseTab::addBehaviorButtonClicked()
 
 void GenericPhraseTab::removeBehaviorButtonClicked()
 {
+	QMessageBox::StandardButton btn = QMessageBox::question(this, "Delete behavior", "Are you sure you want to delete this behavior?"
+			,QMessageBox::Yes | QMessageBox::No);
 
+	if (btn == QMessageBox::Yes){
+		_behaviorList->removeItemWidget(_behaviorList->currentItem());
+
+		std::string key = _phraseGroupBox->currentText().toStdString();
+		std::string behavior = _behaviorList->currentItem()->text().toStdString();
+
+		QListWidgetItem* item = _behaviorList->takeItem(_behaviorList->currentIndex().row());
+
+		emit onPhraseBehaviorRemoved(key, behavior);
+	}
 }
-
-
-//void GenericPhraseTab::phraseCreated(std::string& key, std::string& phrase)
-//{
-//	emit onPhraseCreated(key, phrase);
-//}
-//
-//void GenericPhraseTab::phraseBehaviorCreated(std::string& key, std::string& behavior)
-//{
-//	emit onPhraseBehaviorCreated(key, behavior);
-//}
-//
-//void GenericPhraseTab::onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>& group)
-//{
-//	_phrasesWidget->setPhraseGroup(group);
-//}
-//
-//void GenericPhraseTab::onPhraseGroupRetrieved(const PhraseGroupData& data)
-//{
-//	_phrasesWidget->setCurrentPhraseGroup(data);
-//}
-//
-//void GenericPhraseTab::onPhraseGroupBoxIndexChanged(const QString& text)
-//{
-//	std::string key = text.toStdString();
-//	emit onPhraseGroupRequired(key);
-//}

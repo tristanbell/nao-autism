@@ -39,6 +39,7 @@ set(settings_editor_HEADERS
 	include/FileMenu.h
 	include/PhraseGroupData.h
 	include/BehaviorData.h
+	include/BaseSettingsData.h
 	include/Controller.h
 	include/Model.h
 	include/Keys.h

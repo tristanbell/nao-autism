@@ -8,14 +8,18 @@
 #ifndef BASESETTINGSTAB_H_
 #define BASESETTINGSTAB_H_
 
+#include <BaseSettingsData.h>
+
+#include <QPushButton>
 #include <QTabWidget>
 #include <QString>
-
 #include <QLabel>
-#include <QLineEdit>
+#include <QSpinBox>
 
 class BaseSettingsTab : public QTabWidget
 {
+
+	Q_OBJECT
 
 public:
 	static const QString TAB_NAME;
@@ -26,11 +30,23 @@ public:
 	}
 
 private:
-	QLineEdit* _waitBox;
-	QLineEdit* _timeoutBox;
-	QLineEdit* _triesBox;
+	QSpinBox* _waitBox;
+	QSpinBox* _timeoutBox;
+	QSpinBox* _triesBox;
+	QPushButton* _setSettingsBtn;
 
 	void init();
+
+	void connectAll();
+	void disconnectAll();
+
+private slots:
+	void onValueUpdated(int value);
+
+	void onSettingsLoaded(const BaseSettingsData& data);
+
+signals:
+	void onSettingsUpdated(const BaseSettingsData& data);
 
 };
 

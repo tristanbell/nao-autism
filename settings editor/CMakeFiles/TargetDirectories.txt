@@ -1,1 +1,0 @@
-/home/parallels/nao-autism/settings editor/CMakeFiles/settings_editor.dir

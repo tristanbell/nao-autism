@@ -204,8 +204,6 @@ void generateBehavior(Json::Value& root, const std::string name, const std::stri
 
 Json::Value generateRewardBehaviorsList()
 {
-	Json::Value list(Json::arrayValue);
-
 	Json::Value reward_1(Json::objectValue);
 
 	Json::Value& reward_1_name = reward_1[BEHAVIOR_NAME_KEY];
@@ -213,9 +211,7 @@ Json::Value generateRewardBehaviorsList()
 	reward_1_name.append(REWARD_2_BEHAVIOR_NAME);
 	reward_1_name.append(REWARD_3_BEHAVIOR_NAME);
 
-	list.append(reward_1);
-
-	return list;
+	return reward_1;
 }
 
 Json::Value generateGenericPhrases()

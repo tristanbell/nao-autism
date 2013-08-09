@@ -50,6 +50,8 @@ void MimicGame::perform(void) {
 		}
 
 		case WAITING_MIMIC: {
+			// While in this state classificationCallback will run,
+			// continuously updating _currentPoseClassification
 			int desiredClassification = _performedBehavior->getClassification();
 
 			if (_currentPoseClassification == desiredClassification) {
@@ -118,7 +120,7 @@ void MimicGame::classificationCallback(const nao_autism_messages::PoseClassifica
 	if (_currentState == WAITING_MIMIC) {
 		if (_poseQueue.size() >= MAX_QUEUE_SIZE) {
 			setOverallClassification();
-			printf("Current class: %d         \n", _currentPoseClassification);
+			std::cout << "Current class: " << _currentPoseClassification << "         \r";
 		}
 
 		_poseQueue.push_back(poseClass);

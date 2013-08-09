@@ -192,6 +192,7 @@ void GuessGame::perform(void) {
 				sleep(_settings.getWait());
 
 				_currentState = ASK_QUESTION;
+				stopSpeechRecognition();
 			}
 		}
 

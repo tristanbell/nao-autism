@@ -1,5 +1,8 @@
 ## Qt4 related files
-include/moc_* # moc headers
+include/moc_*
+
+## Compiles files
+*.cxx
 
 ## Build/devel/install folders
 
@@ -10,6 +13,7 @@ recordings
 
 ## C++ stuff
 bin
+CMakeFiles
 
 ## Linked CMakeLists.txt file
 src/CMakeLists.txt

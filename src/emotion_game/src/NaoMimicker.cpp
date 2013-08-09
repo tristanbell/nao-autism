@@ -38,7 +38,29 @@
 #include <vector>
 #include <string>
 
-ros::Publisher pub;
+#define ORIGINAL_FRAME "/openni_depth_frame"
+#define REMAP_FRAME "/tf_remap"
+
+/*
+ *  Represents the bounding box around the user which allows
+ *  the user to control the Nao's walking movements.
+ */
+struct ControlBox {
+	const double CONTROL_DIST;
+	double front, back, left, right;
+
+	ControlBox(geometry_msgs::Vector3 userPosition) : CONTROL_DIST(1.0)
+	{
+		front = userPosition.z - CONTROL_DIST;
+		back = userPosition.z + CONTROL_DIST;
+		left = userPosition.x - CONTROL_DIST;
+		right = userPosition.x + CONTROL_DIST;
+	}
+};
+
+ControlBox *_controlBox;
+ros::Publisher _arms_pub;
+ros::Publisher _walk_pub;
 bool ready;
 
 // Positions of joints to calculate elbow roll
@@ -52,6 +74,27 @@ tf::Vector3 *_rightShoulder;
 float _leftElbowRoll = 0.0;
 float _rightElbowRoll = 0.0;
 
+void init(geometry_msgs::TransformStamped initTransform) {
+	geometry_msgs::Vector3 userPosition = initTransform.transform.translation;
+	_controlBox = new ControlBox(userPosition);
+
+	printf("User origin: (%f, %f), box: (%f, %f, %f, %f)\n", userPosition.x,
+			userPosition.z, _controlBox->front, _controlBox->back,
+			_controlBox->left, _controlBox->right);
+}
+
+void checkTfBroadcasting(geometry_msgs::TransformStamped transform)
+{
+	if (!ready
+			&& transform.header.frame_id == ORIGINAL_FRAME
+			&& transform.child_frame_id.find("left_foot") != std::string::npos) {
+		init(transform);
+
+		ROS_INFO("/tf is now publishing, ready to go.");
+		ready = true;
+	}
+}
+
 void constructAndPublishMsg(std::vector<std::string> &joints, std::vector<float> &angles)
 {
 	nao_msgs::JointAnglesWithSpeed jointMsg;
@@ -59,7 +102,7 @@ void constructAndPublishMsg(std::vector<std::string> &joints, std::vector<float>
 	jointMsg.joint_names = joints;
 	jointMsg.joint_angles = angles;
 
-	pub.publish(jointMsg);
+	_arms_pub.publish(jointMsg);
 }
 
 void calculateLElbowRoll(void)
@@ -138,115 +181,155 @@ void tfCallback(const tf::tfMessage msg)
 
 	//Allow application to continue when message containing tf for head_1 is received.
 	geometry_msgs::TransformStamped transform = msg.transforms[0];
-	if (!ready && transform.child_frame_id.find("head_") != std::string::npos) {
-		ROS_INFO("/tf is now publishing, ready to go.");
-		ready = true;
-		return;
-	}
+	checkTfBroadcasting(transform);
 
-	if (transform.header.frame_id == "/tf_remap") {
-		float x = transform.transform.rotation.x;
-		float y = transform.transform.rotation.y;
-		float z = transform.transform.rotation.z;
-		float w = transform.transform.rotation.w;
-		geometry_msgs::Vector3 o = transform.transform.translation;
-		tf::Vector3 origin(o.x, o.y, o.z);
-		tf::Quaternion quat(x, y, z, w);
-		tf::Matrix3x3 mat(quat);
+	if (ready) {
+		geometry_msgs::Vector3 translation = transform.transform.translation;
 
-		// Roll: X (Red), Pitch: Y (Green), Yaw: Z (Blue)
-		double roll, pitch, yaw;
+		// Move arms
+		if (transform.header.frame_id == REMAP_FRAME) {
+			// Initialise roll, pitch and yaw for the current joint
+			float x = transform.transform.rotation.x;
+			float y = transform.transform.rotation.y;
+			float z = transform.transform.rotation.z;
+			float w = transform.transform.rotation.w;
+			tf::Vector3 origin(translation.x, translation.y, translation.z);
+			tf::Quaternion quat(x, y, z, w);
+			tf::Matrix3x3 mat(quat);
 
-		mat.getRPY(roll, pitch, yaw);
-		std::vector<std::string> joints;
-		std::vector<float> angles;
+			// Roll: X (Red), Pitch: Y (Green), Yaw: Z (Blue)
+			double roll, pitch, yaw;
 
-		if (transform.child_frame_id.find("left_shoulder_1")
-				!= std::string::npos) {
-			_leftShoulder = new tf::Vector3(origin);
-			pitch = -yaw;
+			mat.getRPY(roll, pitch, yaw);
+			std::vector<std::string> joints;
+			std::vector<float> angles;
 
-			if (pitch > -2.0857 && pitch < 2.0857) {
-				joints.push_back("LShoulderPitch");
-				angles.push_back((float) pitch);
-				toPublish = true;
+			if (transform.child_frame_id.find("left_shoulder_1")
+					!= std::string::npos) {
+				_leftShoulder = new tf::Vector3(origin);
+				pitch = -yaw;
+
+				if (pitch > -2.0857 && pitch < 2.0857) {
+					joints.push_back("LShoulderPitch");
+					angles.push_back((float) pitch);
+					toPublish = true;
+				}
+				if (roll > -0.3142 && roll < 1.3265) {
+					joints.push_back("LShoulderRoll");
+					angles.push_back((float) roll);
+					toPublish = true;
+				}
+	//			printf("Left shoulder roll: %f, pitch: %f      \r", roll, pitch);
+	//			std::flush(std::cout);
 			}
-			if (roll > -0.3142 && roll < 1.3265) {
-				joints.push_back("LShoulderRoll");
-				angles.push_back((float) roll);
-				toPublish = true;
+			if (transform.child_frame_id.find("right_shoulder_1")
+					!= std::string::npos) {
+				_rightShoulder = new tf::Vector3(origin);
+				pitch = yaw;
+				roll = -roll - (M_PI/4);
+
+				if (pitch > -2.0857 && pitch < 2.0857) {
+					joints.push_back("RShoulderPitch");
+					angles.push_back((float) pitch);
+					toPublish = true;
+				}
+				if (roll > -1.3265 && roll < 0.3142) {
+					joints.push_back("RShoulderRoll");
+					angles.push_back((float) roll);
+					toPublish = true;
+				}
+
+	//			printf("Right shoulder roll: %f, pitch: %f      \r", roll, pitch);
+	//			std::flush(std::cout);
 			}
-//			printf("Left shoulder roll: %f, pitch: %f      \r", roll, pitch);
-//			std::flush(std::cout);
+			if (transform.child_frame_id.find("left_elbow_1")
+					!= std::string::npos) {
+				_leftElbow = new tf::Vector3(origin);
+				yaw = -pitch;
+				roll = _leftElbowRoll;
+
+				if (yaw > -2.0857 && yaw < 2.0857) {
+					joints.push_back("LElbowYaw");
+					angles.push_back((float) yaw);
+					toPublish = true;
+				}
+				if (roll > -1.5446 && roll < -0.0349) {
+					joints.push_back("LElbowRoll");
+					angles.push_back((float) roll);
+					toPublish = true;
+				}
+			}
+			if (transform.child_frame_id.find("right_elbow_1")
+					!= std::string::npos) {
+				_rightElbow = new tf::Vector3(origin);
+				yaw = pitch;
+				roll = _rightElbowRoll;
+
+				if (yaw > -2.0857 && yaw < 2.0857) {
+					joints.push_back("RElbowYaw");
+					angles.push_back((float) pitch);
+					toPublish = true;
+				}
+				if (roll > 0.0349 && roll < 1.5446) {
+					joints.push_back("RElbowRoll");
+					angles.push_back((float) roll);
+					toPublish = true;
+				}
+			}
+			if (transform.child_frame_id.find("left_hand_1")
+					!= std::string::npos) {
+				_leftHand = new tf::Vector3(origin);
+			}
+			if (transform.child_frame_id.find("right_hand_1")
+					!= std::string::npos) {
+				_rightHand = new tf::Vector3(origin);
+			}
+
+			// Elbow roll must be calculated manually, for some reason
+			calculateLElbowRoll();
+			calculateRElbowRoll();
+
+			if (toPublish) {
+				constructAndPublishMsg(joints, angles);
+			}
 		}
-		if (transform.child_frame_id.find("right_shoulder_1")
-				!= std::string::npos) {
-			_rightShoulder = new tf::Vector3(origin);
-			pitch = yaw;
-			roll = roll - (M_PI/2);
+		// Control walking
+		if (transform.header.frame_id == ORIGINAL_FRAME) {
+			if (transform.child_frame_id == "/left_foot_1"/* ||
+					transform.child_frame_id == "right_foot_1"*/) {
+				printf("Left foot: (%f, %f)\r", translation.x, translation.z);
+				std::flush(std::cout);
 
-			if (pitch > -2.0857 && pitch < 2.0857) {
-				joints.push_back("RShoulderPitch");
-				angles.push_back((float) pitch);
-				toPublish = true;
-			}
-			if (roll > -1.3265 && roll < 0.3142) {
-				joints.push_back("RShoulderRoll");
-				angles.push_back((float) roll);
-				toPublish = true;
-			}
+				geometry_msgs::Twist msg;
 
-			printf("Right shoulder roll: %f, pitch: %f      \r", roll, pitch);
-			std::flush(std::cout);
-		}
-		if (transform.child_frame_id.find("left_elbow_1")
-				!= std::string::npos) {
-			_leftElbow = new tf::Vector3(origin);
-			yaw = -pitch;
-			roll = _leftElbowRoll;
+				if (translation.z < _controlBox->front) {
+					// Walk forward
+					msg.linear.x = 1;
+				}
+				else if (translation.z > _controlBox->back) {
+					// Walk backward
+					msg.linear.x = -1;
+				}
+				else {
+					// Stop walking
+					msg.linear.x = 0;
+				}
 
-			if (yaw > -2.0857 && yaw < 2.0857) {
-				joints.push_back("LElbowYaw");
-				angles.push_back((float) yaw);
-				toPublish = true;
-			}
-			if (roll > -1.5446 && roll < -0.0349) {
-				joints.push_back("LElbowRoll");
-				angles.push_back((float) roll);
-				toPublish = true;
-			}
-		}
-		if (transform.child_frame_id.find("right_elbow_1")
-				!= std::string::npos) {
-			_rightElbow = new tf::Vector3(origin);
-			yaw = pitch;
-			roll = _rightElbowRoll;
+				if (translation.x < _controlBox->left) {
+					// Shuffle left
+					msg.linear.y = 1;
+				}
+				if (translation.x > _controlBox->right) {
+					// Shuffle right
+					msg.linear.y = -1;
+				}
+				else {
+					// Stop shuffling
+					msg.linear.y = 0;
+				}
 
-			if (yaw > -2.0857 && yaw < 2.0857) {
-				joints.push_back("RElbowYaw");
-				angles.push_back((float) pitch);
-				toPublish = true;
+				_walk_pub.publish(msg);
 			}
-			if (roll > 0.0349 && roll < 1.5446) {
-				joints.push_back("RElbowRoll");
-				angles.push_back((float) roll);
-				toPublish = true;
-			}
-		}
-		if (transform.child_frame_id.find("left_hand_1")
-				!= std::string::npos) {
-			_leftHand = new tf::Vector3(origin);
-		}
-		if (transform.child_frame_id.find("right_hand_1")
-				!= std::string::npos) {
-			_rightHand = new tf::Vector3(origin);
-		}
-
-		calculateLElbowRoll();
-		calculateRElbowRoll();
-
-		if (toPublish) {
-			constructAndPublishMsg(joints, angles);
 		}
 	}
 }
@@ -254,7 +337,8 @@ void tfCallback(const tf::tfMessage msg)
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "mimicker");
 	ros::NodeHandle nh;
-	pub = nh.advertise<nao_msgs::JointAnglesWithSpeed>("/joint_angles", 50);
+	_arms_pub = nh.advertise<nao_msgs::JointAnglesWithSpeed>("/joint_angles", 50);
+	_walk_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 50);
 	ros::Subscriber sub = nh.subscribe("/tf", 50, tfCallback);
 
 	ros::Rate rate(60);

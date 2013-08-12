@@ -34,33 +34,48 @@
 #include <tf/tfMessage.h>
 #include <tf/tf.h>
 #include <nao_msgs/JointAnglesWithSpeed.h>
+#include <visualization_msgs/Marker.h>
 
 #include <vector>
 #include <string>
 
 #define ORIGINAL_FRAME "/openni_depth_frame"
 #define REMAP_FRAME "/tf_remap"
+#define CONTROL_DIST 0.4
+
+enum RobotMovements {
+	FORWARD,
+	BACKWARD,
+	LEFT,
+	RIGHT,
+	STOPX,
+	STOPY
+};
 
 /*
  *  Represents the bounding box around the user which allows
  *  the user to control the Nao's walking movements.
  */
 struct ControlBox {
-	const double CONTROL_DIST;
 	double front, back, left, right;
 
-	ControlBox(geometry_msgs::Vector3 userPosition) : CONTROL_DIST(1.0)
+	ControlBox(geometry_msgs::Vector3 userPosition)
 	{
-		front = userPosition.z - CONTROL_DIST;
-		back = userPosition.z + CONTROL_DIST;
-		left = userPosition.x - CONTROL_DIST;
-		right = userPosition.x + CONTROL_DIST;
+		front = userPosition.x - CONTROL_DIST;
+		back = userPosition.x + CONTROL_DIST;
+		left = userPosition.y - CONTROL_DIST;
+		right = userPosition.y + CONTROL_DIST;
 	}
 };
 
 ControlBox *_controlBox;
+RobotMovements _leftXMotionControl;
+RobotMovements _leftYMotionControl;
+RobotMovements _rightXMotionControl;
+RobotMovements _rightYMotionControl;
 ros::Publisher _arms_pub;
 ros::Publisher _walk_pub;
+ros::Publisher _box_pub;
 bool ready;
 
 // Positions of joints to calculate elbow roll
@@ -77,10 +92,61 @@ float _rightElbowRoll = 0.0;
 void init(geometry_msgs::TransformStamped initTransform) {
 	geometry_msgs::Vector3 userPosition = initTransform.transform.translation;
 	_controlBox = new ControlBox(userPosition);
+	_leftXMotionControl = STOPX;
+	_rightXMotionControl = STOPX;
+	_leftYMotionControl = STOPY;
+	_rightYMotionControl = STOPY;
 
 	printf("User origin: (%f, %f), box: (%f, %f, %f, %f)\n", userPosition.x,
 			userPosition.z, _controlBox->front, _controlBox->back,
 			_controlBox->left, _controlBox->right);
+
+	/*
+	ros::Rate r(1);
+	while (ros::ok()) {
+    visualization_msgs::Marker marker;
+    // Set the frame ID and timestamp.  See the TF tutorials for information on these.
+    marker.header.frame_id = "/openni_depth_frame";
+    marker.header.stamp = ros::Time::now();
+
+    // Set the namespace and id for this marker.  This serves to create a unique ID
+    // Any marker sent with the same namespace and id will overwrite the old one
+    marker.ns = "basic_shapes";
+    marker.id = 0;
+
+    marker.type = visualization_msgs::Marker::CUBE;
+
+    // Set the marker action.  Options are ADD and DELETE
+    marker.action = visualization_msgs::Marker::ADD;
+
+    // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
+    marker.pose.position.x = _controlBox->back;
+    marker.pose.position.y = _controlBox->left;
+    marker.pose.position.z = userPosition.z;
+    marker.pose.orientation.x = 0.0;
+    marker.pose.orientation.y = 0.0;
+    marker.pose.orientation.z = 0.0;
+    marker.pose.orientation.w = 1.0;
+
+    // Set the scale of the marker -- 1x1x1 here means 1m on a side
+    marker.scale.x = _controlBox->right - _controlBox->left;
+    marker.scale.y = _controlBox->back - _controlBox->front;
+    marker.scale.z = 0.1;
+
+    // Set the color -- be sure to set alpha to something non-zero!
+    marker.color.r = 0.0f;
+    marker.color.g = 1.0f;
+    marker.color.b = 0.0f;
+    marker.color.a = 1.0;
+
+    marker.lifetime = ros::Duration();
+
+    // Publish the marker
+    _box_pub.publish(marker);
+
+	r.sleep();
+	}
+	*/
 }
 
 void checkTfBroadcasting(geometry_msgs::TransformStamped transform)
@@ -105,6 +171,46 @@ void constructAndPublishMsg(std::vector<std::string> &joints, std::vector<float>
 	_arms_pub.publish(jointMsg);
 }
 
+void constructAndPublishMovement(void) {
+	geometry_msgs::Twist msg;
+
+//	std::cout << "Movement: ";
+
+	if (_leftXMotionControl == FORWARD || _rightXMotionControl == FORWARD) {
+		std::cout << "forward" << std::endl;
+		msg.linear.x = 1;
+	} else if (_leftXMotionControl == BACKWARD || _rightXMotionControl == BACKWARD) {
+		std::cout << "backward" << std::endl;
+		msg.linear.x = -1;
+	}
+	if (_leftXMotionControl == STOPX && _rightXMotionControl == STOPX) {
+		std::cout << "stopX" << std::endl;
+		msg.linear.x = 0;
+	}
+
+	// Only move left or right if not already moving forward or back
+	if (msg.linear.x == 0) {
+		if (_leftYMotionControl == LEFT) {
+//			std::cout << "left" << std::endl;
+			msg.linear.y = 1;
+		} else if (_rightYMotionControl == RIGHT) {
+//			std::cout << "right" << std::endl;
+			msg.linear.y = -1;
+		}
+
+		if (_leftYMotionControl == STOPY && _rightYMotionControl == STOPY) {
+//			std::cout << "stopY" << std::endl;
+			msg.linear.y = 0;
+		}
+	} else {
+		msg.linear.y = 0;
+	}
+
+//	std::cout << std::endl;
+
+	_walk_pub.publish(msg);
+}
+
 void calculateLElbowRoll(void)
 {
 	if (_leftElbow && _leftHand && _leftShoulder) {
@@ -114,7 +220,7 @@ void calculateLElbowRoll(void)
 		float etohLength = _leftElbow->distance(*_leftHand);
 		float stoeLength = _leftShoulder->distance(*_leftElbow);
 
-//			// Find distances and normalize (to between 0 and 1)
+		// Find distances and normalize (to between 0 and 1)
 		elbowToHand.setX((_leftElbow->x() - _leftHand->x()) / etohLength);
 		elbowToHand.setY((_leftElbow->y() - _leftHand->y()) / etohLength);
 		elbowToHand.setZ((_leftElbow->z() - _leftHand->z()) / etohLength);
@@ -122,14 +228,6 @@ void calculateLElbowRoll(void)
 		shoulderToElbow.setX((_leftShoulder->x() - _leftElbow->x()) / stoeLength);
 		shoulderToElbow.setY((_leftShoulder->y() - _leftElbow->y()) / stoeLength);
 		shoulderToElbow.setZ((_leftShoulder->z() - _leftElbow->z()) / stoeLength);
-
-//			elbowToHand.setX((_leftElbow->x() + _leftHand->x()));
-//			elbowToHand.setY((_leftElbow->y() + _leftHand->y()));
-//			elbowToHand.setZ((_leftElbow->z() + _leftHand->z()));
-
-//			shoulderToElbow.setX((_leftShoulder->x() + _leftElbow->x()));
-//			shoulderToElbow.setY((_leftShoulder->y() + _leftElbow->y()));
-//			shoulderToElbow.setZ((_leftShoulder->z() + _leftElbow->z()));
 
 		float theta = elbowToHand.angle(shoulderToElbow);
 
@@ -158,14 +256,6 @@ void calculateRElbowRoll(void)
 		shoulderToElbow.setY((_rightShoulder->y() - _rightElbow->y()) / stoeLength);
 		shoulderToElbow.setZ((_rightShoulder->z() - _rightElbow->z()) / stoeLength);
 
-//		_elbowToHand.setX((_rightElbow->x() + _rightHand->x()));
-//		_elbowToHand.setY((_rightElbow->y() + _rightHand->y()));
-//		_elbowToHand.setZ((_rightElbow->z() + _rightHand->z()));
-
-//		_shoulderToElbow.setX((_rightShoulder->x() + _rightElbow->x()));
-//		_shoulderToElbow.setY((_rightShoulder->y() + _rightElbow->y()));
-//		_shoulderToElbow.setZ((_rightShoulder->z() + _rightElbow->z()));
-
 		float theta = elbowToHand.angle(shoulderToElbow);
 
 //		printf("Right elbow roll -- tf: %f, calculated: %f      \r", _rightElbowRoll, theta);
@@ -178,9 +268,9 @@ void calculateRElbowRoll(void)
 void tfCallback(const tf::tfMessage msg)
 {
 	bool toPublish = false;
-
-	//Allow application to continue when message containing tf for head_1 is received.
 	geometry_msgs::TransformStamped transform = msg.transforms[0];
+
+	// Only allow application to continue when message containing tf for head joint is received.
 	checkTfBroadcasting(transform);
 
 	if (ready) {
@@ -295,40 +385,56 @@ void tfCallback(const tf::tfMessage msg)
 		}
 		// Control walking
 		if (transform.header.frame_id == ORIGINAL_FRAME) {
-			if (transform.child_frame_id == "/left_foot_1"/* ||
-					transform.child_frame_id == "right_foot_1"*/) {
-				printf("Left foot: (%f, %f)\r", translation.x, translation.z);
-				std::flush(std::cout);
+			std::string child = transform.child_frame_id;
+			if (child == "/left_foot_1") {
+//				printf("Left foot: (%f, %f, %f)\r", translation.x, translation.y, translation.z);
+//				std::flush(std::cout);
 
 				geometry_msgs::Twist msg;
 
-				if (translation.z < _controlBox->front) {
-					// Walk forward
-					msg.linear.x = 1;
+				if (translation.x < _controlBox->front) {
+					std::cout << "Left forward" << std::endl;
+					_leftXMotionControl = FORWARD;
 				}
-				else if (translation.z > _controlBox->back) {
-					// Walk backward
-					msg.linear.x = -1;
-				}
-				else {
-					// Stop walking
-					msg.linear.x = 0;
-				}
-
-				if (translation.x < _controlBox->left) {
-					// Shuffle left
-					msg.linear.y = 1;
-				}
-				if (translation.x > _controlBox->right) {
-					// Shuffle right
-					msg.linear.y = -1;
+				else if (translation.x > _controlBox->back) {
+					std::cout << "Left back" << std::endl;
+					_leftXMotionControl = BACKWARD;
 				}
 				else {
-					// Stop shuffling
-					msg.linear.y = 0;
+					_leftXMotionControl = STOPX;
 				}
 
-				_walk_pub.publish(msg);
+				if (translation.y > _controlBox->right) {
+					_leftYMotionControl = LEFT;
+				}
+				else {
+					_leftYMotionControl = STOPX;
+				}
+			}
+			if (child == "/right_foot_1") {
+//				printf("Left foot: (%f, %f)\r", translation.x, translation.z);
+//				std::flush(std::cout);
+
+				if (translation.x < _controlBox->front) {
+					std::cout << "Right forward" << std::endl;
+					_rightXMotionControl = FORWARD;
+				}
+				else if (translation.x > _controlBox->back) {
+					std::cout << "Right back" << std::endl;
+					_rightXMotionControl = BACKWARD;
+				}
+				else {
+					_rightXMotionControl = STOPX;
+				}
+
+				if (translation.y < _controlBox->left) {
+					_rightYMotionControl = RIGHT;
+				}
+				else {
+					_rightYMotionControl = STOPY;
+				}
+
+				constructAndPublishMovement();
 			}
 		}
 	}
@@ -338,7 +444,8 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "mimicker");
 	ros::NodeHandle nh;
 	_arms_pub = nh.advertise<nao_msgs::JointAnglesWithSpeed>("/joint_angles", 50);
-	_walk_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 50);
+	_walk_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 2);
+	_box_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 1);
 	ros::Subscriber sub = nh.subscribe("/tf", 50, tfCallback);
 
 	ros::Rate rate(60);

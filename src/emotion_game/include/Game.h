@@ -28,9 +28,7 @@ public:
 							_naoControl(),
 							_recognizedWords()
 	{
-		std::cout << "Initialising game..." << std::endl;
 		_speechSubscriber = _nodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 1000, &Game::onSpeechRecognized, this);
-		std::cout << "Initialising done, subscribed to speech." << std::endl;
 	}
 
 	virtual ~Game() { }

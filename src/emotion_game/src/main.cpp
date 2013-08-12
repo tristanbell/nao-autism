@@ -55,6 +55,8 @@ bool loadPhraseMaps(Json::Value& doc, std::map<std::string, std::vector<Phrase> 
 		std::map<std::string, std::vector<Phrase> >& guessGamePhraseMap,
 		std::map<std::string, std::vector<Phrase> >& mimicGamePhraseMap);
 
+void runGameLoop(Game* guessGame, Game* mimicGame, Game* currentGame);
+
 int main(int argc, char** argv)
 {
 	if (argc != 2){
@@ -200,44 +202,17 @@ int main(int argc, char** argv)
 		mimicGameSettings.setPhraseMap(mimicGamePhraseMap);
 		mimicGameSettings.setConfidenceThreshold(0.25);
 
-		std::cout << "Setting up games..." << std::endl;
-
 		Game* guessGame = new GuessGame(guessGameSettings);
-		std::cout << "Guess game ready!" << std::endl;
 		Game* mimicGame = new MimicGame(mimicGameSettings);
-		std::cout << "Mimic game ready!" << std::endl;
 
 		//Set current game and start it.
 //		Game* currentGame = guessGame;
 		Game* currentGame = mimicGame;
 		currentGame->startGame();
 
-		std::cout << "Game initialisation done, starting." << std::endl;
+		ROS_INFO("Game initialisation done, starting.");
 
-		ros::Rate loopRate(40);
-		//All checks are done, start game loop
-		while (ros::ok()){
-			if (!currentGame->isDone){
-				currentGame->perform();
-			}else{
-				//Clean up state of current game
-				currentGame->endGame();
-
-				//Swap games
-				if (currentGame == guessGame){
-					currentGame = mimicGame;
-				}else{
-					currentGame = guessGame;
-				}
-
-				//Start the new game
-				currentGame->startGame();
-			}
-
-			//Spin once to enable call backs, etc.
-			ros::spinOnce();
-			loopRate.sleep();
-		}
+		runGameLoop(guessGame, mimicGame, currentGame);
 	}else{
 		std::cout << "Invalid json data file." << std::endl;
 
@@ -257,6 +232,34 @@ int main(int argc, char** argv)
 //	startSpeechRecognition();
 
 	return 0;
+}
+
+void runGameLoop(Game* guessGame, Game* mimicGame, Game* currentGame)
+{
+	ros::Rate loopRate(40);
+	//All checks are done, start game loop
+	while (ros::ok()){
+		if (!currentGame->isDone){
+			currentGame->perform();
+		}else{
+			//Clean up state of current game
+			currentGame->endGame();
+
+			//Swap games
+			if (currentGame == guessGame){
+				currentGame = mimicGame;
+			}else{
+				currentGame = guessGame;
+			}
+
+			//Start the new game
+			currentGame->startGame();
+		}
+
+		//Spin once to enable call backs, etc.
+		ros::spinOnce();
+		loopRate.sleep();
+	}
 }
 
 void initSpeechRecognition(std::vector<std::string>& vocabVector)

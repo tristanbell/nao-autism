@@ -40,7 +40,6 @@ void MimicGame::perform(void) {
 
 			if (_settings.getPhraseVector(MIMIC_PROMPT_FOLLOW_KEY, questionVector))
 				sayAny(questionVector);
-			std::cout << "Finished prompt." << std::endl;
 
 			_currentState = WAITING_MIMIC;
 
@@ -83,7 +82,7 @@ void MimicGame::perform(void) {
 		}
 
 		case WAITING_ANSWER_CONTINUE: {
-
+			waitToContinue();
 			break;
 		}
 

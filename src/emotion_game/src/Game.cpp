@@ -60,6 +60,10 @@ void Game::performEmotion(void)
 	_performedBehavior = new Behavior(ref);
 }
 
+/**
+ * Asks user if they want to continue playing, starts speech recognition
+ * and changes state to waiting for an answer.
+ */
 void Game::askToContinue(void)
 {
 	std::vector<Phrase> phrases;
@@ -74,12 +78,17 @@ void Game::askToContinue(void)
 	}
 	sleep(_settings.getWait());
 
+	startSpeechRecognition();
+
 	_currentState = WAITING_ANSWER_CONTINUE;
 }
 
+/**
+ * Waits until yes/no is 'heard'. If yes, change state to perform emotion.
+ * If no, signal that game is done.
+ */
 void Game::waitToContinue(void)
 {
-	//Wait until yes/no is 'heard'
 	std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
 	while (it != _recognizedWords.end()){
 		std::pair<std::string, float>& pair = *it;

@@ -65,3 +65,13 @@ bool GameSettings::getPhraseVector(const std::string& key, std::vector<Phrase>& 
 
 	return false;
 }
+
+void GameSettings::setConfidenceThreshold(float confidenceThreshold)
+{
+	this->confidenceThreshold = confidenceThreshold;
+}
+
+float GameSettings::getConfidenceThreshold() const
+{
+	return confidenceThreshold;
+}

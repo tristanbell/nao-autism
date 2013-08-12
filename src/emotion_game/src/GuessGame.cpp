@@ -10,22 +10,15 @@
 
 #include <Keys.h>
 
-#define WORD_RECOGNIZED_TOPIC "word_recognized"
-#define confidenceThreshold 0.25f // TODO: Implement in GameSettings class
-
 #include <iostream>
 
-GuessGame::GuessGame(GameSettings& settings) :  Game(settings),
-											   _guessNodeHandle(),
-											   _recognizedWords()
+GuessGame::GuessGame(GameSettings& settings) :  Game(settings)
 {
 	_performedBehavior = NULL;
 
 	_waitingSpeech = false;
 	_currentState = INTRODUCTION;
 	_performedEmotion = false;
-
-	_speechSubscriber = _guessNodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 1000, &GuessGame::onSpeechRecognized, &*this);
 }
 
 void GuessGame::startGame(void) {
@@ -114,7 +107,7 @@ void GuessGame::perform(void) {
 			std::pair<std::string, float>& pair = *it;
 
 			//Check for correct answer
-			if (pair.first == _performedBehavior->getActualName() && pair.second >= confidenceThreshold){
+			if (pair.first == _performedBehavior->getActualName() && pair.second >= _settings.getConfidenceThreshold()){
 				std::list<std::string> parts;
 				parts.push_back(_performedBehavior->getActualName());
 
@@ -199,46 +192,12 @@ void GuessGame::perform(void) {
 	}
 
 	case ASK_QUESTION_CONTINUE:{
-		std::vector<Phrase> phrases;
-		if (_settings.getPhraseVector(CONTINUE_GAME_QUESTION_KEY, phrases)){
-			const Phrase& current = sayAny(phrases);
-
-			if (current.getNumberOfBehaviors() == 0){
-				std::string behavior = current.getRandomBehaviorName();
-
-				_naoControl.perform(behavior);
-			}
-		}
-		sleep(_settings.getWait());
-
-		_currentState = WAITING_ANSWER_CONTINUE;
+		askToContinue();
 		break;
 	}
 
-	//TODO: Integrate this with the rest of the 'game'
 	case WAITING_ANSWER_CONTINUE:{
-		//Wait until yes/no is 'heard'
-		std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
-		while (it != _recognizedWords.end()){
-			std::pair<std::string, float>& pair = *it;
-
-			if (pair.first == "yes" && pair.second >= confidenceThreshold){
-				_currentState = PERFORM_EMOTION;
-				stopSpeechRecognition();
-
-				_recognizedWords.clear();
-				return;
-			}else if (pair.first == "no" && pair.second >= confidenceThreshold){
-				isDone = true;
-				stopSpeechRecognition();
-
-				_recognizedWords.clear();
-				return;
-			}
-
-			it++;
-		}
-
+		waitToContinue();
 		break;
 	}
 
@@ -252,20 +211,6 @@ void GuessGame::endGame(void) {
 	//Clean up
 	if (_performedBehavior == NULL)
 		delete _performedBehavior;
-}
-
-void GuessGame::onSpeechRecognized(const nao_msgs::WordRecognized msg)
-{
-	//Check to see if speech is needed, if so push onto list
-	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)){
-		for (int i=0;i<msg.words.size();i++){
-			std::pair<std::string, float> pair(msg.words[i], msg.confidence_values[i]);
-
-			std::cout << "Recognized word: " << msg.words[i] << ", confidence: " << msg.confidence_values[i] << "\n";
-
-			_recognizedWords.push_back(pair);
-		}
-	}
 }
 
 

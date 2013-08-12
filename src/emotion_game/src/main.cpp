@@ -150,7 +150,16 @@ int main(int argc, char** argv)
 		//Load reward behavior list
 		Json::Value rewardBehaviorVal = doc.get(REWARD_BEHAVIOR_LIST_KEY, Json::Value::null);
 		if (rewardBehaviorVal.type() != Json::Value::null.type()){
-			rewardBehaviorList = getBehaviorList(rewardBehaviorVal);
+			Json::Value rewardBehaviorListVal = rewardBehaviorVal[BEHAVIOR_NAME_KEY];
+
+			Json::Value::ArrayIndex size = rewardBehaviorListVal.size();
+			for (int i=0;i<size;i++){
+				Json::Value current = rewardBehaviorListVal.get(i, Json::Value::null);
+
+				if (current != Json::Value::null){
+					rewardBehaviorList.push_back(current.asString());
+				}
+			}
 		}else{
 			ROS_ERROR("Unable to find behaviors, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
 			return 1;
@@ -193,11 +202,13 @@ int main(int argc, char** argv)
 		Game* mimicGame = new MimicGame(mimicGameSettings);
 
 		//Set current game and start it.
-		Game* currentGame = guessGame;
+//		Game* currentGame = guessGame;
+		Game* currentGame = mimicGame;
 		currentGame->startGame();
 
 		ROS_INFO("Game initialisation done, starting.");
 
+		ros::Rate loopRate(40);
 		//All checks are done, start game loop
 		while (ros::ok()){
 			if (!currentGame->isDone){
@@ -219,6 +230,7 @@ int main(int argc, char** argv)
 
 			//Spin once to enable call backs, etc.
 			ros::spinOnce();
+			loopRate.sleep();
 		}
 	}else{
 		std::cout << "Invalid json data file." << std::endl;

@@ -9,13 +9,12 @@
 #include <MimicGame.h>
 #include <Keys.h>
 
-MimicGame::MimicGame(GameSettings& settings) : Game(settings),
-											   _mimicNodeHandle()
+MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 {
 	_performedBehavior = NULL;
 	_currentState = INTRODUCTION;
 	_performedEmotion = false;
-	_classSubscriber = _mimicNodeHandle.subscribe("/classification", 15, &MimicGame::classificationCallback, this);
+	_classSubscriber = _nodeHandle.subscribe("/classification", 15, &MimicGame::classificationCallback, this);
 }
 
 void MimicGame::startGame(void) {
@@ -38,11 +37,9 @@ void MimicGame::perform(void) {
 		case PROMPT_MIMIC: {
 			std::vector<Phrase> questionVector;
 
-			std::list<std::string> parts;
-			parts.push_back(_performedBehavior->getActualName());
-
-			if (_settings.getPhraseVector(QUESTION_KEY, questionVector))
-				sayAny(questionVector, parts);
+			if (_settings.getPhraseVector(MIMIC_PROMPT_FOLLOW_KEY, questionVector))
+				sayAny(questionVector);
+			std::cout << "Finished prompt." << std::endl;
 
 			_currentState = WAITING_MIMIC;
 
@@ -55,13 +52,32 @@ void MimicGame::perform(void) {
 			int desiredClassification = _performedBehavior->getClassification();
 
 			if (_currentPoseClassification == desiredClassification) {
-				// Say well done here, then ask to continue
+				// Say well done
+				std::list<std::string> parts;
+				parts.push_back(_performedBehavior->getActualName());
 
-				_currentState = WAITING_ANSWER_CONTINUE;
+				std::vector<Phrase> phraseVector;
+				if (_settings.getPhraseVector(CORRECT_ANSWER_KEY, phraseVector)) {
+					const Phrase& phrase = sayAny(phraseVector, parts);
+
+					if (phrase.getNumberOfBehaviors() != 0) {
+						std::string behavior = phrase.getRandomBehaviorName();
+
+						_naoControl.perform(behavior);
+					}
+				}
+				sleep(_settings.getWait());
+
+				_currentState = ASK_QUESTION_CONTINUE;
 			}
 
 			// Include a timeout for incorrect poses
 
+			break;
+		}
+
+		case ASK_QUESTION_CONTINUE: {
+			askToContinue();
 			break;
 		}
 
@@ -120,7 +136,8 @@ void MimicGame::classificationCallback(const nao_autism_messages::PoseClassifica
 	if (_currentState == WAITING_MIMIC) {
 		if (_poseQueue.size() >= MAX_QUEUE_SIZE) {
 			setOverallClassification();
-			std::cout << "Current class: " << _currentPoseClassification << "         \r";
+//			std::cout << "Current class: " << _currentPoseClassification << "         \r";
+//			std::flush(std::cout);
 		}
 
 		_poseQueue.push_back(poseClass);

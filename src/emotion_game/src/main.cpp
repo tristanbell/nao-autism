@@ -149,9 +149,18 @@ int main(int argc, char** argv)
 
 		//Load reward behavior list
 		Json::Value rewardBehaviorVal = doc.get(REWARD_BEHAVIOR_LIST_KEY, Json::Value::null);
-		if (rewardBehaviorVal.type() != Json::Value::null.type()){
-			rewardBehaviorList = getBehaviorList(rewardBehaviorVal);
-		}else{
+		if (rewardBehaviorVal.type() != Json::Value::null.type()) {
+			Json::Value rewardBehaviorListVal =
+					rewardBehaviorVal[BEHAVIOR_NAME_KEY];
+			Json::Value::ArrayIndex size = rewardBehaviorListVal.size();
+			for (int i = 0; i < size; i++) {
+				Json::Value current = rewardBehaviorListVal.get(i,
+						Json::Value::null);
+				if (current != Json::Value::null) {
+					rewardBehaviorList.push_back(current.asString());
+				}
+			}
+		} else {
 			ROS_ERROR("Unable to find behaviors, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
 			return 1;
 		}

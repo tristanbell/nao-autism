@@ -189,6 +189,7 @@ int main(int argc, char** argv)
 		guessGameSettings.setMaxPromptAmount(maxPrompts);
 		guessGameSettings.setBehaviorVector(allBehaviorList);
 		guessGameSettings.setPhraseMap(guessGamePhraseMap);
+		guessGameSettings.setConfidenceThreshold(0.25);
 
 		GameSettings mimicGameSettings;
 
@@ -197,16 +198,21 @@ int main(int argc, char** argv)
 		mimicGameSettings.setBehaviorVector(allBehaviorList);
 		mimicGameSettings.setMaxPromptAmount(maxPrompts);
 		mimicGameSettings.setPhraseMap(mimicGamePhraseMap);
+		mimicGameSettings.setConfidenceThreshold(0.25);
+
+		std::cout << "Setting up games..." << std::endl;
 
 		Game* guessGame = new GuessGame(guessGameSettings);
+		std::cout << "Guess game ready!" << std::endl;
 		Game* mimicGame = new MimicGame(mimicGameSettings);
+		std::cout << "Mimic game ready!" << std::endl;
 
 		//Set current game and start it.
 //		Game* currentGame = guessGame;
 		Game* currentGame = mimicGame;
 		currentGame->startGame();
 
-		ROS_INFO("Game initialisation done, starting.");
+		std::cout << "Game initialisation done, starting." << std::endl;
 
 		ros::Rate loopRate(40);
 		//All checks are done, start game loop

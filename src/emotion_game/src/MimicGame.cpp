@@ -18,6 +18,7 @@ MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 }
 
 void MimicGame::startGame(void) {
+	std::cout << "Mimic game starting..." << std::endl;
 	_currentState = INTRODUCTION;
 }
 

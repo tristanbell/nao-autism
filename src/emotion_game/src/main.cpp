@@ -55,6 +55,8 @@ bool loadPhraseMaps(Json::Value& doc, std::map<std::string, std::vector<Phrase> 
 		std::map<std::string, std::vector<Phrase> >& guessGamePhraseMap,
 		std::map<std::string, std::vector<Phrase> >& mimicGamePhraseMap);
 
+void runGameLoop(Game* guessGame, Game* mimicGame, Game* currentGame);
+
 int main(int argc, char** argv)
 {
 	if (argc != 2){
@@ -149,18 +151,18 @@ int main(int argc, char** argv)
 
 		//Load reward behavior list
 		Json::Value rewardBehaviorVal = doc.get(REWARD_BEHAVIOR_LIST_KEY, Json::Value::null);
-		if (rewardBehaviorVal.type() != Json::Value::null.type()) {
-			Json::Value rewardBehaviorListVal =
-					rewardBehaviorVal[BEHAVIOR_NAME_KEY];
+		if (rewardBehaviorVal.type() != Json::Value::null.type()){
+			Json::Value rewardBehaviorListVal = rewardBehaviorVal[BEHAVIOR_NAME_KEY];
+
 			Json::Value::ArrayIndex size = rewardBehaviorListVal.size();
-			for (int i = 0; i < size; i++) {
-				Json::Value current = rewardBehaviorListVal.get(i,
-						Json::Value::null);
-				if (current != Json::Value::null) {
+			for (int i=0;i<size;i++){
+				Json::Value current = rewardBehaviorListVal.get(i, Json::Value::null);
+
+				if (current != Json::Value::null){
 					rewardBehaviorList.push_back(current.asString());
 				}
 			}
-		} else {
+		}else{
 			ROS_ERROR("Unable to find behaviors, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
 			return 1;
 		}
@@ -189,6 +191,7 @@ int main(int argc, char** argv)
 		guessGameSettings.setMaxPromptAmount(maxPrompts);
 		guessGameSettings.setBehaviorVector(allBehaviorList);
 		guessGameSettings.setPhraseMap(guessGamePhraseMap);
+		guessGameSettings.setConfidenceThreshold(0.25);
 
 		GameSettings mimicGameSettings;
 
@@ -197,38 +200,19 @@ int main(int argc, char** argv)
 		mimicGameSettings.setBehaviorVector(allBehaviorList);
 		mimicGameSettings.setMaxPromptAmount(maxPrompts);
 		mimicGameSettings.setPhraseMap(mimicGamePhraseMap);
+		mimicGameSettings.setConfidenceThreshold(0.25);
 
 		Game* guessGame = new GuessGame(guessGameSettings);
 		Game* mimicGame = new MimicGame(mimicGameSettings);
 
 		//Set current game and start it.
 		Game* currentGame = guessGame;
+//		Game* currentGame = mimicGame;
 		currentGame->startGame();
 
 		ROS_INFO("Game initialisation done, starting.");
 
-		//All checks are done, start game loop
-		while (ros::ok()){
-			if (!currentGame->isDone){
-				currentGame->perform();
-			}else{
-				//Clean up state of current game
-				currentGame->endGame();
-
-				//Swap games
-				if (currentGame == guessGame){
-					currentGame = mimicGame;
-				}else{
-					currentGame = guessGame;
-				}
-
-				//Start the new game
-				currentGame->startGame();
-			}
-
-			//Spin once to enable call backs, etc.
-			ros::spinOnce();
-		}
+		runGameLoop(guessGame, mimicGame, currentGame);
 	}else{
 		std::cout << "Invalid json data file." << std::endl;
 
@@ -248,6 +232,34 @@ int main(int argc, char** argv)
 //	startSpeechRecognition();
 
 	return 0;
+}
+
+void runGameLoop(Game* guessGame, Game* mimicGame, Game* currentGame)
+{
+	ros::Rate loopRate(40);
+	//All checks are done, start game loop
+	while (ros::ok()){
+		if (!currentGame->isDone){
+			currentGame->perform();
+		}else{
+			//Clean up state of current game
+			currentGame->endGame();
+
+			//Swap games
+			if (currentGame == guessGame){
+				currentGame = mimicGame;
+			}else{
+				currentGame = guessGame;
+			}
+
+			//Start the new game
+			currentGame->startGame();
+		}
+
+		//Spin once to enable call backs, etc.
+		ros::spinOnce();
+		loopRate.sleep();
+	}
 }
 
 void initSpeechRecognition(std::vector<std::string>& vocabVector)

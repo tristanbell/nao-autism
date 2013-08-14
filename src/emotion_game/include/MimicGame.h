@@ -29,7 +29,7 @@ public:
 	void endGame(void);
 
 private:
-	ros::NodeHandle _mimicNodeHandle;
+//	ros::NodeHandle _mimicNodeHandle;
 	ros::Subscriber _classSubscriber;
 	std::vector<nao_autism_messages::PoseClassification> _poseQueue;
 	short _currentPoseClassification;

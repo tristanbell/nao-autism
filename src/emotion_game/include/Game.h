@@ -8,15 +8,28 @@
 #ifndef GAME_H_
 #define GAME_H_
 
+#include <ros/ros.h>
 #include <GameSettings.h>
 #include <nao_control/NaoControl.h>
+#include <nao_msgs/WordRecognized.h>
+#include <Phrase.h>
 #include <Keys.h>
+
+#include <string>
+#include <vector>
+#include <list>
+
+#define WORD_RECOGNIZED_TOPIC "word_recognized"
 
 class Game {
 public:
 	Game(GameSettings gs) : _settings(gs),
-							_naoControl()
-	{ }
+							_nodeHandle(),
+							_naoControl(),
+							_recognizedWords()
+	{
+		_speechSubscriber = _nodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 1000, &Game::onSpeechRecognized, this);
+	}
 
 	virtual ~Game() { }
 
@@ -54,16 +67,22 @@ protected:
 
 	nao_control::NaoControl _naoControl;
 	GameSettings _settings;
+	ros::NodeHandle _nodeHandle;
+	ros::Subscriber _speechSubscriber;
 
 	State _currentState;
 	bool _performedEmotion;
 	Behavior* _performedBehavior;
+	std::list<std::pair<std::string, float> > _recognizedWords;
 
 	void introduction(void);
 	void performEmotion(void);
+	void askToContinue(void);
+	void waitToContinue(void);
 
 	bool startSpeechRecognition();
 	bool stopSpeechRecognition();
+	void onSpeechRecognized(const nao_msgs::WordRecognized msg);
 
 	const Phrase& say(const Phrase& phrase);
 	const Phrase& say(const Phrase& phrase, const std::list<std::string> parts);

@@ -1,0 +1,5 @@
+<launch>
+	<node name="tracker" pkg="openni_tracker" type="openni_tracker" output="screen" />
+	<node name="remapper" pkg="emotion_game" type="tf_remap" output="screen" />
+	<node name="mimicker" pkg="emotion_game" type="mimicker" output="screen" />
+</launch>

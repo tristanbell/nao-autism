@@ -30,19 +30,25 @@
  * RElbowRoll		Right elbow joint (Z)					2 to 88.5			0.0349 to 1.5446
  */
 
+// ROS and relevant messages
 #include <ros/ros.h>
 #include <tf/tfMessage.h>
 #include <tf/tf.h>
 #include <nao_msgs/JointAnglesWithSpeed.h>
 #include <visualization_msgs/Marker.h>
+#include <std_msgs/String.h>
 
 #include <vector>
 #include <string>
 
 #define ORIGINAL_FRAME "/openni_depth_frame"
 #define REMAP_FRAME "/tf_remap"
-#define CONTROL_DIST 0.4
+#define CONTROL_DIST 0.3
 
+/*
+ * Used to determine the direction the Nao should walk in,
+ * according to the positions of limbs.
+ */
 enum RobotMovements {
 	FORWARD,
 	BACKWARD,
@@ -68,6 +74,13 @@ struct ControlBox {
 	}
 };
 
+// For initial setup, determining which user will control the Nao
+std::string _userNumber = "";
+ros::Publisher _user_pub;
+// Links user numbers to hand and head positions
+std::map< std::string, std::pair<geometry_msgs::Vector3, geometry_msgs::Vector3> > _userDistanceMap;
+
+// For controlling the Nao
 ControlBox *_controlBox;
 RobotMovements _leftXMotionControl;
 RobotMovements _leftYMotionControl;
@@ -75,7 +88,7 @@ RobotMovements _rightXMotionControl;
 RobotMovements _rightYMotionControl;
 ros::Publisher _arms_pub;
 ros::Publisher _walk_pub;
-ros::Publisher _box_pub;
+bool broadcasting;
 bool ready;
 
 // Positions of joints to calculate elbow roll
@@ -85,11 +98,26 @@ tf::Vector3 *_leftShoulder;
 tf::Vector3 *_rightHand;
 tf::Vector3 *_rightElbow;
 tf::Vector3 *_rightShoulder;
-
 float _leftElbowRoll = 0.0;
 float _rightElbowRoll = 0.0;
 
+// Torso rotation used to turn the robot
+double _initTorsoRotation, _torsoRotation = 0.0;
+#define ROTATION_BOUNDARY 0.1
+
 void init(geometry_msgs::TransformStamped initTransform) {
+	// Initialise torso rotation
+	float x = initTransform.transform.rotation.x;
+	float y = initTransform.transform.rotation.y;
+	float z = initTransform.transform.rotation.z;
+	float w = initTransform.transform.rotation.w;
+	tf::Quaternion quat(x, y, z, w);
+	tf::Matrix3x3 mat(quat);
+	double roll, pitch, yaw;
+	mat.getRPY(roll, pitch, yaw);
+	_initTorsoRotation = _torsoRotation = pitch;
+	ROS_INFO("Initial rotation: %f", _initTorsoRotation);
+
 	geometry_msgs::Vector3 userPosition = initTransform.transform.translation;
 	_controlBox = new ControlBox(userPosition);
 	_leftXMotionControl = STOPX;
@@ -100,71 +128,22 @@ void init(geometry_msgs::TransformStamped initTransform) {
 	printf("User origin: (%f, %f), box: (%f, %f, %f, %f)\n", userPosition.x,
 			userPosition.z, _controlBox->front, _controlBox->back,
 			_controlBox->left, _controlBox->right);
-
-	/*
-	ros::Rate r(1);
-	while (ros::ok()) {
-    visualization_msgs::Marker marker;
-    // Set the frame ID and timestamp.  See the TF tutorials for information on these.
-    marker.header.frame_id = "/openni_depth_frame";
-    marker.header.stamp = ros::Time::now();
-
-    // Set the namespace and id for this marker.  This serves to create a unique ID
-    // Any marker sent with the same namespace and id will overwrite the old one
-    marker.ns = "basic_shapes";
-    marker.id = 0;
-
-    marker.type = visualization_msgs::Marker::CUBE;
-
-    // Set the marker action.  Options are ADD and DELETE
-    marker.action = visualization_msgs::Marker::ADD;
-
-    // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
-    marker.pose.position.x = _controlBox->back;
-    marker.pose.position.y = _controlBox->left;
-    marker.pose.position.z = userPosition.z;
-    marker.pose.orientation.x = 0.0;
-    marker.pose.orientation.y = 0.0;
-    marker.pose.orientation.z = 0.0;
-    marker.pose.orientation.w = 1.0;
-
-    // Set the scale of the marker -- 1x1x1 here means 1m on a side
-    marker.scale.x = _controlBox->right - _controlBox->left;
-    marker.scale.y = _controlBox->back - _controlBox->front;
-    marker.scale.z = 0.1;
-
-    // Set the color -- be sure to set alpha to something non-zero!
-    marker.color.r = 0.0f;
-    marker.color.g = 1.0f;
-    marker.color.b = 0.0f;
-    marker.color.a = 1.0;
-
-    marker.lifetime = ros::Duration();
-
-    // Publish the marker
-    _box_pub.publish(marker);
-
-	r.sleep();
-	}
-	*/
 }
 
 void checkTfBroadcasting(geometry_msgs::TransformStamped transform)
 {
-	if (!ready
+	if (!broadcasting
 			&& transform.header.frame_id == ORIGINAL_FRAME
 			&& transform.child_frame_id.find("left_foot") != std::string::npos) {
-		init(transform);
-
 		ROS_INFO("/tf is now publishing, ready to go.");
-		ready = true;
+		broadcasting = true;
 	}
 }
 
 void constructAndPublishMsg(std::vector<std::string> &joints, std::vector<float> &angles)
 {
 	nao_msgs::JointAnglesWithSpeed jointMsg;
-	jointMsg.speed = 0.25;
+	jointMsg.speed = 0.28;
 	jointMsg.joint_names = joints;
 	jointMsg.joint_angles = angles;
 
@@ -174,43 +153,58 @@ void constructAndPublishMsg(std::vector<std::string> &joints, std::vector<float>
 void constructAndPublishMovement(void) {
 	geometry_msgs::Twist msg;
 
-//	std::cout << "Movement: ";
+	std::cout << "Movement: ";
 
 	if (_leftXMotionControl == FORWARD || _rightXMotionControl == FORWARD) {
-		std::cout << "forward" << std::endl;
+		std::cout << "forward  " << "\r";
 		msg.linear.x = 1;
 	} else if (_leftXMotionControl == BACKWARD || _rightXMotionControl == BACKWARD) {
-		std::cout << "backward" << std::endl;
+		std::cout << "backward " << "\r";
 		msg.linear.x = -1;
 	}
 	if (_leftXMotionControl == STOPX && _rightXMotionControl == STOPX) {
-		std::cout << "stopX" << std::endl;
+		std::cout << "stop    " << "\r";
 		msg.linear.x = 0;
 	}
 
 	// Only move left or right if not already moving forward or back
 	if (msg.linear.x == 0) {
 		if (_leftYMotionControl == LEFT) {
-//			std::cout << "left" << std::endl;
+			std::cout << "left     " << "\r";
 			msg.linear.y = 1;
 		} else if (_rightYMotionControl == RIGHT) {
-//			std::cout << "right" << std::endl;
+			std::cout << "right    " << "\r";
 			msg.linear.y = -1;
 		}
 
 		if (_leftYMotionControl == STOPY && _rightYMotionControl == STOPY) {
-//			std::cout << "stopY" << std::endl;
+			std::cout << "stopY" << std::endl;
 			msg.linear.y = 0;
 		}
 	} else {
 		msg.linear.y = 0;
 	}
 
-//	std::cout << std::endl;
+//	std::cout << "Rotation: " << _torsoRotation << "         \r";
+
+	if (_torsoRotation > _initTorsoRotation + ROTATION_BOUNDARY) {
+		// Turn right
+		std::cout << "Turn right      " << "\r";
+		msg.angular.z = 1;
+	}
+	else if (_torsoRotation < _initTorsoRotation - ROTATION_BOUNDARY) {
+		// Turn left
+		std::cout << "Turn left       " << "\r";
+		msg.angular.z = -1;
+	}
+
+	std::flush(std::cout);
 
 	_walk_pub.publish(msg);
 }
 
+// TODO: make left and right elbow calculations into one method,
+// 		 taking elbow to calculate as a parameter
 void calculateLElbowRoll(void)
 {
 	if (_leftElbow && _leftHand && _leftShoulder) {
@@ -265,6 +259,203 @@ void calculateRElbowRoll(void)
 	}
 }
 
+void moveLegs(geometry_msgs::TransformStamped& transform,
+		geometry_msgs::Vector3& translation)
+{
+	std::string child = transform.child_frame_id;
+	if (child == "/left_foot" + _userNumber) {
+		geometry_msgs::Twist msg;
+		if (translation.x < _controlBox->front) {
+			_leftXMotionControl = FORWARD;
+		} else if (translation.x > _controlBox->back) {
+			_leftXMotionControl = BACKWARD;
+		} else {
+			_leftXMotionControl = STOPX;
+		}
+
+		if (translation.y > _controlBox->right) {
+			_leftYMotionControl = LEFT;
+		} else {
+			_leftYMotionControl = STOPX;
+		}
+	}
+
+	if (child == "/right_foot" + _userNumber) {
+		if (translation.x < _controlBox->front) {
+			_rightXMotionControl = FORWARD;
+		} else if (translation.x > _controlBox->back) {
+			_rightXMotionControl = BACKWARD;
+		} else {
+			_rightXMotionControl = STOPX;
+		}
+
+		if (translation.y < _controlBox->left) {
+			_rightYMotionControl = RIGHT;
+		} else {
+			_rightYMotionControl = STOPY;
+		}
+		constructAndPublishMovement();
+	}
+
+	if (child == "/torso" + _userNumber) {
+		float x = transform.transform.rotation.x;
+		float y = transform.transform.rotation.y;
+		float z = transform.transform.rotation.z;
+		float w = transform.transform.rotation.w;
+		tf::Quaternion quat(x, y, z, w);
+		tf::Matrix3x3 mat(quat);
+		double roll, pitch, yaw;
+		mat.getRPY(roll, pitch, yaw);
+
+		_torsoRotation = pitch;
+	}
+
+}
+
+void moveArms(geometry_msgs::TransformStamped& transform,
+		geometry_msgs::Vector3& translation, bool toPublish)
+{
+	tf::Vector3 origin(translation.x, translation.y, translation.z);
+
+	// Initialise roll, pitch and yaw values for joints
+	float x = transform.transform.rotation.x;
+	float y = transform.transform.rotation.y;
+	float z = transform.transform.rotation.z;
+	float w = transform.transform.rotation.w;
+	tf::Quaternion quat(x, y, z, w);
+	tf::Matrix3x3 mat(quat);
+	double roll, pitch, yaw;
+	mat.getRPY(roll, pitch, yaw);
+
+	// Vectors for publishing to Nao (ex. joint at joints[i] moves to angles[i] angle)
+	std::vector < std::string > joints;
+	std::vector<float> angles;
+
+	if (transform.child_frame_id.find("left_shoulder" + _userNumber) != std::string::npos) {
+		_leftShoulder = new tf::Vector3(origin);
+		pitch = -yaw;
+		if (pitch > -2.0857 && pitch < 2.0857) {
+			joints.push_back("LShoulderPitch");
+			angles.push_back((float) (pitch));
+			toPublish = true;
+		}
+		if (roll > -0.3142 && roll < 1.3265) {
+			joints.push_back("LShoulderRoll");
+			angles.push_back((float) (roll));
+			toPublish = true;
+		}
+	}
+
+	if (transform.child_frame_id.find("right_shoulder" + _userNumber)
+			!= std::string::npos) {
+		_rightShoulder = new tf::Vector3(origin);
+		pitch = yaw;
+		roll = -roll - (M_PI / 4);
+
+		if (pitch > -2.0857 && pitch < 2.0857) {
+			joints.push_back("RShoulderPitch");
+			angles.push_back((float) pitch);
+			toPublish = true;
+		}
+		if (roll > -1.3265 && roll < 0.3142) {
+			joints.push_back("RShoulderRoll");
+			angles.push_back((float) roll);
+			toPublish = true;
+		}
+
+	//	printf("Right shoulder roll: %f, pitch: %f      \r", roll, pitch);
+	//	std::flush(std::cout);
+	}
+
+	if (transform.child_frame_id.find("left_elbow" + _userNumber) != std::string::npos) {
+		_leftElbow = new tf::Vector3(origin);
+		yaw = -pitch;
+		roll = _leftElbowRoll;
+		if (yaw > -2.0857 && yaw < 2.0857) {
+			joints.push_back("LElbowYaw");
+			angles.push_back((float) (yaw));
+			toPublish = true;
+		}
+		if (roll > -1.5446 && roll < -0.0349) {
+			joints.push_back("LElbowRoll");
+			angles.push_back((float) (roll));
+			toPublish = true;
+		}
+	}
+
+	if (transform.child_frame_id.find("right_elbow" + _userNumber) != std::string::npos) {
+		_rightElbow = new tf::Vector3(origin);
+		yaw = pitch;
+		roll = _rightElbowRoll;
+		if (yaw > -2.0857 && yaw < 2.0857) {
+			joints.push_back("RElbowYaw");
+			angles.push_back((float) (pitch));
+			toPublish = true;
+		}
+		if (roll > 0.0349 && roll < 1.5446) {
+			joints.push_back("RElbowRoll");
+			angles.push_back((float) (roll));
+			toPublish = true;
+		}
+	}
+
+	// Elbow roll must be calculated manually
+	if (transform.child_frame_id.find("left_hand" + _userNumber) != std::string::npos) {
+		_leftHand = new tf::Vector3(origin);
+	}
+	if (transform.child_frame_id.find("right_hand" + _userNumber) != std::string::npos) {
+		_rightHand = new tf::Vector3(origin);
+	}
+	calculateLElbowRoll();
+	calculateRElbowRoll();
+
+	if (toPublish) {
+		constructAndPublishMsg(joints, angles);
+	}
+}
+
+#define MIN_DISTANCE 0.5
+
+void lookForStartGesture(const geometry_msgs::TransformStamped& transform,
+						const geometry_msgs::Vector3& translation)
+{
+	std::string child = transform.child_frame_id;
+	std::string userNum = child.substr(child.size() - 2);
+
+	if (child.find("head") != std::string::npos) {
+		_userDistanceMap[userNum].first = translation;
+	}
+	if (child.find("left_hand") != std::string::npos) {
+		_userDistanceMap[userNum].second = translation;
+	}
+
+	try {
+		// Use torso frame for initialising control box
+		if (child.find("torso") != std::string::npos) {
+			geometry_msgs::Vector3 head = _userDistanceMap.at(userNum).first;
+			geometry_msgs::Vector3 hand = _userDistanceMap.at(userNum).second;
+
+			// Lazy distance calculation
+			tf::Vector3 he(head.x, head.y, head.z);
+			tf::Vector3 ha(hand.x, hand.y, hand.z);
+			float dist = he.distance(ha);
+
+			if (dist <= MIN_DISTANCE) {
+				_userNumber = userNum;
+
+				// Signal to TfRemap node which user to track
+				std_msgs::String msg;
+				msg.data = _userNumber;
+				_user_pub.publish(msg);
+
+				printf("User set: %s           \n", userNum.c_str());
+				init(transform);
+				ready = true;
+			}
+		}
+	} catch (std::out_of_range& ex) { }
+}
+
 void tfCallback(const tf::tfMessage msg)
 {
 	bool toPublish = false;
@@ -273,168 +464,21 @@ void tfCallback(const tf::tfMessage msg)
 	// Only allow application to continue when message containing tf for head joint is received.
 	checkTfBroadcasting(transform);
 
-	if (ready) {
-		geometry_msgs::Vector3 translation = transform.transform.translation;
+	geometry_msgs::Vector3 translation = transform.transform.translation;
 
-		// Move arms
-		if (transform.header.frame_id == REMAP_FRAME) {
-			// Initialise roll, pitch and yaw for the current joint
-			float x = transform.transform.rotation.x;
-			float y = transform.transform.rotation.y;
-			float z = transform.transform.rotation.z;
-			float w = transform.transform.rotation.w;
-			tf::Vector3 origin(translation.x, translation.y, translation.z);
-			tf::Quaternion quat(x, y, z, w);
-			tf::Matrix3x3 mat(quat);
-
-			// Roll: X (Red), Pitch: Y (Green), Yaw: Z (Blue)
-			double roll, pitch, yaw;
-
-			mat.getRPY(roll, pitch, yaw);
-			std::vector<std::string> joints;
-			std::vector<float> angles;
-
-			if (transform.child_frame_id.find("left_shoulder_1")
-					!= std::string::npos) {
-				_leftShoulder = new tf::Vector3(origin);
-				pitch = -yaw;
-
-				if (pitch > -2.0857 && pitch < 2.0857) {
-					joints.push_back("LShoulderPitch");
-					angles.push_back((float) pitch);
-					toPublish = true;
-				}
-				if (roll > -0.3142 && roll < 1.3265) {
-					joints.push_back("LShoulderRoll");
-					angles.push_back((float) roll);
-					toPublish = true;
-				}
-	//			printf("Left shoulder roll: %f, pitch: %f      \r", roll, pitch);
-	//			std::flush(std::cout);
+	if (broadcasting) {
+		if (ready) {
+			// Move arms
+			if (transform.header.frame_id == REMAP_FRAME) {
+				moveArms(transform, translation, toPublish);
 			}
-			if (transform.child_frame_id.find("right_shoulder_1")
-					!= std::string::npos) {
-				_rightShoulder = new tf::Vector3(origin);
-				pitch = yaw;
-				roll = -roll - (M_PI/4);
-
-				if (pitch > -2.0857 && pitch < 2.0857) {
-					joints.push_back("RShoulderPitch");
-					angles.push_back((float) pitch);
-					toPublish = true;
-				}
-				if (roll > -1.3265 && roll < 0.3142) {
-					joints.push_back("RShoulderRoll");
-					angles.push_back((float) roll);
-					toPublish = true;
-				}
-
-	//			printf("Right shoulder roll: %f, pitch: %f      \r", roll, pitch);
-	//			std::flush(std::cout);
+			// Control walking
+			if (transform.header.frame_id == ORIGINAL_FRAME) {
+				moveLegs(transform, translation);
 			}
-			if (transform.child_frame_id.find("left_elbow_1")
-					!= std::string::npos) {
-				_leftElbow = new tf::Vector3(origin);
-				yaw = -pitch;
-				roll = _leftElbowRoll;
-
-				if (yaw > -2.0857 && yaw < 2.0857) {
-					joints.push_back("LElbowYaw");
-					angles.push_back((float) yaw);
-					toPublish = true;
-				}
-				if (roll > -1.5446 && roll < -0.0349) {
-					joints.push_back("LElbowRoll");
-					angles.push_back((float) roll);
-					toPublish = true;
-				}
-			}
-			if (transform.child_frame_id.find("right_elbow_1")
-					!= std::string::npos) {
-				_rightElbow = new tf::Vector3(origin);
-				yaw = pitch;
-				roll = _rightElbowRoll;
-
-				if (yaw > -2.0857 && yaw < 2.0857) {
-					joints.push_back("RElbowYaw");
-					angles.push_back((float) pitch);
-					toPublish = true;
-				}
-				if (roll > 0.0349 && roll < 1.5446) {
-					joints.push_back("RElbowRoll");
-					angles.push_back((float) roll);
-					toPublish = true;
-				}
-			}
-			if (transform.child_frame_id.find("left_hand_1")
-					!= std::string::npos) {
-				_leftHand = new tf::Vector3(origin);
-			}
-			if (transform.child_frame_id.find("right_hand_1")
-					!= std::string::npos) {
-				_rightHand = new tf::Vector3(origin);
-			}
-
-			// Elbow roll must be calculated manually, for some reason
-			calculateLElbowRoll();
-			calculateRElbowRoll();
-
-			if (toPublish) {
-				constructAndPublishMsg(joints, angles);
-			}
-		}
-		// Control walking
-		if (transform.header.frame_id == ORIGINAL_FRAME) {
-			std::string child = transform.child_frame_id;
-			if (child == "/left_foot_1") {
-//				printf("Left foot: (%f, %f, %f)\r", translation.x, translation.y, translation.z);
-//				std::flush(std::cout);
-
-				geometry_msgs::Twist msg;
-
-				if (translation.x < _controlBox->front) {
-					std::cout << "Left forward" << std::endl;
-					_leftXMotionControl = FORWARD;
-				}
-				else if (translation.x > _controlBox->back) {
-					std::cout << "Left back" << std::endl;
-					_leftXMotionControl = BACKWARD;
-				}
-				else {
-					_leftXMotionControl = STOPX;
-				}
-
-				if (translation.y > _controlBox->right) {
-					_leftYMotionControl = LEFT;
-				}
-				else {
-					_leftYMotionControl = STOPX;
-				}
-			}
-			if (child == "/right_foot_1") {
-//				printf("Left foot: (%f, %f)\r", translation.x, translation.z);
-//				std::flush(std::cout);
-
-				if (translation.x < _controlBox->front) {
-					std::cout << "Right forward" << std::endl;
-					_rightXMotionControl = FORWARD;
-				}
-				else if (translation.x > _controlBox->back) {
-					std::cout << "Right back" << std::endl;
-					_rightXMotionControl = BACKWARD;
-				}
-				else {
-					_rightXMotionControl = STOPX;
-				}
-
-				if (translation.y < _controlBox->left) {
-					_rightYMotionControl = RIGHT;
-				}
-				else {
-					_rightYMotionControl = STOPY;
-				}
-
-				constructAndPublishMovement();
+		} else {
+			if (transform.header.frame_id == ORIGINAL_FRAME) {
+				lookForStartGesture(transform, translation);
 			}
 		}
 	}
@@ -445,12 +489,15 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	_arms_pub = nh.advertise<nao_msgs::JointAnglesWithSpeed>("/joint_angles", 50);
 	_walk_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 2);
-	_box_pub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 1);
+	_user_pub = nh.advertise<std_msgs::String>("/user_number", 1);
 	ros::Subscriber sub = nh.subscribe("/tf", 50, tfCallback);
+
+	// Short delay to allow for stepping back from laptop
+	sleep(2);
 
 	ros::Rate rate(60);
 	ROS_INFO("Waiting for a head tf to be published.");
-	while (!ready) {
+	while (!broadcasting) {
 		ros::spinOnce();
 
 		if (!nh.ok()) {
@@ -465,7 +512,12 @@ int main(int argc, char **argv) {
 	ROS_INFO("All set up, go!");
 	ros::spin();
 
-	std::cout << std::endl;
+	// Send message to stop moving once the program has finished
+	geometry_msgs::Twist stopMsg;
+	stopMsg.linear.x = 0.0;
+	stopMsg.linear.y = 0.0;
+	_walk_pub.publish(stopMsg);
+
 	return 0;
 }
 

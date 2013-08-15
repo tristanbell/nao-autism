@@ -269,8 +269,8 @@ void tfCallback(const tf::tfMessage msg)
 						nao_autism_messages::PoseClassification pc;
 
 						pc.user_number = val;
-						// Fill this with the actual value
 						pc.classification = (int) thisClass;
+						pc.pose_data = poseData.getJoints();
 
 						_classification_publisher.publish(pc);
 					}

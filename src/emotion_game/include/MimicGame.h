@@ -13,6 +13,7 @@
 
 #include <nao_msgs/WordRecognized.h>
 #include <nao_autism_messages/PoseClassification.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <Phrase.h>
 
 #include <string>
@@ -29,13 +30,14 @@ public:
 	void endGame(void);
 
 private:
-//	ros::NodeHandle _mimicNodeHandle;
+	int _userToTrack;
 	ros::Subscriber _classSubscriber;
 	std::vector<nao_autism_messages::PoseClassification> _poseQueue;
 	short _currentPoseClassification;
 
 	void setOverallClassification(void);
 	void classificationCallback(const nao_autism_messages::PoseClassification poseClass);
+	void setUserToTrack(void);
 };
 
 #endif /* MIMICGAME_H_ */

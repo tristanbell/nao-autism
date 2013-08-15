@@ -8,6 +8,7 @@
 #include <Game.h>
 #include <MimicGame.h>
 #include <Keys.h>
+#include <boost/foreach.hpp>
 
 MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 {
@@ -15,6 +16,7 @@ MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 	_currentState = INTRODUCTION;
 	_performedEmotion = false;
 	_classSubscriber = _nodeHandle.subscribe("/classification", 15, &MimicGame::classificationCallback, this);
+	_userToTrack = 0;
 }
 
 void MimicGame::startGame(void) {
@@ -26,6 +28,8 @@ void MimicGame::perform(void) {
 	switch (_currentState) {
 		case INTRODUCTION: {
 			introduction();
+			while (_userToTrack == 0)
+				setUserToTrack();
 			break;
 		}
 
@@ -98,18 +102,23 @@ void MimicGame::endGame(void) {
 }
 
 void MimicGame::setOverallClassification(void) {
-	std::map<short, int> votes;
+	// Map of PoseClassification's classification mapped to the number
+	// of times that classification appears in the poseQueue.
+	std::map<int, int> votes;
 
 	// Get the number of times each pose appears in _poseQueue
 	for (int i = 0; i < _poseQueue.size(); i++) {
-		votes[_poseQueue[i].classification]++;
+		// Only pay attention to current user
+		if (_poseQueue[i].user_number == _userToTrack) {
+			votes[_poseQueue[i].classification]++;
+		}
 	}
 
 	// Get the pose with the highest number of votes
-	std::map<short, int>::iterator it = votes.begin();
-	std::pair<short, int> pair = *it;
+	std::map<int, int>::iterator it = votes.begin();
+	std::pair<int, int> pair = *it;
 
-	short highestPose = pair.first;
+	int highestPose = pair.first;
 	int highestNum = pair.second;
 
 	it++;
@@ -136,15 +145,54 @@ void MimicGame::classificationCallback(const nao_autism_messages::PoseClassifica
 	if (_currentState == WAITING_MIMIC) {
 		if (_poseQueue.size() >= MAX_QUEUE_SIZE) {
 			setOverallClassification();
-//			std::cout << "Current class: " << _currentPoseClassification << "         \r";
-//			std::flush(std::cout);
 		}
 
 		_poseQueue.push_back(poseClass);
 	}
 }
 
+#define TRACK_POSE_DIST 0.7
 
+/**
+ * Put the Nao in a pose for the user to copy (hands on head).
+ * Whichever use copies it correctly first is then the user to
+ * be tracked. All other users' classifications will be ignored
+ * after this point.
+ */
+void MimicGame::setUserToTrack(void)
+{
+	std::vector<Phrase> phraseVector;
+	if (_settings.getPhraseVector(CORRECT_ANSWER_KEY, phraseVector)) {
+		const Phrase& phrase = sayAny(phraseVector);
+
+		if (phrase.getNumberOfBehaviors() != 0) {
+			std::string behavior = phrase.getRandomBehaviorName();
+
+			_naoControl.perform(behavior);
+		}
+	}
+
+	BOOST_FOREACH(nao_autism_messages::PoseClassification pc, _poseQueue) {
+		geometry_msgs::Vector3 head = pc.pose_data[0].transform.translation;
+		geometry_msgs::Vector3 left_hand = pc.pose_data[5].transform.translation;
+		geometry_msgs::Vector3 right_hand = pc.pose_data[8].transform.translation;
+
+		float ldx = head.x - left_hand.x;
+		float ldy = head.y - left_hand.y;
+		float ldz = head.z - left_hand.z;
+		float rdx = head.x - right_hand.x;
+		float rdy = head.y - right_hand.y;
+		float rdz = head.z - right_hand.z;
+
+		float lDist = sqrt(ldx*ldx + ldy*ldy + ldz*ldz);
+		float rDist = sqrt(rdx*rdx + rdy*rdy + rdz*rdz);
+
+		if (lDist < TRACK_POSE_DIST && rDist < TRACK_POSE_DIST) {
+			_userToTrack = pc.user_number;
+			break;
+		}
+	}
+}
 
 
 

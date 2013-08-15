@@ -2,6 +2,7 @@
 
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
+#include <boost/algorithm/string.hpp>
 
 #define START_SPEECH_RECOGNITION_NAME "nao_speech/start_recognition"
 #define STOP_SPEECH_RECOGNITION_NAME "nao_speech/stop_recognition"
@@ -78,7 +79,7 @@ void Game::askToContinue(void)
 	}
 	sleep(_settings.getWait());
 
-	startSpeechRecognition();
+//	startSpeechRecognition();
 
 	_currentState = WAITING_ANSWER_CONTINUE;
 }
@@ -95,13 +96,13 @@ void Game::waitToContinue(void)
 
 		if (pair.first == "yes" && pair.second >= _settings.getConfidenceThreshold()){
 			_currentState = PERFORM_EMOTION;
-			stopSpeechRecognition();
+//			stopSpeechRecognition();
 
 			_recognizedWords.clear();
 			return;
 		}else if (pair.first == "no" && pair.second >= _settings.getConfidenceThreshold()){
 			isDone = true;
-			stopSpeechRecognition();
+//			stopSpeechRecognition();
 
 			_recognizedWords.clear();
 			return;
@@ -184,6 +185,20 @@ void Game::onSpeechRecognized(const nao_msgs::WordRecognized msg)
 
 			std::cout << "Recognized word: " << msg.words[i] << ", confidence: " << msg.confidence_values[i] << "\n";
 
+			_recognizedWords.push_back(pair);
+		}
+	}
+}
+
+void Game::onSpeech(const std_msgs::String msg) {
+	//Check to see if speech is needed, if so push onto list
+	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)) {
+		// Split all recognised words into a vector of strings
+		std::vector<std::string> words;
+		boost::split(words, msg.data, boost::is_any_of(" "));
+
+		for (int i = 0; i < words.size(); i++) {
+			std::pair<std::string, float> pair(words[i], 1.0);
 			_recognizedWords.push_back(pair);
 		}
 	}

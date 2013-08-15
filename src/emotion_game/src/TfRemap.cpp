@@ -69,9 +69,12 @@ public:
 
 			rate.sleep();
 		}
-		ROS_INFO("Ready.");
 	}
 
+	/**
+	 * Remap transforms from the original frame to their position relative
+	 * to the torso.
+	 */
 	void remap(void) {
 		ros::NodeHandle _node;
 		tf::TransformListener _listener;
@@ -113,12 +116,18 @@ public:
 
 std::string userNumber = "";
 
+/**
+ * Sets the user number to track.
+ */
 void userNumCallback(std_msgs::String msg)
 {
 	userNumber = msg.data;
 	std::cout << "User set for remapping." << std::endl;
 }
 
+/**
+ * Waits for a user number to be sent that determines which user to track.
+ */
 void waitForUserNumber(void)
 {
 	ros::NodeHandle nh;

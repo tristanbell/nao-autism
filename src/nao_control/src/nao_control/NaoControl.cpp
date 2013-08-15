@@ -24,23 +24,23 @@ nao_control::NaoControl::NaoControl() :
 	ros::Rate loopRate(5);
 
 	ROS_INFO("Waiting until speech publisher is ready...");
-	while (speechPublisher.getNumSubscribers() == 0){
-		if (!ros::ok()){
-			return;
-		}
-
-		loopRate.sleep();
-	}
+//	while (speechPublisher.getNumSubscribers() == 0){
+//		if (!ros::ok()){
+//			return;
+//		}
+//
+//		loopRate.sleep();
+//	}
 	ROS_INFO("Speech publisher is ready.");
 
 	ROS_INFO("Waiting for behavior manager to start.");
-	while (!behaviorActionClient.isServerConnected()){
-		if (!ros::ok()){
-			return;
-		}
-
-		loopRate.sleep();
-	}
+//	while (!behaviorActionClient.isServerConnected()){
+//		if (!ros::ok()){
+//			return;
+//		}
+//
+//		loopRate.sleep();
+//	}
 
 	ROS_INFO("Connection made to behavior manager.");
 }

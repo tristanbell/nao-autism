@@ -20,6 +20,7 @@
 #include <list>
 
 #define WORD_RECOGNIZED_TOPIC "word_recognized"
+#define SPEECH_TOPIC "recognizer/output"
 
 class Game {
 public:
@@ -29,6 +30,7 @@ public:
 							_recognizedWords()
 	{
 		_speechSubscriber = _nodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 1000, &Game::onSpeechRecognized, this);
+		_speechSubscriber2 = _nodeHandle.subscribe(SPEECH_TOPIC, 20, &Game::onSpeech, this);
 	}
 
 	virtual ~Game() { }
@@ -65,11 +67,14 @@ protected:
 		WAITING_MIMIC
 	};
 
+	// General settings/control
 	nao_control::NaoControl _naoControl;
 	GameSettings _settings;
 	ros::NodeHandle _nodeHandle;
 	ros::Subscriber _speechSubscriber;
+	ros::Subscriber _speechSubscriber2;
 
+	// Behaviors, speech
 	State _currentState;
 	bool _performedEmotion;
 	Behavior* _performedBehavior;
@@ -83,6 +88,7 @@ protected:
 	bool startSpeechRecognition();
 	bool stopSpeechRecognition();
 	void onSpeechRecognized(const nao_msgs::WordRecognized msg);
+	void onSpeech(const std_msgs::String msg);
 
 	const Phrase& say(const Phrase& phrase);
 	const Phrase& say(const Phrase& phrase, const std::list<std::string> parts);

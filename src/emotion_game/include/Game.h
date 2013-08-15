@@ -79,6 +79,8 @@ protected:
 	bool _performedEmotion;
 	Behavior* _performedBehavior;
 	std::list<std::pair<std::string, float> > _recognizedWords;
+	time_t _startWaitTime; // For timeouts
+	int _timesPrompted;
 
 	void introduction(void);
 	void performEmotion(void);

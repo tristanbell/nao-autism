@@ -216,7 +216,7 @@ void classification::DataLoader::parseTimestamp(string timestamp,
 
 	vector<string> fields;
 
-	// If you get an error here, it's just eclipse being a dick. Works if you compile from terminal.
+	// If you get an error here, it's just Eclipse. Works if you compile from terminal.
 	split(fields, timestamp, is_any_of("\n"));
 
 	// The first part of the timestamp should be the time a button was clicked

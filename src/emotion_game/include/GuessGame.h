@@ -18,9 +18,8 @@ public:
 	void endGame(void);
 
 private:
+	// Is this needed?
 	bool _waitingSpeech;
-	time_t _startWaitTime;
-	int _timesPrompted;
 };
 
 #endif /* GUESSGAME_H_ */

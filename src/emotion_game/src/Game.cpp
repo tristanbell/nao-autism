@@ -4,8 +4,10 @@
 #include <std_srvs/Empty.h>
 #include <boost/algorithm/string.hpp>
 
-#define START_SPEECH_RECOGNITION_NAME "nao_speech/start_recognition"
-#define STOP_SPEECH_RECOGNITION_NAME "nao_speech/stop_recognition"
+#define START_NAO_SPEECH_RECOGNITION_NAME "nao_speech/start_recognition"
+#define STOP_NAO_SPEECH_RECOGNITION_NAME "nao_speech/stop_recognition"
+#define START_PS_SPEECH_RECOGNITION_NAME "recognizer/start"
+#define STOP_PS_SPEECH_RECOGNITION_NAME "recognizer/stop"
 
 const Phrase Game::NULL_PHRASE = Phrase("");
 
@@ -79,7 +81,7 @@ void Game::askToContinue(void)
 	}
 	sleep(_settings.getWait());
 
-//	startSpeechRecognition();
+	startSpeechRecognition();
 
 	_currentState = WAITING_ANSWER_CONTINUE;
 }
@@ -96,13 +98,13 @@ void Game::waitToContinue(void)
 
 		if (pair.first == "yes" && pair.second >= _settings.getConfidenceThreshold()){
 			_currentState = PERFORM_EMOTION;
-//			stopSpeechRecognition();
+			stopSpeechRecognition();
 
 			_recognizedWords.clear();
 			return;
 		}else if (pair.first == "no" && pair.second >= _settings.getConfidenceThreshold()){
 			isDone = true;
-//			stopSpeechRecognition();
+			stopSpeechRecognition();
 
 			_recognizedWords.clear();
 			return;
@@ -118,10 +120,11 @@ bool Game::startSpeechRecognition()
 
 	ros::NodeHandle nh;
 
-	ros::ServiceClient client = nh.serviceClient<std_srvs::Empty>(START_SPEECH_RECOGNITION_NAME);
+	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(START_NAO_SPEECH_RECOGNITION_NAME);
+	ros::ServiceClient client2 = nh.serviceClient<std_srvs::Empty>(START_PS_SPEECH_RECOGNITION_NAME);
 	std_srvs::Empty emptySrv;
 
-	return client.call(emptySrv);
+	return client1.call(emptySrv) && client2.call(emptySrv);
 }
 
 bool Game::stopSpeechRecognition()
@@ -130,10 +133,11 @@ bool Game::stopSpeechRecognition()
 
 	ros::NodeHandle nh;
 
-	ros::ServiceClient client = nh.serviceClient<std_srvs::Empty>(STOP_SPEECH_RECOGNITION_NAME);
+	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(STOP_NAO_SPEECH_RECOGNITION_NAME);
+	ros::ServiceClient client2 = nh.serviceClient<std_srvs::Empty>(STOP_PS_SPEECH_RECOGNITION_NAME);
 	std_srvs::Empty emptySrv;
 
-	return client.call(emptySrv);
+	return client1.call(emptySrv) && client2.call(emptySrv);
 }
 
 const Phrase& Game::sayRandParts(const Phrase& phrase, std::list<std::string> parts)

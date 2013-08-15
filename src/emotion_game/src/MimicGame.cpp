@@ -20,8 +20,8 @@ MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 }
 
 void MimicGame::startGame(void) {
-	std::cout << "Mimic game starting..." << std::endl;
 	_currentState = INTRODUCTION;
+	isDone = false;
 }
 
 void MimicGame::perform(void) {
@@ -44,6 +44,9 @@ void MimicGame::perform(void) {
 
 			if (_settings.getPhraseVector(MIMIC_PROMPT_FOLLOW_KEY, questionVector))
 				sayAny(questionVector);
+
+			// Initialise time for mimic timeout
+			time(&_startWaitTime);
 
 			_currentState = WAITING_MIMIC;
 
@@ -73,9 +76,57 @@ void MimicGame::perform(void) {
 				sleep(_settings.getWait());
 
 				_currentState = ASK_QUESTION_CONTINUE;
+				break;
 			}
 
-			// Include a timeout for incorrect poses
+			// Timeout for incorrect poses
+			time_t currentTime;
+			time(&currentTime);
+
+			if (currentTime - _startWaitTime >= _settings.getTimeout()){
+				_timesPrompted++;
+
+				//Check to see if the number of prompts exceeds the max number
+				//if so, assume incorrect and perform another emotion
+				if (_timesPrompted > _settings.getMaxPromptAmount()) {
+					//Collect last performed behaviors name, as incorrect phrase may require it
+					std::list<std::string> parts;
+					parts.push_back(_performedBehavior->getActualName());
+
+					//Alert child
+					std::vector<Phrase> phraseVector;
+					if (_settings.getPhraseVector(INCORRECT_ANSWER_KEY, phraseVector)){
+						const Phrase& phrase = sayAny(phraseVector, parts);
+
+						if (phrase.getNumberOfBehaviors() != 0){
+							std::string behavior = phrase.getRandomBehaviorName();
+
+							_naoControl.perform(behavior);
+						}
+					}
+					sleep(_settings.getWait());
+
+					_currentState = PERFORM_EMOTION;
+
+					_timesPrompted = 0;
+
+					break;
+				} else {
+					std::vector<Phrase> phraseVector;
+					if (_settings.getPhraseVector(PROMPT_KEY, phraseVector)){
+						const Phrase& phrase = sayAny(phraseVector);
+
+						if (phrase.getNumberOfBehaviors() != 0){
+							std::string behavior = phrase.getRandomBehaviorName();
+
+							_naoControl.perform(behavior);
+						}
+					}
+					sleep(_settings.getWait());
+
+					_currentState = PROMPT_MIMIC;
+				}
+			}
 
 			break;
 		}
@@ -90,17 +141,21 @@ void MimicGame::perform(void) {
 			break;
 		}
 
-		default: {
+		default:
 			break;
-		}
 	}
 
 }
 
-void MimicGame::endGame(void) {
 
+void MimicGame::endGame(void) {
+	// Nothing to clean up
 }
 
+/**
+ * Finds and sets the overall classification value from the queue of
+ * PoseClassifications.
+ */
 void MimicGame::setOverallClassification(void) {
 	// Map of PoseClassification's classification mapped to the number
 	// of times that classification appears in the poseQueue.
@@ -141,6 +196,10 @@ void MimicGame::setOverallClassification(void) {
 
 #define MAX_QUEUE_SIZE 15
 
+/**
+ * Receives PoseClassification messages, pushes them to a queue and
+ * calculates the most likely classification from the queue.
+ */
 void MimicGame::classificationCallback(const nao_autism_messages::PoseClassification poseClass) {
 	if (_currentState == WAITING_MIMIC) {
 		if (_poseQueue.size() >= MAX_QUEUE_SIZE) {

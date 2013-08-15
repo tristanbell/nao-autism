@@ -93,7 +93,7 @@ void GuessGame::perform(void) {
 		//_recognizedWords.push_back(std::pair<std::string, float>(_performedBehavior->getActualName(), 0));
 
 		//Set the start time for waiting (used to calculate timeouts)
-//		startSpeechRecognition();
+		startSpeechRecognition();
 		time(&_startWaitTime);
 
 		break;
@@ -125,7 +125,7 @@ void GuessGame::perform(void) {
 
 				_recognizedWords.clear();
 
-				//We shall ask the child here if they wish to continue with the current gamme
+				//We shall ask the child here if they wish to continue with the current game
 				_currentState = ASK_QUESTION_CONTINUE;
 
 				_timesPrompted = 0;
@@ -165,7 +165,7 @@ void GuessGame::perform(void) {
 				sleep(_settings.getWait());
 
 				_currentState = PERFORM_EMOTION;
-//				stopSpeechRecognition();
+				stopSpeechRecognition();
 
 				_recognizedWords.clear();
 				_timesPrompted = 0;

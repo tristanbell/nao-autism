@@ -33,7 +33,7 @@ private:
 	int _userToTrack;
 	ros::Subscriber _classSubscriber;
 	std::vector<nao_autism_messages::PoseClassification> _poseQueue;
-	short _currentPoseClassification;
+	int _currentPoseClassification;
 
 	void setOverallClassification(void);
 	void classificationCallback(const nao_autism_messages::PoseClassification poseClass);

@@ -14,6 +14,7 @@ struct BaseSettingsData
 	int _wait;
 	int _timeout;
 	int _tries;
+	float _confidence;
 
 };
 

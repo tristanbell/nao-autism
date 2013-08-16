@@ -91,6 +91,9 @@ void Model::saveData(const std::string& location)
 	Json::Value& speechWaitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
 	speechWaitVal = _settingsData._wait;
 
+	Json::Value& confidenceVal = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
+	confidenceVal = _settingsData._confidence;
+
 	Json::Value& rewardBehavior = doc[REWARD_BEHAVIOR_LIST_KEY];
 	Json::Value& rewardBehaviorNames = rewardBehavior[BEHAVIOR_NAME_KEY];
 	addStringArrayToDoc(rewardBehaviorNames, _rewardBehaviorDataList);
@@ -367,6 +370,9 @@ void Model::loadData(Json::Value& docRoot){
 
 		Json::Value& waitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
 		_settingsData._wait = waitVal.asInt();
+
+		Json::Value& confidenceVal = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
+		_settingsData._confidence = confidenceVal.asFloat();
 	}else{
 		MissingDataException missing;
 		missing.what = "Missing base settings.";

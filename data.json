@@ -4,6 +4,7 @@
    },
    "Base settings" : {
       "Maxiumum prompts" : 2,
+      "Speech recognition confidence" : 0.3000000119209290,
       "Speech wait" : 3,
       "Timeout" : 15
    },

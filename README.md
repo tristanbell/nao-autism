@@ -14,4 +14,3 @@ Things to do
 + Make GUI for running the nodes/diagnostics
 + Write documentation
 + Make sure mimicker sits/stands properly
-+ Calibrate university Kinect's camera

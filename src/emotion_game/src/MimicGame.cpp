@@ -209,11 +209,13 @@ void MimicGame::setOverallClassification(void) {
  * calculates the most likely classification from the queue.
  */
 void MimicGame::classificationCallback(const nao_autism_messages::PoseClassification poseClass) {
-	if (_currentState == WAITING_MIMIC || _currentState == WAITING_TRACK) {
+	if (_currentState == WAITING_MIMIC) {
 		if (_poseQueue.size() >= MAX_QUEUE_SIZE) {
 			setOverallClassification();
 		}
 
+		_poseQueue.push_back(poseClass);
+	}else if (_currentState == WAITING_TRACK) {
 		_poseQueue.push_back(poseClass);
 	}
 }
@@ -243,8 +245,8 @@ void MimicGame::setUserToTrack(void)
 		float lDist = sqrt(ldx*ldx + ldy*ldy + ldz*ldz);
 		float rDist = sqrt(rdx*rdx + rdy*rdy + rdz*rdz);
 
-		printf("Left: %f, Right: %f   \r", lDist, rDist);
-		std::flush(std::cout);
+		//printf("Left: %f, Right: %f   \n", lDist, rDist);
+//		std::flush(std::cout);
 
 		if (lDist < TRACK_POSE_DIST && rDist < TRACK_POSE_DIST) {
 			_userToTrack = pc.user_number;

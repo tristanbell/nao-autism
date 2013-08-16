@@ -100,10 +100,11 @@ void GuessGame::perform(void) {
 	}
 
 	case WAITING_ANSWER_QUESTION:{
+		std::list<std::string>::iterator it = _recognizedWords.begin();
+
 		//Wait until answer is given
-		while (_recognizedWords.size() > 0){
-			std::string& word = _recognizedWords.front();
-			_recognizedWords.pop_front();
+		while (it != _recognizedWords.end()){
+			std::string& word = *it;
 
 			//Check for correct answer
 			if (word == _performedBehavior->getActualName()){
@@ -131,7 +132,11 @@ void GuessGame::perform(void) {
 
 				return;
 			}
+
+			it++;
 		}
+
+		_recognizedWords.clear();
 
 		//Check to see if the duration of time has exceeded the maximum wait
 		//if so, prompt the child and ask the question again.

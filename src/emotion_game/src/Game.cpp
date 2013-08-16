@@ -94,9 +94,10 @@ void Game::askToContinue(void)
  */
 void Game::waitToContinue(void)
 {
-	while (_recognizedWords.size() > 0){
-		std::string word = _recognizedWords.front();
-		_recognizedWords.pop_front();
+	std::list<std::string>::iterator it = _recognizedWords.begin();
+
+	while (it != _recognizedWords.end()){
+		std::string word = *it;
 
 		if (word == "yes"){
 			_currentState = PERFORM_EMOTION;
@@ -111,7 +112,11 @@ void Game::waitToContinue(void)
 			_recognizedWords.clear();
 			return;
 		}
+
+		it++;
 	}
+
+	_recognizedWords.clear();
 }
 
 bool Game::startSpeechRecognition()
@@ -185,8 +190,6 @@ void Game::onSpeechRecognized(const nao_msgs::WordRecognized msg)
 	//Check to see if speech is needed, if so push onto list
 	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)){
 		for (int i=0;i<msg.words.size();i++){
-			std::pair<std::string, float> pair(msg.words[i], msg.confidence_values[i]);
-
 			std::cout << "Recognized word: " << msg.words[i] << ", confidence: " << msg.confidence_values[i] << "\n";
 
 			if (msg.confidence_values[i] >= _settings.getConfidenceThreshold())
@@ -203,6 +206,7 @@ void Game::onSpeech(const std_msgs::String msg) {
 		boost::split(words, msg.data, boost::is_any_of(" "));
 
 		for (int i = 0; i < words.size(); i++) {
+			std::cout << "Recognized word: " << words[i] << "\n";
 			_recognizedWords.push_back(words[i]);
 		}
 	}

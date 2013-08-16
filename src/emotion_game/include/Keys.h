@@ -12,6 +12,7 @@
 #define SPEECH_WAIT_SETTING_KEY "Speech wait"
 #define TIMEOUT_SETTING_KEY "Timeout"
 #define MAX_PROMPT_KEY "Maxiumum prompts"
+#define SPEECH_RECOGNITION_CONFIDENCE_KEY "Speech recognition confidence"
 
 #define REWARD_BEHAVIOR_LIST_KEY "Available reward behaviors"
 

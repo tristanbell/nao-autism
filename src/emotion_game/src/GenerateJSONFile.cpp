@@ -20,6 +20,7 @@
 #define DEFAULT_WAIT 3
 #define DEFAULT_TIMEOUT 15
 #define DEFAULT_PROMPTS 2
+#define DEFAULT_CONFIDENCE 0.3f
 
 #define HAPPY_BEHAVIOR_NAME "happy_1"
 #define HAPPY_BEHAVIOR_ACTUAL "happy"
@@ -98,6 +99,9 @@ int main(int argc, char** argv)
 
 		Json::Value& maxTimesPrompted = baseSettings[MAX_PROMPT_KEY];
 		maxTimesPrompted = DEFAULT_PROMPTS;
+
+		Json::Value& confidence = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
+		confidence = DEFAULT_CONFIDENCE;
 
 		//Generate generic phrases
 		Json::Value& genericPhrases = doc[PHRASE_KEY];

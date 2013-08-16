@@ -109,6 +109,7 @@ int main(int argc, char** argv)
 		int wait = 3;
 		int timeout = 5;
 		int maxPrompts = 2;
+		float confidenceValue = 0.3;
 
 		std::vector<Behavior> allBehaviorList;
 		std::vector<Behavior> rewardBehaviorList;
@@ -133,6 +134,11 @@ int main(int argc, char** argv)
 			Json::Value maxPromptVal = baseSettings.get(MAX_PROMPT_KEY, Json::Value::null);
 			if (maxPromptVal.type() != Json::Value::null.type()){
 				maxPrompts = maxPromptVal.asInt();
+			}
+
+			Json::Value confidenceVal = baseSettings.get(SPEECH_RECOGNITION_CONFIDENCE_KEY, Json::Value::null);
+			if (confidenceVal.type() != Json::Value::null.type()){
+				confidenceValue = confidenceVal.asFloat();
 			}
 		}else{
 			ROS_ERROR("Unable to find the base settings, perhaps the json data file is invalid, run the gen_json node to generate a new json file.");
@@ -191,7 +197,7 @@ int main(int argc, char** argv)
 		guessGameSettings.setMaxPromptAmount(maxPrompts);
 		guessGameSettings.setBehaviorVector(allBehaviorList);
 		guessGameSettings.setPhraseMap(guessGamePhraseMap);
-		guessGameSettings.setConfidenceThreshold(0.25);
+		guessGameSettings.setConfidenceThreshold(confidenceValue);
 
 		GameSettings mimicGameSettings;
 
@@ -200,7 +206,7 @@ int main(int argc, char** argv)
 		mimicGameSettings.setBehaviorVector(allBehaviorList);
 		mimicGameSettings.setMaxPromptAmount(maxPrompts);
 		mimicGameSettings.setPhraseMap(mimicGamePhraseMap);
-		mimicGameSettings.setConfidenceThreshold(0.25);
+		mimicGameSettings.setConfidenceThreshold(confidenceValue);
 
 		Game* guessGame = new GuessGame(guessGameSettings);
 		Game* mimicGame = new MimicGame(mimicGameSettings);

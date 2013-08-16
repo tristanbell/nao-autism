@@ -37,6 +37,16 @@ void BaseSettingsTab::init()
 	_triesBox->setEnabled(false);
 	layout->addWidget(_triesBox, rowNumber, 0);
 	rowNumber++;
+
+	QLabel* confidenceLabel = new QLabel("Speech recognition confidence (%):");
+	layout->addWidget(confidenceLabel, rowNumber, 0);
+	rowNumber++;
+
+	_confidenceBox = new QSpinBox;
+	_confidenceBox->setEnabled(false);
+	_confidenceBox->setMaximum(100);
+	layout->addWidget(_confidenceBox, rowNumber, 0);
+	rowNumber++;
 }
 
 void BaseSettingsTab::onValueUpdated(int value)
@@ -47,6 +57,7 @@ void BaseSettingsTab::onValueUpdated(int value)
 	data._timeout = _timeoutBox->value();
 	data._tries = _triesBox->value();
 	data._wait = _waitBox->value();
+	data._confidence = _confidenceBox->value() / 100.0f;
 
 	emit onSettingsUpdated(data);
 }
@@ -66,6 +77,9 @@ void BaseSettingsTab::onSettingsLoaded(const BaseSettingsData& data)
 	_waitBox->setValue(data._wait);
 	_waitBox->setEnabled(true);
 
+	_confidenceBox->setValue(data._confidence * 100);
+	_confidenceBox->setEnabled(true);
+
 	connectAll();
 }
 
@@ -77,6 +91,8 @@ void BaseSettingsTab::connectAll()
 			this, SLOT(onValueUpdated(int)));
 	QObject::connect(_waitBox, SIGNAL(valueChanged(int)),
 			this, SLOT(onValueUpdated(int)));
+	QObject::connect(_confidenceBox, SIGNAL(valueChanged(int)),
+			this, SLOT(onValueUpdated(int)));
 }
 
 void BaseSettingsTab::disconnectAll()
@@ -86,5 +102,7 @@ void BaseSettingsTab::disconnectAll()
 	QObject::disconnect(_triesBox, SIGNAL(valueChanged(int)),
 			this, SLOT(onValueUpdated(int)));
 	QObject::disconnect(_waitBox, SIGNAL(valueChanged(int)),
+			this, SLOT(onValueUpdated(int)));
+	QObject::disconnect(_confidenceBox, SIGNAL(valueChanged(int)),
 			this, SLOT(onValueUpdated(int)));
 }

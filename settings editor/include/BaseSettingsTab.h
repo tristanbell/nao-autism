@@ -33,6 +33,7 @@ private:
 	QSpinBox* _waitBox;
 	QSpinBox* _timeoutBox;
 	QSpinBox* _triesBox;
+	QSpinBox* _confidenceBox;
 	QPushButton* _setSettingsBtn;
 
 	void init();

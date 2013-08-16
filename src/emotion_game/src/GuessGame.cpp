@@ -100,14 +100,13 @@ void GuessGame::perform(void) {
 	}
 
 	case WAITING_ANSWER_QUESTION:{
-		std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
-
 		//Wait until answer is given
-		while (it != _recognizedWords.end()){
-			std::pair<std::string, float>& pair = *it;
+		while (_recognizedWords.size() > 0){
+			std::string& word = _recognizedWords.front();
+			_recognizedWords.pop_front();
 
 			//Check for correct answer
-			if (pair.first == _performedBehavior->getActualName() && pair.second >= _settings.getConfidenceThreshold()){
+			if (word == _performedBehavior->getActualName()){
 				std::list<std::string> parts;
 				parts.push_back(_performedBehavior->getActualName());
 
@@ -132,8 +131,6 @@ void GuessGame::perform(void) {
 
 				return;
 			}
-
-			it++;
 		}
 
 		//Check to see if the duration of time has exceeded the maximum wait
@@ -185,6 +182,7 @@ void GuessGame::perform(void) {
 				sleep(_settings.getWait());
 
 				_currentState = ASK_QUESTION;
+				stopSpeechRecognition();
 			}
 		}
 

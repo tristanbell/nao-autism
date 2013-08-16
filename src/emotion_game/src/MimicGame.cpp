@@ -16,20 +16,28 @@ MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 	_currentState = INTRODUCTION;
 	_performedEmotion = false;
 	_classSubscriber = _nodeHandle.subscribe("/classification", 15, &MimicGame::classificationCallback, this);
-	_userToTrack = 0;
 }
 
 void MimicGame::startGame(void) {
 	_currentState = INTRODUCTION;
 	isDone = false;
+	_userToTrack = 0;
 }
 
 void MimicGame::perform(void) {
 	switch (_currentState) {
 		case INTRODUCTION: {
 			introduction();
-			while (_userToTrack == 0)
-				setUserToTrack();
+			_currentState = WAITING_TRACK;
+
+			break;
+		}
+
+		case WAITING_TRACK: {
+			setUserToTrack();
+			if (_userToTrack != 0)
+				_currentState = PERFORM_EMOTION;
+
 			break;
 		}
 
@@ -201,7 +209,7 @@ void MimicGame::setOverallClassification(void) {
  * calculates the most likely classification from the queue.
  */
 void MimicGame::classificationCallback(const nao_autism_messages::PoseClassification poseClass) {
-	if (_currentState == WAITING_MIMIC) {
+	if (_currentState == WAITING_MIMIC || _currentState == WAITING_TRACK) {
 		if (_poseQueue.size() >= MAX_QUEUE_SIZE) {
 			setOverallClassification();
 		}
@@ -210,7 +218,7 @@ void MimicGame::classificationCallback(const nao_autism_messages::PoseClassifica
 	}
 }
 
-#define TRACK_POSE_DIST 0.7
+#define TRACK_POSE_DIST 0.6
 
 /**
  * Put the Nao in a pose for the user to copy (hands on head).
@@ -220,17 +228,6 @@ void MimicGame::classificationCallback(const nao_autism_messages::PoseClassifica
  */
 void MimicGame::setUserToTrack(void)
 {
-	std::vector<Phrase> phraseVector;
-	if (_settings.getPhraseVector(CORRECT_ANSWER_KEY, phraseVector)) {
-		const Phrase& phrase = sayAny(phraseVector);
-
-		if (phrase.getNumberOfBehaviors() != 0) {
-			std::string behavior = phrase.getRandomBehaviorName();
-
-			_naoControl.perform(behavior);
-		}
-	}
-
 	BOOST_FOREACH(nao_autism_messages::PoseClassification pc, _poseQueue) {
 		geometry_msgs::Vector3 head = pc.pose_data[0].transform.translation;
 		geometry_msgs::Vector3 left_hand = pc.pose_data[5].transform.translation;
@@ -246,8 +243,13 @@ void MimicGame::setUserToTrack(void)
 		float lDist = sqrt(ldx*ldx + ldy*ldy + ldz*ldz);
 		float rDist = sqrt(rdx*rdx + rdy*rdy + rdz*rdz);
 
+		printf("Left: %f, Right: %f   \r", lDist, rDist);
+		std::flush(std::cout);
+
 		if (lDist < TRACK_POSE_DIST && rDist < TRACK_POSE_DIST) {
 			_userToTrack = pc.user_number;
+			printf("\n \nTracking user %d\n", _userToTrack);
+			_poseQueue.clear();
 			break;
 		}
 	}

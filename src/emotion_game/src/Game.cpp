@@ -18,10 +18,11 @@ void Game::introduction(void)
 	if (getGameSettings().getPhraseVector(START_KEY, phraseVector)){
 		const Phrase& phrase = sayAny(phraseVector);
 
-		if (phrase.getNumberOfBehaviors() != 0){
+		if (phrase.getNumberOfBehaviors() != 0) {
 			std::string behavior = phrase.getRandomBehaviorName();
 
-			_naoControl.perform(behavior);
+			if (!_naoControl.perform(behavior))
+				ROS_ERROR("Could not perform behavior %s", behavior.c_str());
 		}
 	}
 	sleep(_settings.getWait());
@@ -32,7 +33,8 @@ void Game::introduction(void)
 		if (phrase.getNumberOfBehaviors() != 0){
 			std::string behavior = phrase.getRandomBehaviorName();
 
-			_naoControl.perform(behavior);
+			if (!_naoControl.perform(behavior))
+				ROS_ERROR("Could not perform behavior %s", behavior.c_str());
 		}
 	}
 	sleep(_settings.getWait());

@@ -21,28 +21,28 @@ nao_control::NaoControl::NaoControl() :
 
 	speechPublisher = nodeHandle.advertise<std_msgs::String>(SPEECH_TOPIC_NAME, 1000);
 
-	ros::Rate loopRate(5);
+	ros::Rate loopRate(10);
 
-	ROS_INFO("Waiting until speech publisher is ready...");
-//	while (speechPublisher.getNumSubscribers() == 0){
-//		if (!ros::ok()){
-//			return;
-//		}
-//
-//		loopRate.sleep();
-//	}
-	ROS_INFO("Speech publisher is ready.");
+	printf("Waiting until speech publisher is ready...\n");
+	while (speechPublisher.getNumSubscribers() == 0){
+		if (!ros::ok()){
+			return;
+		}
 
-	ROS_INFO("Waiting for behavior manager to start.");
-//	while (!behaviorActionClient.isServerConnected()){
-//		if (!ros::ok()){
-//			return;
-//		}
-//
-//		loopRate.sleep();
-//	}
+		loopRate.sleep();
+	}
+	printf("Speech publisher is ready.\n");
 
-	ROS_INFO("Connection made to behavior manager.");
+	printf("Waiting for behavior manager to start.\n");
+	while (!behaviorActionClient.isServerConnected()){
+		if (!ros::ok()){
+			return;
+		}
+
+		loopRate.sleep();
+	}
+
+	printf("Connection made to behavior manager.\n");
 }
 
 /*

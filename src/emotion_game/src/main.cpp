@@ -212,8 +212,8 @@ int main(int argc, char** argv)
 		Game* mimicGame = new MimicGame(mimicGameSettings);
 
 		//Set current game and start it.
-		Game* currentGame = guessGame;
-//		Game* currentGame = mimicGame;
+//		Game* currentGame = guessGame;
+		Game* currentGame = mimicGame;
 		currentGame->startGame();
 
 		ROS_INFO("Game initialisation done, starting.");

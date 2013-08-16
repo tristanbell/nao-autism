@@ -4,7 +4,7 @@ project(emotion_game)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS nao_control nao_msgs roscpp std_msgs tf)
+find_package(catkin REQUIRED COMPONENTS nao_control nao_msgs roscpp std_msgs visualization_msgs tf)
 find_package(Boost REQUIRED COMPONENTS system)
 
 set(start_game_SRCS
@@ -58,9 +58,6 @@ add_dependencies(start_game nao_msgs_generate_msg_cpp)
 
 add_executable(gen_json ${gen_json_SRCS} ${gen_json_HDRS})
 target_link_libraries(gen_json ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-
-add_executable(tf_remap src/TfRemap.cpp)
-target_link_libraries(tf_remap ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(mimicker src/NaoMimicker.cpp)
 target_link_libraries(mimicker ${catkin_LIBRARIES})

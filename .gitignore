@@ -18,5 +18,11 @@ CMakeFiles
 ## Linked CMakeLists.txt file
 src/CMakeLists.txt
 
+## Settings editor build files
+settings editor/CMakeCache.txt
+settings editor/Makefile
+settings editor/cmake_install.cmake
+settings editor/settings_editor
+
 ## Temp files created by gedit
 *.*~

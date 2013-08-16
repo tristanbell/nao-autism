@@ -37,10 +37,14 @@ public:
 	const std::map<std::string, std::vector<Phrase> >& getPhraseMap() const;
 	bool getPhraseVector(const std::string& key, std::vector<Phrase>& phraseList) const;
 
+	void setConfidenceThreshold(float confidenceThreshold);
+	float getConfidenceThreshold() const;
+
 private:
 	int msWait;
 	int timeout;
 	int defaultPrompts;
+	float confidenceThreshold;
 
 	std::vector<Behavior> behaviorVector;
 	std::map<std::string, std::vector<Phrase> > phraseMap;

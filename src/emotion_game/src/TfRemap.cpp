@@ -8,6 +8,8 @@
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
+#include <tf/tfMessage.h>
+#include <std_msgs/String.h>
 #include <boost/foreach.hpp>
 
 #include <vector>
@@ -17,30 +19,62 @@
 
 class TfRemap {
 
+private:
+	bool ready;
+
+	void waitForTfBroadcast(tf::tfMessage msg) {
+		if (msg.transforms[0].child_frame_id.find("head")
+						!= std::string::npos) {
+
+			ROS_INFO("/tf is now publishing, ready to go.");
+			ready = true;
+		}
+	}
+
 public:
 	tf::TransformBroadcaster _broadcaster;
 	const std::string _reference_frame;
 	std::vector<std::string> _joints;
 
-	TfRemap(void) : _broadcaster(), _reference_frame("/torso_1") {
+	TfRemap(std::string userNum) : _broadcaster(), _reference_frame("/torso" + userNum) {
 		ros::Time::init();
 
-		_joints.push_back("/head_1");
-		_joints.push_back("/neck_1");
-		_joints.push_back("/left_shoulder_1");
-		_joints.push_back("/left_elbow_1");
-		_joints.push_back("/left_hand_1");
-		_joints.push_back("/right_shoulder_1");
-		_joints.push_back("/right_elbow_1");
-		_joints.push_back("/right_hand_1");
-		_joints.push_back("/left_hip_1");
-		_joints.push_back("/left_knee_1");
-		_joints.push_back("/left_foot_1");
-		_joints.push_back("/right_hip_1");
-		_joints.push_back("/right_knee_1");
-		_joints.push_back("/right_foot_1");
+		_joints.push_back("/head" + userNum);
+		_joints.push_back("/neck" + userNum);
+		_joints.push_back("/left_shoulder" + userNum);
+		_joints.push_back("/left_elbow" + userNum);
+		_joints.push_back("/left_hand" + userNum);
+		_joints.push_back("/right_shoulder" + userNum);
+		_joints.push_back("/right_elbow" + userNum);
+		_joints.push_back("/right_hand" + userNum);
+		_joints.push_back("/left_hip" + userNum);
+		_joints.push_back("/left_knee" + userNum);
+		_joints.push_back("/left_foot" + userNum);
+		_joints.push_back("/right_hip" + userNum);
+		_joints.push_back("/right_knee" + userNum);
+		_joints.push_back("/right_foot" + userNum);
+
+		ros::NodeHandle nh;
+		ros::Subscriber tfSub = nh.subscribe("/tf", 10, &TfRemap::waitForTfBroadcast, this);
+		ros::Rate rate(60);
+		ROS_INFO("Waiting for a head tf to be published.");
+		while (!ready) {
+			ros::spinOnce();
+
+			if (!nh.ok()) {
+				ROS_INFO("Closing down.");
+
+				exit(EXIT_FAILURE);
+			}
+
+			rate.sleep();
+		}
 	}
 
+	/**
+	 * Remap transforms from the original frame to their position relative
+	 * to the torso.
+	 */
 	void remap(void) {
 		ros::NodeHandle _node;
 		tf::TransformListener _listener;
@@ -80,9 +114,39 @@ public:
 	}
 };
 
+std::string userNumber = "";
+
+/**
+ * Sets the user number to track.
+ */
+void userNumCallback(std_msgs::String msg)
+{
+	userNumber = msg.data;
+	std::cout << "User set for remapping." << std::endl;
+}
+
+/**
+ * Waits for a user number to be sent that determines which user to track.
+ */
+void waitForUserNumber(void)
+{
+	ros::NodeHandle nh;
+	ros::Subscriber sub = nh.subscribe("/user_number", 1, userNumCallback);
+
+	ros::Rate r(30);
+	while (userNumber == "") {
+		ros::spinOnce();
+		r.sleep();
+	}
+
+
+}
+
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "remapper");
-	TfRemap remapper;
+
+	waitForUserNumber();
+	TfRemap remapper(userNumber);
 	remapper.remap();
 
 	return 0;

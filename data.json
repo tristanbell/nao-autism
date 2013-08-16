@@ -16,12 +16,12 @@
       {
          "Actual name" : "scared",
          "Behavior names" : [ "scared_1" ],
-         "Classification" : 2
+         "Classification" : 3
       },
       {
          "Actual name" : "sad",
          "Behavior names" : [ "sad_1" ],
-         "Classification" : 3
+         "Classification" : 2
       },
       {
          "Actual name" : "angry",

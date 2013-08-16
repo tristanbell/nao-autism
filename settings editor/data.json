@@ -4,7 +4,7 @@
    },
    "Base settings" : {
       "Maxiumum prompts" : 2,
-      "Speech wait" : 3,
+      "Speech wait" : 6,
       "Timeout" : 15
    },
    "Behaviors" : [

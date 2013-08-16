@@ -2,9 +2,12 @@
 
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
+#include <boost/algorithm/string.hpp>
 
-#define START_SPEECH_RECOGNITION_NAME "nao_speech/start_recognition"
-#define STOP_SPEECH_RECOGNITION_NAME "nao_speech/stop_recognition"
+#define START_NAO_SPEECH_RECOGNITION_NAME "nao_speech/start_recognition"
+#define STOP_NAO_SPEECH_RECOGNITION_NAME "nao_speech/stop_recognition"
+#define START_PS_SPEECH_RECOGNITION_NAME "recognizer/start"
+#define STOP_PS_SPEECH_RECOGNITION_NAME "recognizer/stop"
 
 const Phrase Game::NULL_PHRASE = Phrase("");
 
@@ -60,16 +63,68 @@ void Game::performEmotion(void)
 	_performedBehavior = new Behavior(ref);
 }
 
+/**
+ * Asks user if they want to continue playing, starts speech recognition
+ * and changes state to waiting for an answer.
+ */
+void Game::askToContinue(void)
+{
+	std::vector<Phrase> phrases;
+	if (_settings.getPhraseVector(CONTINUE_GAME_QUESTION_KEY, phrases)){
+		const Phrase& current = sayAny(phrases);
+
+		if (current.getNumberOfBehaviors() == 0){
+			std::string behavior = current.getRandomBehaviorName();
+
+			_naoControl.perform(behavior);
+		}
+	}
+	sleep(_settings.getWait());
+
+	startSpeechRecognition();
+
+	_currentState = WAITING_ANSWER_CONTINUE;
+}
+
+/**
+ * Waits until yes/no is 'heard'. If yes, change state to perform emotion.
+ * If no, signal that game is done.
+ */
+void Game::waitToContinue(void)
+{
+	std::list<std::pair<std::string, float> >::iterator it = _recognizedWords.begin();
+	while (it != _recognizedWords.end()){
+		std::pair<std::string, float>& pair = *it;
+
+		if (pair.first == "yes" && pair.second >= _settings.getConfidenceThreshold()){
+			_currentState = PERFORM_EMOTION;
+			stopSpeechRecognition();
+
+			_recognizedWords.clear();
+			return;
+		}else if (pair.first == "no" && pair.second >= _settings.getConfidenceThreshold()){
+			isDone = true;
+			stopSpeechRecognition();
+
+			_recognizedWords.clear();
+			return;
+		}
+
+		it++;
+	}
+}
+
 bool Game::startSpeechRecognition()
 {
 	std::cout << "Starting speech recognition." << std::endl;
 
 	ros::NodeHandle nh;
 
-	ros::ServiceClient client = nh.serviceClient<std_srvs::Empty>(START_SPEECH_RECOGNITION_NAME);
+	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(START_NAO_SPEECH_RECOGNITION_NAME);
+	ros::ServiceClient client2 = nh.serviceClient<std_srvs::Empty>(START_PS_SPEECH_RECOGNITION_NAME);
 	std_srvs::Empty emptySrv;
 
-	return client.call(emptySrv);
+	return client1.call(emptySrv) && client2.call(emptySrv);
 }
 
 bool Game::stopSpeechRecognition()
@@ -78,10 +133,11 @@ bool Game::stopSpeechRecognition()
 
 	ros::NodeHandle nh;
 
-	ros::ServiceClient client = nh.serviceClient<std_srvs::Empty>(STOP_SPEECH_RECOGNITION_NAME);
+	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(STOP_NAO_SPEECH_RECOGNITION_NAME);
+	ros::ServiceClient client2 = nh.serviceClient<std_srvs::Empty>(STOP_PS_SPEECH_RECOGNITION_NAME);
 	std_srvs::Empty emptySrv;
 
-	return client.call(emptySrv);
+	return client1.call(emptySrv) && client2.call(emptySrv);
 }
 
 const Phrase& Game::sayRandParts(const Phrase& phrase, std::list<std::string> parts)
@@ -122,6 +178,34 @@ const Phrase& Game::sayRandParts(const Phrase& phrase, std::list<std::string> pa
 	}
 
 	return NULL_PHRASE;
+}
+
+void Game::onSpeechRecognized(const nao_msgs::WordRecognized msg)
+{
+	//Check to see if speech is needed, if so push onto list
+	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)){
+		for (int i=0;i<msg.words.size();i++){
+			std::pair<std::string, float> pair(msg.words[i], msg.confidence_values[i]);
+
+			std::cout << "Recognized word: " << msg.words[i] << ", confidence: " << msg.confidence_values[i] << "\n";
+
+			_recognizedWords.push_back(pair);
+		}
+	}
+}
+
+void Game::onSpeech(const std_msgs::String msg) {
+	//Check to see if speech is needed, if so push onto list
+	if (!isDone && (_currentState == WAITING_ANSWER_CONTINUE || _currentState == WAITING_ANSWER_QUESTION)) {
+		// Split all recognised words into a vector of strings
+		std::vector<std::string> words;
+		boost::split(words, msg.data, boost::is_any_of(" "));
+
+		for (int i = 0; i < words.size(); i++) {
+			std::pair<std::string, float> pair(words[i], 1.0);
+			_recognizedWords.push_back(pair);
+		}
+	}
 }
 
 const Phrase& Game::say(const Phrase& phrase)

@@ -113,6 +113,7 @@ ros::Publisher _arms_pub;
 ros::Publisher _walk_pub;
 bool broadcasting;
 bool ready;
+bool _reverse; // Have the Nao mirror actions (=false) or not (=true)
 
 // Positions of joints to calculate elbow roll
 Pose _pose;
@@ -126,7 +127,7 @@ double _initTorsoRotation, _torsoRotation = 0.0;
 /**
  * Initialises torso rotation, leg movement and a ControlBox around the user.
  */
-void init(geometry_msgs::TransformStamped initTransform) {
+void init(geometry_msgs::TransformStamped initTransform, bool shouldReverse = false) {
 	// Initialise torso rotation
 	float x = initTransform.transform.rotation.x;
 	float y = initTransform.transform.rotation.y;
@@ -149,6 +150,8 @@ void init(geometry_msgs::TransformStamped initTransform) {
 
 	_nao_control = new nao_control::NaoControl();
 	_naoPose = STANDING;
+
+	_reverse = shouldReverse;
 }
 
 /**
@@ -170,7 +173,7 @@ void checkTfBroadcasting(geometry_msgs::TransformStamped transform)
 void constructAndPublishMsg(std::vector<std::string> &joints, std::vector<float> &angles)
 {
 	nao_msgs::JointAnglesWithSpeed jointMsg;
-	jointMsg.speed = 0.28;
+	jointMsg.speed = 0.3;
 	jointMsg.joint_names = joints;
 	jointMsg.joint_angles = angles;
 
@@ -225,6 +228,14 @@ void constructAndPublishMovement(void) {
 		// Turn left
 //		std::cout << "Turn left       " << "\r";
 		msg.angular.z = -1;
+	}
+
+	if (_reverse) {
+		if (msg.linear.y != 0)
+			msg.linear.y *= -1;
+
+		if (msg.angular.z != 0)
+			msg.angular.z *= -1;
 	}
 
 	std::flush(std::cout);
@@ -363,7 +374,11 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 	std::vector<float> angles;
 
 	if (transform.child_frame_id.find("left_shoulder" + _userNumber) != std::string::npos) {
-		_pose.leftShoulder = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.leftShoulder = new tf::Vector3(origin);
+		else
+			_pose.rightShoulder = new tf::Vector3(origin);
+
 		pitch = getJointAngle(_pose.leftElbow, _pose.leftShoulder, _pose.leftHip) - 1.6;
 		roll = 1.63 - getLimbAngle(_pose.leftElbow, _pose.leftShoulder, _pose.leftHip, _pose.rightHip);
 
@@ -381,7 +396,11 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 
 	if (transform.child_frame_id.find("right_shoulder" + _userNumber)
 			!= std::string::npos) {
-		_pose.rightShoulder = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.rightShoulder = new tf::Vector3(origin);
+		else
+			_pose.leftShoulder = new tf::Vector3(origin);
+
 		pitch = getJointAngle(_pose.rightElbow, _pose.rightShoulder, _pose.rightHip) - 1.6;
 		roll = getLimbAngle(_pose.rightElbow, _pose.rightShoulder, _pose.rightHip, _pose.leftHip) - 1.57;
 
@@ -398,7 +417,11 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 	}
 
 	if (transform.child_frame_id.find("left_elbow" + _userNumber) != std::string::npos) {
-		_pose.leftElbow = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.leftElbow = new tf::Vector3(origin);
+		else
+			_pose.rightElbow = new tf::Vector3(origin);
+
 		yaw = getLimbAngle(_pose.leftHand, _pose.leftElbow, _pose.leftShoulder, _pose.leftHip) - 1.57;
 		roll = -getJointAngle(_pose.leftHand, _pose.leftElbow, _pose.leftShoulder);
 
@@ -415,7 +438,11 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 	}
 
 	if (transform.child_frame_id.find("right_elbow" + _userNumber) != std::string::npos) {
-		_pose.rightElbow = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.rightElbow = new tf::Vector3(origin);
+		else
+			_pose.leftElbow = new tf::Vector3(origin);
+
 		yaw = 1.57 - getLimbAngle(_pose.rightHand, _pose.rightElbow, _pose.rightShoulder, _pose.rightHip);
 		roll = getJointAngle(_pose.rightHand, _pose.rightElbow, _pose.rightShoulder);
 
@@ -432,22 +459,40 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 	}
 
 	if (transform.child_frame_id.find("left_hand" + _userNumber) != std::string::npos) {
-		_pose.leftHand = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.leftHand = new tf::Vector3(origin);
+		else
+			_pose.rightHand = new tf::Vector3(origin);
 	}
 	if (transform.child_frame_id.find("right_hand" + _userNumber) != std::string::npos) {
-		_pose.rightHand = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.rightHand = new tf::Vector3(origin);
+		else
+			_pose.leftHand = new tf::Vector3(origin);
 	}
 	if (transform.child_frame_id.find("left_hip" + _userNumber) != std::string::npos) {
-		_pose.leftHip = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.leftHip = new tf::Vector3(origin);
+		else
+			_pose.rightHip = new tf::Vector3(origin);
 	}
 	if (transform.child_frame_id.find("right_hip" + _userNumber) != std::string::npos) {
-		_pose.rightHip = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.rightHip = new tf::Vector3(origin);
+		else
+			_pose.leftHip = new tf::Vector3(origin);
 	}
 	if (transform.child_frame_id.find("left_foot" + _userNumber) != std::string::npos) {
-		_pose.leftFoot = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.leftFoot = new tf::Vector3(origin);
+		else
+			_pose.rightFoot = new tf::Vector3(origin);
 	}
 	if (transform.child_frame_id.find("right_foot" + _userNumber) != std::string::npos) {
-		_pose.rightFoot = new tf::Vector3(origin);
+		if (!_reverse)
+			_pose.rightFoot = new tf::Vector3(origin);
+		else
+			_pose.leftFoot = new tf::Vector3(origin);
 	}
 
 	if (toPublish) {
@@ -496,7 +541,7 @@ void lookForStartGesture(const geometry_msgs::TransformStamped& transform,
 				_user_pub.publish(msg);
 
 				printf("User set: %s           \n", userNum.c_str());
-				init(transform);
+				init(transform, true);
 				ready = true;
 			}
 		}
@@ -512,15 +557,15 @@ void checkSitting(void)
 		float rDist = _pose.rightHip->distance(*_pose.rightFoot);
 
 		if (_naoPose == STANDING && (lDist < SITTING_DISTANCE || rDist < SITTING_DISTANCE)) {
-//			if (_nao_control.perform("sit_down"))
+			if (_nao_control->perform("sit_down"))
 				_naoPose = SITTING;
 		}
 		else if (_naoPose == SITTING && lDist >= SITTING_DISTANCE && rDist >= SITTING_DISTANCE) {
-//			if (_nao_control.perform("stand_up"))
+			if (_nao_control->perform("stand_up"))
 				_naoPose = STANDING;
 		}
 
-		printf("%s      %f, %f     \r", (_naoPose == SITTING ? "SITTING" : "STANDING"), lDist, rDist);
+		printf("%s        \r", (_naoPose == SITTING ? "SITTING" : "STANDING"));
 		std::flush(std::cout);
 	}
 }

@@ -266,6 +266,9 @@ void runGameLoop(Game* guessGame, Game* mimicGame, Game* currentGame)
 		ros::spinOnce();
 		loopRate.sleep();
 	}
+
+	//Force speech recognition to stop
+	currentGame->stopSpeechRecognition();
 }
 
 void initSpeechRecognition(std::vector<std::string>& vocabVector)

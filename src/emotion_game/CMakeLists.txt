@@ -61,3 +61,6 @@ target_link_libraries(gen_json ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(mimicker src/NaoMimicker.cpp)
 target_link_libraries(mimicker ${catkin_LIBRARIES})
+
+add_executable(dump_diagnostic src/Diagnostics.cpp)
+target_link_libraries(dump_diagnostic ${catkin_LIBRARIES})

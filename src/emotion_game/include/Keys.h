@@ -23,6 +23,7 @@
 #define KINECT_PROMPT_KEY "Kinect tracking prompt"
 #define POSITIVE_KEY "Positive phrases"
 #define INTRODUCTION_KEY "Introduction"
+#define REWARD_PROMPT_KEY "Reward prompt"
 
 #define START_KEY "Start"
 #define INSTRUCTION_KEY "Instruction"

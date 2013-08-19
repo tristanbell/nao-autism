@@ -45,6 +45,7 @@
 #define KINECT_PROMPT_PHRASE "Copy the robot"
 #define POSITIVE_PHRASE "Well done"
 #define INTRODUCTION_PHRASE "Lets play"
+#define REWARD_PROMPT_PHRASE "Lets dance"
 
 #define GUESS_INTRODUCTION_PHRASE "Guess the emotion"
 #define GUESS_INSTRUCTION_PHRASE "The robot will do an emotion and you will have to guess what it is"
@@ -239,6 +240,11 @@ Json::Value generateGenericPhrases()
 	introductionPhrases.append(INTRODUCTION_PHRASE);
 	Json::Value& introductionBehaviors = introductionPhrase[BEHAVIOR_KEY];
 	introductionBehaviors.append(INFORM_PHRASE_BEHAVIOR_1);
+
+	Json::Value& rewardPromptPhrase = val[REWARD_PROMPT_KEY];
+	Json::Value& rewardPromptPhrases = rewardPromptPhrase[PHRASE_KEY];
+	rewardPromptPhrases.append(REWARD_PROMPT_PHRASE);
+	Json::Value& rewardPromptBehaviors = rewardPromptPhrase[BEHAVIOR_KEY];
 
 	return val;
 }

@@ -41,21 +41,31 @@
 
 bool tfReady;
 
+std::vector<Behavior> rewardBehaviorList;
+
+Game* guessGame;
+Game* mimicGame;
+
+//Methods required for running the game
+void runGameLoop();
+void rewardChild(nao_control::NaoControl& cntrl);
+
+//Methods required for initialising speech recognition
 void initSpeechRecognition(std::vector<std::string>& vocabVector);
 std::string generateXMLRPCArray(std::vector<std::string> vector);
 
+//Methods required for checking if everything is running
 bool checkRunningNodes(std::vector<std::string>&);
 void checkTfTransforms();
 void tfCallback(const tf::tfMessage);
 
+//Methods required for loading settings
 std::vector<Behavior> getBehaviorList(Json::Value& behaviorRoot);
 
 std::map<std::string, std::vector<Phrase> > getPhraseMap(Json::Value& phraseRoot);
 bool loadPhraseMaps(Json::Value& doc, std::map<std::string, std::vector<Phrase> >& genericPhraseMap,
 		std::map<std::string, std::vector<Phrase> >& guessGamePhraseMap,
 		std::map<std::string, std::vector<Phrase> >& mimicGamePhraseMap);
-
-void runGameLoop(Game* guessGame, Game* mimicGame, Game* currentGame);
 
 int main(int argc, char** argv)
 {
@@ -112,7 +122,6 @@ int main(int argc, char** argv)
 		float confidenceValue = 0.3;
 
 		std::vector<Behavior> allBehaviorList;
-		std::vector<Behavior> rewardBehaviorList;
 
 		std::map<std::string, std::vector<Phrase> > genericPhraseMap, guessGamePhraseMap, mimicGamePhraseMap;
 		if (!loadPhraseMaps(doc, genericPhraseMap, guessGamePhraseMap, mimicGamePhraseMap))
@@ -208,17 +217,12 @@ int main(int argc, char** argv)
 		mimicGameSettings.setPhraseMap(mimicGamePhraseMap);
 		mimicGameSettings.setConfidenceThreshold(confidenceValue);
 
-		Game* guessGame = new GuessGame(guessGameSettings);
-		Game* mimicGame = new MimicGame(mimicGameSettings);
-
-		//Set current game and start it.
-//		Game* currentGame = guessGame;
-		Game* currentGame = mimicGame;
-		currentGame->startGame();
+		guessGame = new GuessGame(guessGameSettings);
+		mimicGame = new MimicGame(mimicGameSettings);
 
 		ROS_INFO("Game initialisation done, starting.");
 
-		runGameLoop(guessGame, mimicGame, currentGame);
+		runGameLoop();
 	}else{
 		std::cout << "Invalid json data file." << std::endl;
 
@@ -240,14 +244,23 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-void runGameLoop(Game* guessGame, Game* mimicGame, Game* currentGame)
+void runGameLoop()
 {
+	nao_control::NaoControl rewardBehaviorControl;
+
+	//Set current game and start it.
+	Game* currentGame = mimicGame;
+	currentGame->startGame();
+
 	ros::Rate loopRate(40);
 	//All checks are done, start game loop
 	while (ros::ok()){
 		if (!currentGame->isDone){
 			currentGame->perform();
 		}else{
+			//Reward child
+			rewardChild(rewardBehaviorControl);
+
 			//Clean up state of current game
 			currentGame->endGame();
 
@@ -269,6 +282,11 @@ void runGameLoop(Game* guessGame, Game* mimicGame, Game* currentGame)
 
 	//Force speech recognition to stop
 	currentGame->stopSpeechRecognition();
+}
+
+void rewardChild(nao_control::NaoControl& cntrl)
+{
+
 }
 
 void initSpeechRecognition(std::vector<std::string>& vocabVector)

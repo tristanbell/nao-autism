@@ -45,6 +45,9 @@ public:
 		return _naoControl;
 	}
 
+	bool startSpeechRecognition();
+	bool stopSpeechRecognition();
+
 	virtual void startGame(void) = 0;
 	virtual void perform(void) = 0;
 	virtual void endGame(void) = 0;
@@ -88,8 +91,6 @@ protected:
 	void askToContinue(void);
 	void waitToContinue(void);
 
-	bool startSpeechRecognition();
-	bool stopSpeechRecognition();
 	void onSpeechRecognized(const nao_msgs::WordRecognized msg);
 	void onSpeech(const std_msgs::String msg);
 

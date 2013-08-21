@@ -68,7 +68,8 @@ protected:
 		ASK_QUESTION_CONTINUE,
 		WAITING_ANSWER_CONTINUE,
 		PROMPT_MIMIC,
-		WAITING_MIMIC
+		WAITING_MIMIC,
+		END_GAME
 	};
 
 	// General settings/control
@@ -90,6 +91,7 @@ protected:
 	void performEmotion(void);
 	void askToContinue(void);
 	void waitToContinue(void);
+	void endGameSpeech();
 
 	void onSpeechRecognized(const nao_msgs::WordRecognized msg);
 	void onSpeech(const std_msgs::String msg);

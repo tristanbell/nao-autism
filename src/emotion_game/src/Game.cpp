@@ -106,7 +106,7 @@ void Game::waitToContinue(void)
 			_recognizedWords.clear();
 			return;
 		}else if (word == "no"){
-			isDone = true;
+			_currentState = END_GAME;
 			stopSpeechRecognition();
 
 			_recognizedWords.clear();
@@ -117,6 +117,20 @@ void Game::waitToContinue(void)
 	}
 
 	_recognizedWords.clear();
+}
+
+void Game::endGameSpeech()
+{
+	std::vector<Phrase> phraseVector;
+	if (_settings.getPhraseVector(FINISH_KEY, phraseVector)){
+		const Phrase& phrase = sayAny(phraseVector);
+
+		if (phrase.getNumberOfBehaviors() == 0){
+			std::string behavior = phrase.getRandomBehaviorName();
+
+			_naoControl.perform(behavior);
+		}
+	}
 }
 
 bool Game::startSpeechRecognition()

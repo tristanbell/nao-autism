@@ -42,6 +42,8 @@
 #define REWARD_2_BEHAVIOR_NAME "reward_2"
 #define REWARD_3_BEHAVIOR_NAME "reward_3"
 
+#define MIMIC_PROMPT_COPY_BEHAVIOR "arms_up"
+
 #define KINECT_PROMPT_PHRASE "Copy the robot"
 #define POSITIVE_PHRASE "Well done"
 #define INTRODUCTION_PHRASE "Lets play"
@@ -61,6 +63,7 @@
 #define MIMIC_INSTRUCTION_PHRASE "The robot will do an emotion and you will have to copy the emotion when the robot asks you to"
 #define MIMIC_EMOTION_PHRASE "The robot is %"
 #define MIMIC_PROMPT_FOLLOW_PHRASE "Do the same"
+#define MIMIC_PROMPT_COPY_PHRASE "Do what the robot is doing"
 #define MIMIC_CORRECT_PHRASE "Well done"
 #define MIMIC_PROMPT_PHRASE "Try again"
 #define MIMIC_INCORRECT_PHRASE "Better luck next time"
@@ -337,6 +340,12 @@ Json::Value generateMimicGamePhrases()
 	promptFollowPhrases.append(MIMIC_PROMPT_FOLLOW_PHRASE);
 	Json::Value& promptFollowBehaviors = promptFollowPhrase[BEHAVIOR_KEY];
 	promptFollowBehaviors.append(QUESTION_PHRASE_BEHAVIOR_1);
+
+	Json::Value& promptCopyPhrase = val[MIMIC_PROMPT_COPY_KEY];
+	Json::Value& promptCopyPhrases = promptCopyPhrase[PHRASE_KEY];
+	promptCopyPhrases.append(MIMIC_PROMPT_COPY_PHRASE);
+	Json::Value& promptCopyBehaviors = promptCopyPhrase[BEHAVIOR_KEY];
+	promptCopyBehaviors.append(MIMIC_PROMPT_COPY_BEHAVIOR);
 
 	Json::Value& correctPhrase = val[CORRECT_ANSWER_KEY];
 	Json::Value& correctPhrases = correctPhrase[PHRASE_KEY];

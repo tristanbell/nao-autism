@@ -40,6 +40,7 @@
 #define MIMIC_GAME_KEY "Mimic game"
 #define MIMIC_EMOTION_KEY "Say emotion"
 #define MIMIC_PROMPT_FOLLOW_KEY "Prompt to follow"
+#define MIMIC_PROMPT_COPY_KEY "Prompt to copy for kinect"
 
 #define PHRASE_KEY "Phrases"
 #define BEHAVIOR_KEY "Behaviors"

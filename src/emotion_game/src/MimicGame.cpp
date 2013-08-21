@@ -28,6 +28,16 @@ void MimicGame::perform(void) {
 	switch (_currentState) {
 		case INTRODUCTION: {
 			introduction();
+
+			//Prompt child to copy robot and perform required behavior
+			std::vector<Phrase> phraseVector;
+			if(_settings.getPhraseVector(MIMIC_PROMPT_COPY_KEY, phraseVector)){
+				const Phrase& phr = sayAny(phraseVector);
+				_naoControl.perform(phr.getRandomBehaviorName());
+
+				sleep(_settings.getWait());
+			}
+
 			_currentState = WAITING_TRACK;
 
 			break;
@@ -146,6 +156,13 @@ void MimicGame::perform(void) {
 
 		case WAITING_ANSWER_CONTINUE: {
 			waitToContinue();
+			break;
+		}
+
+		case END_GAME:{
+			endGameSpeech();
+
+			isDone = true;
 			break;
 		}
 

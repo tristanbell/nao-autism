@@ -7,6 +7,7 @@
 
 #include <ros/ros.h>
 #include <std_srvs/Empty.h>
+#include <std_msgs/Empty.h>
 
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -32,6 +33,9 @@
 
 #include <sstream>
 
+#define SAFE_POS_BEHAVIOR "sit_down"
+#define INIT_BEHAVIOR "init"
+
 #define VOCABULARY_KEY "nao_speech/vocabulary"
 
 #define NODE_NAME "emotion_game"
@@ -41,10 +45,17 @@
 
 bool tfReady;
 
+int speechWait;
+
+std::map<std::string, std::vector<Phrase> > genericPhraseMap;
 std::vector<Behavior> rewardBehaviorList;
 
 Game* guessGame;
 Game* mimicGame;
+
+//Variables required to handle the overriding of the game loop if required
+ros::Subscriber naoStopSubscriber;
+bool naoStop = false;
 
 //Methods required for running the game
 void runGameLoop();
@@ -58,6 +69,12 @@ std::string generateXMLRPCArray(std::vector<std::string> vector);
 bool checkRunningNodes(std::vector<std::string>&);
 void checkTfTransforms();
 void tfCallback(const tf::tfMessage);
+
+/**
+ * This method will override control of the game loop and stop the Nao safely, this
+ * is used to prevent damage to the Nao because of overheating joints/low battery.
+ */
+void stopNaoCallback(const std_msgs::Empty&);
 
 //Methods required for loading settings
 std::vector<Behavior> getBehaviorList(Json::Value& behaviorRoot);
@@ -116,14 +133,14 @@ int main(int argc, char** argv)
 		Json::Value nullValue(Json::nullValue);
 
 		//All the required setting objects
-		int wait = 3;
+		speechWait = 3;
 		int timeout = 5;
 		int maxPrompts = 2;
 		float confidenceValue = 0.3;
 
 		std::vector<Behavior> allBehaviorList;
 
-		std::map<std::string, std::vector<Phrase> > genericPhraseMap, guessGamePhraseMap, mimicGamePhraseMap;
+		std::map<std::string, std::vector<Phrase> > guessGamePhraseMap, mimicGamePhraseMap;
 		if (!loadPhraseMaps(doc, genericPhraseMap, guessGamePhraseMap, mimicGamePhraseMap))
 			return 1;
 
@@ -132,7 +149,7 @@ int main(int argc, char** argv)
 		if (baseSettings.type() != nullValue.type()){
 			Json::Value waitVal = baseSettings.get(SPEECH_WAIT_SETTING_KEY, nullValue);
 			if (waitVal.type() != nullValue.type()){
-				wait = waitVal.asInt();
+				speechWait = waitVal.asInt();
 			}
 
 			Json::Value timeoutVal = baseSettings.get(TIMEOUT_SETTING_KEY, nullValue);
@@ -198,10 +215,14 @@ int main(int argc, char** argv)
 		//Now everything is loaded, perform pre-game tests
 		initSpeechRecognition(vocabularyVector);
 
+		//Create subscriber to allow for overriding game control and stop the nao
+		ros::NodeHandle nh("~");
+		naoStopSubscriber = nh.subscribe("stop", 100, stopNaoCallback);
+
 		//Create settings and instances of games
 		GameSettings guessGameSettings;
 
-		guessGameSettings.setWait(wait);
+		guessGameSettings.setWait(speechWait);
 		guessGameSettings.setTimeout(timeout);
 		guessGameSettings.setMaxPromptAmount(maxPrompts);
 		guessGameSettings.setBehaviorVector(allBehaviorList);
@@ -210,7 +231,7 @@ int main(int argc, char** argv)
 
 		GameSettings mimicGameSettings;
 
-		mimicGameSettings.setWait(wait);
+		mimicGameSettings.setWait(speechWait);
 		mimicGameSettings.setTimeout(timeout);
 		mimicGameSettings.setBehaviorVector(allBehaviorList);
 		mimicGameSettings.setMaxPromptAmount(maxPrompts);
@@ -229,18 +250,6 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-
-	//For now, hardcode the Phrases
-	//std::map<std::string, Phrase> phraseMap;
-
-//	while (!checkRunningNodes(node_names))
-//		sleep(1);
-//
-//	//Check if the tf transform node is active and publishing
-//	checkTfTransforms();
-
-//	startSpeechRecognition();
-
 	return 0;
 }
 
@@ -248,36 +257,49 @@ void runGameLoop()
 {
 	nao_control::NaoControl rewardBehaviorControl;
 
+	rewardBehaviorControl.perform("stand_up");
+
 	//Set current game and start it.
-	Game* currentGame = mimicGame;
+	Game* currentGame = guessGame;
 	currentGame->startGame();
 
 	ros::Rate loopRate(40);
 	//All checks are done, start game loop
 	while (ros::ok()){
-		if (!currentGame->isDone){
-			currentGame->perform();
+		if (naoStop){
+			std::cout << "Recieved stop message, stopping the nao and returning to safe position\n";
+
+			rewardBehaviorControl.say("I don't feel too well, I am going to sit down.");
+
+			rewardBehaviorControl.perform(INIT_BEHAVIOR);
+			rewardBehaviorControl.perform(SAFE_POS_BEHAVIOR);
+
+			break;
 		}else{
-			//Reward child
-			rewardChild(rewardBehaviorControl);
-
-			//Clean up state of current game
-			currentGame->endGame();
-
-			//Swap games
-			if (currentGame == guessGame){
-				currentGame = mimicGame;
+			if (!currentGame->isDone){
+				currentGame->perform();
 			}else{
-				currentGame = guessGame;
+				//Reward child after game has finished
+				rewardChild(rewardBehaviorControl);
+
+				//Clean up state of current game
+				currentGame->endGame();
+
+				//Swap games
+				if (currentGame == guessGame){
+					currentGame = mimicGame;
+				}else{
+					currentGame = guessGame;
+				}
+
+				//Start the new game
+				currentGame->startGame();
 			}
 
-			//Start the new game
-			currentGame->startGame();
+			//Spin once to enable call backs, etc.
+			ros::spinOnce();
+			loopRate.sleep();
 		}
-
-		//Spin once to enable call backs, etc.
-		ros::spinOnce();
-		loopRate.sleep();
 	}
 
 	//Force speech recognition to stop
@@ -286,7 +308,32 @@ void runGameLoop()
 
 void rewardChild(nao_control::NaoControl& cntrl)
 {
+	//Prompt child about reward
+	try{
+		//Get random phrase and say it
+		std::vector<Phrase>& phraseVector = genericPhraseMap.at(REWARD_PROMPT_KEY);
+		int rnd = rand() % phraseVector.size();
 
+		Phrase& phrase = phraseVector[rnd];
+		cntrl.say(phrase.getPhrase());
+		sleep(speechWait);
+
+		//Find random reward behavior and perform it
+		rnd = rand() % rewardBehaviorList.size();
+		Behavior& behavior = rewardBehaviorList[rnd];
+
+		cntrl.perform(behavior.getName());
+
+		//Say positive phrase to child
+		phraseVector = genericPhraseMap.at(POSITIVE_KEY);
+		rnd = rand() % phraseVector.size();
+
+		phrase = phraseVector[rnd];
+		cntrl.say(phrase.getPhrase());
+		sleep(speechWait);
+	}catch (std::out_of_range& oor){
+
+	}
 }
 
 void initSpeechRecognition(std::vector<std::string>& vocabVector)
@@ -398,6 +445,11 @@ bool checkRunningNodes(std::vector<std::string>& node_names)
 	}
 
 	return false;
+}
+
+void stopNaoCallback(const std_msgs::Empty& emptyMsg)
+{
+	naoStop = true;
 }
 
 std::map<std::string, std::vector<Phrase> > getPhraseMap(Json::Value& phraseRoot)

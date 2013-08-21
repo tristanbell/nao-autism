@@ -7,6 +7,14 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
+set(diagnostics_SRCS
+	src/main.cpp
+)
+
+set(checker_SRCS
+	src/CheckerNode.cpp
+)
+
 # add_message_files(
 #   FILES
 #   Message1.msg
@@ -34,3 +42,9 @@ catkin_package(
 include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_executable(run ${diagnostics_SRCS})
+target_link_libraries(run ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(run_checker ${checker_SRCS})
+target_link_libraries(run_checker ${catkin_LIBRARIES} ${Boost_LIBRARIES})

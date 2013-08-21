@@ -258,6 +258,7 @@ void runGameLoop()
 	nao_control::NaoControl rewardBehaviorControl;
 
 	rewardBehaviorControl.perform("stand_up");
+	rewardBehaviorControl.perform("init");
 
 	//Set current game and start it.
 	Game* currentGame = guessGame;

@@ -1,0 +1,357 @@
+Name: nao_joint: HeadYaw
+Hardware ID: 00000ALDR1008E001866#HeadYaw
+Level: 0
+Message: Normal: 39.0 C
+======================================
+	Key:Temperature
+	Value:39.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: HeadPitch
+Hardware ID: 00000ALDR1008E001866#HeadPitch
+Level: 0
+Message: Normal: 39.0 C
+======================================
+	Key:Temperature
+	Value:39.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LShoulderPitch
+Hardware ID: 00000ALDR1008E001866#LShoulderPitch
+Level: 0
+Message: Normal: 40.0 C
+======================================
+	Key:Temperature
+	Value:40.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LShoulderRoll
+Hardware ID: 00000ALDR1008E001866#LShoulderRoll
+Level: 0
+Message: Normal: 39.0 C
+======================================
+	Key:Temperature
+	Value:39.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LElbowYaw
+Hardware ID: 00000ALDR1008E001866#LElbowYaw
+Level: 0
+Message: Normal: 39.0 C
+======================================
+	Key:Temperature
+	Value:39.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LElbowRoll
+Hardware ID: 00000ALDR1008E001866#LElbowRoll
+Level: 0
+Message: Normal: 40.0 C
+======================================
+	Key:Temperature
+	Value:40.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LHipYawPitch
+Hardware ID: 00000ALDR1008E001866#LHipYawPitch
+Level: 0
+Message: Normal: 34.0 C
+======================================
+	Key:Temperature
+	Value:34.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LHipRoll
+Hardware ID: 00000ALDR1008E001866#LHipRoll
+Level: 0
+Message: Normal: 29.0 C
+======================================
+	Key:Temperature
+	Value:29.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LHipPitch
+Hardware ID: 00000ALDR1008E001866#LHipPitch
+Level: 0
+Message: Normal: 38.0 C
+======================================
+	Key:Temperature
+	Value:38.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LKneePitch
+Hardware ID: 00000ALDR1008E001866#LKneePitch
+Level: 0
+Message: Normal: 39.0 C
+======================================
+	Key:Temperature
+	Value:39.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LAnklePitch
+Hardware ID: 00000ALDR1008E001866#LAnklePitch
+Level: 0
+Message: Normal: 48.0 C
+======================================
+	Key:Temperature
+	Value:48.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: LAnkleRoll
+Hardware ID: 00000ALDR1008E001866#LAnkleRoll
+Level: 0
+Message: Normal: 28.0 C
+======================================
+	Key:Temperature
+	Value:28.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RHipYawPitch
+Hardware ID: 00000ALDR1008E001866#RHipYawPitch
+Level: 0
+Message: No temperature sensor
+======================================
+	Key:Temperature
+	Value:None
+--------------------------------------
+	Key:Stiffness
+	Value:None
+--------------------------------------
+======================================
+Name: nao_joint: RHipRoll
+Hardware ID: 00000ALDR1008E001866#RHipRoll
+Level: 0
+Message: Normal: 29.0 C
+======================================
+	Key:Temperature
+	Value:29.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RHipPitch
+Hardware ID: 00000ALDR1008E001866#RHipPitch
+Level: 0
+Message: Normal: 43.0 C
+======================================
+	Key:Temperature
+	Value:43.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RKneePitch
+Hardware ID: 00000ALDR1008E001866#RKneePitch
+Level: 0
+Message: Normal: 51.0 C
+======================================
+	Key:Temperature
+	Value:51.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RAnklePitch
+Hardware ID: 00000ALDR1008E001866#RAnklePitch
+Level: 0
+Message: Normal: 31.0 C
+======================================
+	Key:Temperature
+	Value:31.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RAnkleRoll
+Hardware ID: 00000ALDR1008E001866#RAnkleRoll
+Level: 0
+Message: Normal: 28.0 C
+======================================
+	Key:Temperature
+	Value:28.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RShoulderPitch
+Hardware ID: 00000ALDR1008E001866#RShoulderPitch
+Level: 0
+Message: Normal: 39.0 C
+======================================
+	Key:Temperature
+	Value:39.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RShoulderRoll
+Hardware ID: 00000ALDR1008E001866#RShoulderRoll
+Level: 0
+Message: Normal: 39.0 C
+======================================
+	Key:Temperature
+	Value:39.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RElbowYaw
+Hardware ID: 00000ALDR1008E001866#RElbowYaw
+Level: 0
+Message: Normal: 39.0 C
+======================================
+	Key:Temperature
+	Value:39.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_joint: RElbowRoll
+Hardware ID: 00000ALDR1008E001866#RElbowRoll
+Level: 0
+Message: Normal: 42.0 C
+======================================
+	Key:Temperature
+	Value:42.0
+--------------------------------------
+	Key:Stiffness
+	Value:0.0
+--------------------------------------
+======================================
+Name: nao_power: Battery
+Hardware ID: 00000ALDR1008E001866#battery
+Level: 0
+Message: Battery OK (78.4% left)
+======================================
+	Key:Percentage
+	Value:78.3875048161
+--------------------------------------
+	Key:End off Discharge flag
+	Value:False
+--------------------------------------
+	Key:Near End Off Discharge flag
+	Value:False
+--------------------------------------
+	Key:Charge FET on
+	Value:True
+--------------------------------------
+	Key:Discharge FET on
+	Value:True
+--------------------------------------
+	Key:Accu learn flag
+	Value:False
+--------------------------------------
+	Key:Discharging flag
+	Value:True
+--------------------------------------
+	Key:Full Charge Flag
+	Value:False
+--------------------------------------
+	Key:Charge Flag
+	Value:False
+--------------------------------------
+	Key:Charge Temperature Alarm
+	Value:False
+--------------------------------------
+	Key:Over Charge Alarm
+	Value:False
+--------------------------------------
+	Key:Discharge Alarm
+	Value:False
+--------------------------------------
+	Key:Charge Over Current Alarm
+	Value:False
+--------------------------------------
+	Key:Discharge Over Current Alarm (14A)
+	Value:False
+--------------------------------------
+	Key:Discharge Over Current Alarm (6A)
+	Value:False
+--------------------------------------
+	Key:Discharge Temperature Alarm
+	Value:False
+--------------------------------------
+	Key:Power-Supply present
+	Value:True
+--------------------------------------
+	Key:Status
+	Value:-0b111111111010100
+--------------------------------------
+======================================
+Name: nao_power: Current
+Hardware ID: 00000ALDR1008E001866#power
+Level: 0
+Message: Total Current: -0.87 Ampere (discharging)
+======================================
+	Key:Current
+	Value:-0.873000025749
+--------------------------------------
+======================================
+Name: nao_cpu: Head Temperature
+Hardware ID: 00000ALDR1008E001866#cpu
+Level: 0
+Message: unknown, assuming simulation
+======================================
+	Key:CPU Temperature
+	Value:invalid
+--------------------------------------
+	Key:Board Temperature
+	Value:invalid
+--------------------------------------
+======================================
+Name: nao_wlan: Status
+Hardware ID: 00000ALDR1008E001866#wlan
+Level: 0
+Message: nao_diagnostic_updater not running on robot, cannot determine WLAN status
+======================================
+======================================
+Name: nao_ethernet: Status
+Hardware ID: 00000ALDR1008E001866#ethernet
+Level: 0
+Message: nao_diagnostic_updater not running on robot, cannot determine Ethernet status
+======================================
+======================================

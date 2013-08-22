@@ -9,8 +9,6 @@
 #include <string>
 #include <vector>
 
-bool _attemptedOpenniTracker = false;
-
 void NodeBox::init()
 {
 	setTitle("Nodes statuses");
@@ -29,6 +27,12 @@ void NodeBox::init()
 	naoBehaviorsNode._startCommand = "rosrun nao_driver nao_behaviors.py --pip=$NAO_IP";
 
 	_nodeInformationVector.push_back(naoBehaviorsNode);
+
+	NodeInformation naoSpeechNode;
+	naoSpeechNode._name = "/nao_speech";
+	naoSpeechNode._startCommand = "rosrun nao_driver nao_speech.py --pip=$NAO_IP";
+
+	_nodeInformationVector.push_back(naoSpeechNode);
 
 	int rowNumber = 0;
 	for (int i=0;i<_nodeInformationVector.size();i++){

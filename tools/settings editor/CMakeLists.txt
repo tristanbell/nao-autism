@@ -11,7 +11,7 @@ set(settings_editor_SOURCES
 	src/BaseSettingsTab.cpp
 	src/BehaviorsTab.cpp
 	src/GameBehaviorsTab.cpp
-	#src/RewardBehaviorsTab.cpp
+	src/RewardBehaviorsTab.cpp
 	src/PhrasesTab.cpp
 	src/GenericPhraseTab.cpp
 	src/GuessGameTab.cpp
@@ -29,7 +29,7 @@ set(settings_editor_HEADERS
 	include/BaseSettingsTab.h
 	include/BehaviorsTab.h
 	include/GameBehaviorsTab.h
-	#include/RewardBehaviorsTab.h
+	include/RewardBehaviorsTab.h
 	include/PhrasesTab.h
 	include/GenericPhraseTab.h
 	include/GuessGameTab.h

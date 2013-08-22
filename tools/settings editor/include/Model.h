@@ -58,6 +58,9 @@ public:
 
 	void retrieveGameBehavior(const std::string& name) const;
 
+	void addRewardBehavior(const std::string& name);
+	void removeRewardBehavior(const std::string& name);
+
 	void loadData(Json::Value& docRoot);
 
 private:

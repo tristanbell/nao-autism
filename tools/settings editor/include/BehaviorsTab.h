@@ -9,6 +9,7 @@
 #define BEHAVIORSTAB_H_
 
 #include <GameBehaviorsTab.h>
+#include <RewardBehaviorsTab.h>
 
 #include <QTabWidget>
 #include <QString>
@@ -25,9 +26,11 @@ public:
 	}
 
 	GameBehaviorsTab* getGameBehaviorsTab();
+	RewardBehaviorsTab* getRewardBehaviorsTab();
 
 private:
 	GameBehaviorsTab* _gameBehaviorsTab;
+	RewardBehaviorsTab* _rewardBehaviorsTab;
 
 	void init();
 

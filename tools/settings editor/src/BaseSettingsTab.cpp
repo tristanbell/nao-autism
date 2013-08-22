@@ -29,7 +29,7 @@ void BaseSettingsTab::init()
 	layout->addWidget(_timeoutBox, rowNumber, 0);
 	rowNumber++;
 
-	QLabel* triesLabel = new QLabel("Tries before failure (seconds):");
+	QLabel* triesLabel = new QLabel("Tries before failure:");
 	layout->addWidget(triesLabel, rowNumber, 0);
 	rowNumber++;
 

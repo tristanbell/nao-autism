@@ -7,9 +7,16 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
 include(${QT_USE_FILE})
 
-set(diagnostics_SRCS
+set(gui_SRCS
 	src/main.cpp
+	src/NodeBox.cpp
 )
+
+set(gui_HDRS
+	include/NodeBox.h
+)
+
+qt4_wrap_cpp(gui_MOCS ${gui_HDRS})
 
 set(checker_SRCS
 	src/CheckerNode.cpp
@@ -43,8 +50,8 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(run ${diagnostics_SRCS})
-target_link_libraries(run ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(run_gui ${gui_SRCS} ${gui_MOCS})
+target_link_libraries(run_gui ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES})
 
 add_executable(run_checker ${checker_SRCS})
 target_link_libraries(run_checker ${catkin_LIBRARIES} ${Boost_LIBRARIES})

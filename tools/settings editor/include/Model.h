@@ -62,6 +62,7 @@ public:
 	void removeRewardBehavior(const std::string& name);
 
 	void loadData(Json::Value& docRoot);
+	void defaultData();
 
 private:
 	std::string _fileLocation;

@@ -25,6 +25,7 @@ public:
 	}
 
 private:
+	QAction* _newAction;
 	QAction* _openAction;
 	QAction* _saveAction;
 	QAction* _saveAsAction;
@@ -32,6 +33,7 @@ private:
 	void init();
 
 private slots:
+	void newTriggered();
 	void openTriggered();
 	void saveTriggered();
 	void saveAsTriggered();
@@ -43,6 +45,7 @@ private slots:
 	void onUnsuccessfulSave(const std::string& reason);
 
 signals:
+	void onNewRequested();
 	void onOpenRequested(const std::string& location);
 	void onSaveRequested();
 	void onSaveAsRequested(const std::string& location);

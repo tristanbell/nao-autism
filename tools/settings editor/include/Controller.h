@@ -59,6 +59,8 @@ public slots:
 	void onAddRewardBehavior(const std::string& name);
 	void onRemoveRewardBehavior(const std::string& name);
 
+	void loadNewData();
+
 private:
 	Model* _model;
 

@@ -121,3 +121,8 @@ void Controller::onRemoveRewardBehavior(const std::string& name)
 {
 	_model->removeRewardBehavior(name);
 }
+
+void Controller::loadNewData()
+{
+	_model->defaultData();
+}

@@ -1,6 +1,8 @@
 #include <Model.h>
 #include <Keys.h>
 
+#include <GenerateJSONFile.h>
+
 #include <fstream>
 #include <stdexcept>
 
@@ -74,52 +76,56 @@ void Model::saveAs(const std::string& location)
 
 void Model::saveData(const std::string& location)
 {
-	//Create new JSON document
-	Json::Value doc(Json::objectValue);
+	if (location != ""){
+		//Create new JSON document
+		Json::Value doc(Json::objectValue);
 
-	addPhraseMapToDoc(doc, _generalPhraseMap);
-	addBehaviorListToDoc(doc, _gameBehaviorsDataList);
+		addPhraseMapToDoc(doc, _generalPhraseMap);
+		addBehaviorListToDoc(doc, _gameBehaviorsDataList);
 
-	//Add base settings to JSON document
-	Json::Value& baseSettings = doc[BASE_SETTINGS_KEY];
-	Json::Value& maxPromptVal = baseSettings[MAX_PROMPT_KEY];
-	maxPromptVal = _settingsData._tries;
+		//Add base settings to JSON document
+		Json::Value& baseSettings = doc[BASE_SETTINGS_KEY];
+		Json::Value& maxPromptVal = baseSettings[MAX_PROMPT_KEY];
+		maxPromptVal = _settingsData._tries;
 
-	Json::Value& timeoutVal = baseSettings[TIMEOUT_SETTING_KEY];
-	timeoutVal = _settingsData._timeout;
+		Json::Value& timeoutVal = baseSettings[TIMEOUT_SETTING_KEY];
+		timeoutVal = _settingsData._timeout;
 
-	Json::Value& speechWaitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
-	speechWaitVal = _settingsData._wait;
+		Json::Value& speechWaitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
+		speechWaitVal = _settingsData._wait;
 
-	Json::Value& confidenceVal = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
-	confidenceVal = _settingsData._confidence;
+		Json::Value& confidenceVal = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
+		confidenceVal = _settingsData._confidence;
 
-	Json::Value& rewardBehavior = doc[REWARD_BEHAVIOR_LIST_KEY];
-	Json::Value& rewardBehaviorNames = rewardBehavior[BEHAVIOR_NAME_KEY];
-	addStringArrayToDoc(rewardBehaviorNames, _rewardBehaviorDataList);
+		Json::Value& rewardBehavior = doc[REWARD_BEHAVIOR_LIST_KEY];
+		Json::Value& rewardBehaviorNames = rewardBehavior[BEHAVIOR_NAME_KEY];
+		addStringArrayToDoc(rewardBehaviorNames, _rewardBehaviorDataList);
 
-	Json::Value& guessGameSettings = doc[GUESS_GAME_KEY];
-	addPhraseMapToDoc(guessGameSettings, _guessGamePhraseMap);
+		Json::Value& guessGameSettings = doc[GUESS_GAME_KEY];
+		addPhraseMapToDoc(guessGameSettings, _guessGamePhraseMap);
 
-	Json::Value& mimicGameSettings = doc[MIMIC_GAME_KEY];
-	addPhraseMapToDoc(mimicGameSettings, _mimicGamePhraseMap);
+		Json::Value& mimicGameSettings = doc[MIMIC_GAME_KEY];
+		addPhraseMapToDoc(mimicGameSettings, _mimicGamePhraseMap);
 
-	//Generate styled json string
-	Json::StyledWriter writer;
-	std::string output = writer.write(doc);
+		//Generate styled json string
+		Json::StyledWriter writer;
+		std::string output = writer.write(doc);
 
-	//Write generated json string to file and flush
-	std::fstream fs;
-	fs.open(location.c_str(), std::fstream::out);
+		//Write generated json string to file and flush
+		std::fstream fs;
+		fs.open(location.c_str(), std::fstream::out);
 
-	fs << output;
-	fs.flush();
+		fs << output;
+		fs.flush();
 
-	//Close stream
-	fs.close();
+		//Close stream
+		fs.close();
 
-	//Alert slots about successful save
-	emit successfulSave(location);
+		//Alert slots about successful save
+		emit successfulSave(location);
+	}else{
+		emit unsuccessfulSave("Unable to save file, no location specified.");
+	}
 }
 
 void addPhraseMapToDoc(Json::Value& root, std::map<std::string, PhraseGroupData>& map){
@@ -448,6 +454,14 @@ void Model::loadData(Json::Value& docRoot){
 
 	//Fire all required signals for the new data
 	update();
+}
+
+void Model::defaultData()
+{
+	Json::Value val = generateAllData();
+	loadData(val);
+
+	_fileLocation = "";
 }
 
 void Model::update()

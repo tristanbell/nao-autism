@@ -22,6 +22,7 @@ set(settings_editor_SOURCES
 	src/Model.cpp
 	src/Controller.cpp
 	src/jsoncpp.cpp
+	src/GenerateJSONFile.cpp
 )
 
 set(settings_editor_HEADERS
@@ -43,6 +44,7 @@ set(settings_editor_HEADERS
 	include/Controller.h
 	include/Model.h
 	include/Keys.h
+	include/GenerateJSONFile.h
 	include/json/json.h
 )
 

@@ -48,6 +48,9 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	_tabs->addTab(_phrasesTab, PhrasesTab::TAB_NAME);
 
 	//Connect signals to allow saving and loading of data
+	QObject::connect(_fileMenu, SIGNAL(onNewRequested()),
+			controller.get(), SLOT(loadNewData()));
+
 	QObject::connect(_fileMenu, SIGNAL(onOpenRequested(const std::string&)),
 			controller.get(), SLOT(onOpenRequested(const std::string&)));
 

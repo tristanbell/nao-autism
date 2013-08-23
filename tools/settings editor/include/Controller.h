@@ -56,6 +56,9 @@ public slots:
 
 	void onRequestGameBehaviors(const std::string& name);
 
+	void onAddRewardBehavior(const std::string& name);
+	void onRemoveRewardBehavior(const std::string& name);
+
 private:
 	Model* _model;
 

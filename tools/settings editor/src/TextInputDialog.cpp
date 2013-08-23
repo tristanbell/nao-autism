@@ -10,8 +10,8 @@ void TextInputDialog::init(QString& title, QString& labelName)
 	QGridLayout* layout = new QGridLayout;
 	setLayout(layout);
 
-	QLabel* lbl = new QLabel(labelName);
-	layout->addWidget(lbl, 0, 0);
+	_label = new QLabel(labelName);
+	layout->addWidget(_label, 0, 0);
 
 	_lineEdit = new QLineEdit;
 	layout->addWidget(_lineEdit, 1, 0);
@@ -36,7 +36,9 @@ int TextInputDialog::exec()
 {
 	//Reset state
 	_result = UNKNOWN;
-	_lineEdit->clear();
+
+	if (!_noClear)
+		_lineEdit->clear();
 
 	return QDialog::exec();
 }
@@ -44,6 +46,44 @@ int TextInputDialog::exec()
 TextInputDialog::Result TextInputDialog::getResult() const
 {
 	return _result;
+}
+
+void TextInputDialog::setLabelName(QString& text)
+{
+	_label->setText(text);
+}
+
+void TextInputDialog::setLabelName(std::string& text)
+{
+	QString qStr = QString::fromStdString(text);
+
+	setLabelName(qStr);
+}
+
+void TextInputDialog::setTitle(QString& text)
+{
+	setWindowTitle(text);
+}
+
+void TextInputDialog::setTitle(std::string& text)
+{
+	QString qStr = QString::fromStdString(text);
+
+	setTitle(qStr);
+}
+
+void TextInputDialog::setInput(QString& input)
+{
+	_lineEdit->setText(input);
+
+	_noClear = true;
+}
+
+void TextInputDialog::setInput(std::string& input)
+{
+	QString qStr = QString::fromStdString(input);
+
+	setInput(qStr);
 }
 
 QString TextInputDialog::getQInput() const
@@ -61,6 +101,7 @@ std::string TextInputDialog::getInput() const
 void TextInputDialog::onSubmitButtonClicked()
 {
 	_result = CREATED;
+	_noClear = false;
 
 	close();
 }
@@ -68,6 +109,7 @@ void TextInputDialog::onSubmitButtonClicked()
 void TextInputDialog::onCancelButtonClicked()
 {
 	_result = CLOSED;
+	_noClear = false;
 
 	close();
 }

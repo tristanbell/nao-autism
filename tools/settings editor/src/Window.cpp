@@ -37,6 +37,7 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	_tabs->addTab(_behaviorsTab, BehaviorsTab::TAB_NAME);
 
 	GameBehaviorsTab* gameBehaviorTab = _behaviorsTab->getGameBehaviorsTab();
+	RewardBehaviorsTab* rewardBehaviorTab = _behaviorsTab->getRewardBehaviorsTab();
 
 	_phrasesTab = new PhrasesTab;
 
@@ -111,17 +112,21 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	QObject::connect(_mimicGamePhraseTab, SIGNAL(onPhraseBehaviorCreated(std::string&, std::string&)),
 			controller.get(), SLOT(onMimicGamePhraseBehaviorCreated(std::string&, std::string&)));
 
-	//Connect signals and slots so that new phrases/phrase behaviors can be removed from the model
+	//Connect signals and slots so that new phrases/phrase behaviors can be added/removed from the model
 	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseRemoved(const std::string&, const std::string&)),
 			controller.get(), SLOT(onGeneralPhraseRemoved(const std::string&, const std::string&)));
 	QObject::connect(_generalPhraseTab, SIGNAL(onPhraseBehaviorRemoved(const std::string&, const std::string&)),
 			controller.get(), SLOT(onGeneralPhraseBehaviorRemoved(const std::string&, const std::string&)));
 
-	//Connect signals and slots so that new behaviors can be added to the model
 	QObject::connect(gameBehaviorTab, SIGNAL(onBehaviorCreated(const std::string&, const std::string&)),
 			controller.get(), SLOT(onGameBehaviorCreated(const std::string&, const std::string&)));
 	QObject::connect(gameBehaviorTab, SIGNAL(onBehaviorRemoved(const std::string&, const std::string&)),
 			controller.get(), SLOT(onGameBehaviorRemoved(const std::string&, const std::string&)));
+
+	QObject::connect(rewardBehaviorTab, SIGNAL(addBehavior(const std::string&)),
+			controller.get(), SLOT(onAddRewardBehavior(const std::string&)));
+	QObject::connect(rewardBehaviorTab, SIGNAL(removeBehavior(const std::string&)),
+			controller.get(), SLOT(onRemoveRewardBehavior(const std::string&)));
 
 	//Connect signals and slots so the model can alert the view(s) when new PhraseGroupData is loaded
 	QObject::connect(model.get(), SIGNAL(generalPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&)),
@@ -136,4 +141,7 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 	//Connect signals and slots so the model can alert the view(s) when new BehaviorData is loaded
 	QObject::connect(model.get(), SIGNAL(gameBehaviorsLoaded(const std::list<BehaviorData>&)),
 			gameBehaviorTab, SLOT(onBehaviorListLoaded(const std::list<BehaviorData>&)));
+
+	QObject::connect(model.get(), SIGNAL(rewardBehaviorsLoaded(const std::list<std::string>&)),
+			rewardBehaviorTab, SLOT(onBehaviorListLoaded(const std::list<std::string>&)));
 }

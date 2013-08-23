@@ -358,6 +358,16 @@ void Model::retrieveGameBehavior(const std::string& name) const
 	}
 }
 
+void Model::addRewardBehavior(const std::string& name)
+{
+	_rewardBehaviorDataList.push_back(name);
+}
+
+void Model::removeRewardBehavior(const std::string& name)
+{
+	_rewardBehaviorDataList.remove(name);
+}
+
 void Model::loadData(Json::Value& docRoot){
 	//Load base settings
 	Json::Value& baseSettings = docRoot[BASE_SETTINGS_KEY];

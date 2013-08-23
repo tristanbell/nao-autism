@@ -38,6 +38,7 @@ public slots:
 	void onBehaviorListItemChanged();
 
 	void onCreateBehaviorBtnClicked();
+	void onEditBehaviorBtnClicked();
 	void onRemoveBehaviorBtnClicked();
 
 	void onBehaviorListLoaded(const std::list<BehaviorData>&);
@@ -48,9 +49,10 @@ private:
 
 	QListWidget* _availableBehaviorList;
 	QPushButton* _addBtn;
+	QPushButton* _editBtn;
 	QPushButton* _removeBtn;
 
-	TextInputDialog* _addBehaviorDialog;
+	TextInputDialog* _behaviorDialog;
 
 	void init();
 	void fillList(const BehaviorData&);

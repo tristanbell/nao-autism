@@ -28,28 +28,34 @@ void GameBehaviorsTab::init()
 	QObject::connect(_availableBehaviorList, SIGNAL(itemSelectionChanged()),
 			this, SLOT(onBehaviorListItemChanged()));
 
-	QGridLayout* addRemoveBtnLayout = new QGridLayout;
+	QGridLayout* btnLayout = new QGridLayout;
 
 	_addBtn = new QPushButton("Add behavior");
 	_addBtn->setEnabled(false);
-	addRemoveBtnLayout->addWidget(_addBtn, 0, 0);
+	btnLayout->addWidget(_addBtn, 0, 0);
 
 	QObject::connect(_addBtn, SIGNAL(clicked()), this, SLOT(onCreateBehaviorBtnClicked()));
 
+	_editBtn = new QPushButton("Edit behavior");
+	_editBtn->setEnabled(false);
+	btnLayout->addWidget(_editBtn, 0, 1);
+
+	QObject::connect(_editBtn, SIGNAL(clicked()), this, SLOT(onEditBehaviorBtnClicked()));
+
 	_removeBtn = new QPushButton("Remove behavior");
 	_removeBtn->setEnabled(false);
-	addRemoveBtnLayout->addWidget(_removeBtn, 0, 1);
+	btnLayout->addWidget(_removeBtn, 0, 2);
 
 	QObject::connect(_removeBtn, SIGNAL(clicked()), this, SLOT(onRemoveBehaviorBtnClicked()));
 
-	layout->addLayout(addRemoveBtnLayout, 4, 0);
+	layout->addLayout(btnLayout, 4, 0);
 
 	QString qBehaviorDialogTitle("Add behavior:");
 	QString qBehaviorDialogLabel("Behavior name:");
 
 	//Construct dialog for adding behaviors
-	_addBehaviorDialog = new TextInputDialog(qBehaviorDialogTitle, qBehaviorDialogLabel);
-	_addBehaviorDialog->setBaseSize(50, 50);
+	_behaviorDialog = new TextInputDialog(qBehaviorDialogTitle, qBehaviorDialogLabel);
+	_behaviorDialog->setBaseSize(50, 50);
 }
 
 void GameBehaviorsTab::fillList(const BehaviorData& data)
@@ -65,6 +71,7 @@ void GameBehaviorsTab::fillList(const BehaviorData& data)
 	}
 
 	_addBtn->setEnabled(true);
+	_editBtn->setEnabled(false);
 	_removeBtn->setEnabled(false);
 }
 
@@ -76,21 +83,57 @@ void GameBehaviorsTab::onBehaviorBoxIndexChanged(const QString& name)
 
 void GameBehaviorsTab::onBehaviorListItemChanged()
 {
+	_editBtn->setEnabled(true);
 	_removeBtn->setEnabled(true);
 }
 
 void GameBehaviorsTab::onCreateBehaviorBtnClicked()
 {
-	_addBehaviorDialog->exec();
+	QString qTitle = "Add behavior";
+	_behaviorDialog->setTitle(qTitle);
 
-	if (_addBehaviorDialog->getResult() == TextInputDialog::CREATED){
-		std::string key = _behaviorNamesBox->currentText().toStdString();
-		std::string behaviorName = _addBehaviorDialog->getInput();
+	_behaviorDialog->exec();
 
-		//Add new behavior to list
-		_availableBehaviorList->addItem(_addBehaviorDialog->getQInput());
+	if (_behaviorDialog->getResult() == TextInputDialog::CREATED){
+		std::string behaviorName = _behaviorDialog->getInput();
 
-		emit onBehaviorCreated(key, behaviorName);
+		if (behaviorName != ""){
+			std::string key = _behaviorNamesBox->currentText().toStdString();
+
+			//Add new behavior to list
+			_availableBehaviorList->addItem(_behaviorDialog->getQInput());
+
+			emit onBehaviorCreated(key, behaviorName);
+		}
+	}else{
+		QMessageBox::information(this, "Error", "Unable to add behavior as nothing was entered.");
+	}
+}
+
+void GameBehaviorsTab::onEditBehaviorBtnClicked()
+{
+	QString qTitle = "Edit behavior";
+	_behaviorDialog->setTitle(qTitle);
+
+	QString qInput = _availableBehaviorList->currentItem()->text();
+	_behaviorDialog->setInput(qInput);
+
+	_behaviorDialog->exec();
+
+	if (_behaviorDialog->getResult() == TextInputDialog::CREATED){
+		std::string behaviorName = _behaviorDialog->getInput();
+
+		if (behaviorName != ""){
+			std::string key = _behaviorNamesBox->currentText().toStdString();
+
+			std::string oldBehaviorName = _availableBehaviorList->currentItem()->text().toStdString();
+			_availableBehaviorList->currentItem()->setText(_behaviorDialog->getQInput());
+
+			emit onBehaviorRemoved(key, oldBehaviorName);
+			emit onBehaviorCreated(key, behaviorName);
+		}else{
+			QMessageBox::information(this, "Error", "Unable to edit behavior as nothing was entered.");
+		}
 	}
 }
 

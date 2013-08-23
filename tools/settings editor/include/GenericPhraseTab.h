@@ -44,17 +44,21 @@ public slots:
 private:
 	QString _tabName;
 
-	TextInputDialog* _addPhraseDialog;
-	TextInputDialog* _addBehaviorDialog;
+//	TextInputDialog* _addPhraseDialog;
+//	TextInputDialog* _addBehaviorDialog;
+
+	TextInputDialog* _inputDialog;
 
 	QComboBox* _phraseGroupBox;
 
 	QListWidget* _phrasesList;
 	QPushButton* _addPhraseBtn;
+	QPushButton* _editPhraseBtn;
 	QPushButton* _removePhraseBtn;
 
 	QListWidget* _behaviorList;
 	QPushButton* _addBehaviorBtn;
+	QPushButton* _editBehaviorBtn;
 	QPushButton* _removeBehaviorBtn;
 
 	void init();
@@ -66,11 +70,15 @@ private:
 
 private slots:
 	void onPhraseListItemChanged();
+
 	void addPhraseButtonClicked();
+	void editPhraseButtonClicked();
 	void removePhraseButtonClicked();
 
 	void onBehaviorListItemChanged();
+
 	void addBehaviorButtonClicked();
+	void editBehaviorButtonClicked();
 	void removeBehaviorButtonClicked();
 
 	void onPhraseGroupLoaded(const std::map<std::string, PhraseGroupData>&);

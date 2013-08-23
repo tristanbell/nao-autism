@@ -42,9 +42,13 @@ void GenericPhraseTab::init()
 	_addPhraseBtn->setEnabled(false);
 	phraseBtnLayout->addWidget(_addPhraseBtn, 0, 0);
 
+	_editPhraseBtn = new QPushButton("Edit phrase");
+	_editPhraseBtn->setEnabled(false);
+	phraseBtnLayout->addWidget(_editPhraseBtn, 0, 1);
+
 	_removePhraseBtn = new QPushButton("Remove phrase");
 	_removePhraseBtn->setEnabled(false);
-	phraseBtnLayout->addWidget(_removePhraseBtn, 0, 1);
+	phraseBtnLayout->addWidget(_removePhraseBtn, 0, 2);
 
 	//Add the button layout to the main phrase layout
 	phraseLayout->addLayout(phraseBtnLayout, 2, 0);
@@ -68,9 +72,13 @@ void GenericPhraseTab::init()
 	_addBehaviorBtn->setEnabled(false);
 	behaviorBtnLayout->addWidget(_addBehaviorBtn, 0, 0);
 
+	_editBehaviorBtn = new QPushButton("Edit behavior");
+	_editBehaviorBtn->setEnabled(false);
+	behaviorBtnLayout->addWidget(_editBehaviorBtn, 0, 1);
+
 	_removeBehaviorBtn = new QPushButton("Remove behavior");
 	_removeBehaviorBtn->setEnabled(false);
-	behaviorBtnLayout->addWidget(_removeBehaviorBtn, 0, 1);
+	behaviorBtnLayout->addWidget(_removeBehaviorBtn, 0, 2);
 
 	//Add behavior add/remove button layout to the main behavior layout
 	behaviorLayout->addLayout(behaviorBtnLayout, 2, 0);
@@ -78,28 +86,27 @@ void GenericPhraseTab::init()
 	//Add main behavior layout to the main layout
 	layout->addLayout(behaviorLayout, 3, 0);
 
-	//Create instances of the dialogs
-	QString phraseDialogTitle = QString::fromStdString("Add phrase");
-	QString phraseDialogLabel = QString::fromStdString("Phrase:");
-
-	QString behaviorDialogTitle = QString::fromStdString("Add behavior");
-	QString behaviorDialogLabel = QString::fromStdString("Behavior:");
-
-	_addPhraseDialog = new TextInputDialog(phraseDialogTitle, phraseDialogLabel);
-	_addBehaviorDialog = new TextInputDialog(behaviorDialogTitle, behaviorDialogLabel);
+	//Create instance of input dialog
+	_inputDialog = new TextInputDialog;
 
 	//Connect signals to required slots
 	QObject::connect(_phrasesList, SIGNAL(itemSelectionChanged()),
 			this, SLOT(onPhraseListItemChanged()));
+
 	QObject::connect(_addPhraseBtn, SIGNAL(clicked()),
 			this, SLOT(addPhraseButtonClicked()));
+	QObject::connect(_editPhraseBtn, SIGNAL(clicked()),
+			this, SLOT(editPhraseButtonClicked()));
 	QObject::connect(_removePhraseBtn, SIGNAL(clicked()),
 			this, SLOT(removePhraseButtonClicked()));
 
 	QObject::connect(_behaviorList, SIGNAL(itemSelectionChanged()),
 			this, SLOT(onBehaviorListItemChanged()));
+
 	QObject::connect(_addBehaviorBtn, SIGNAL(clicked()),
 			this, SLOT(addBehaviorButtonClicked()));
+	QObject::connect(_editBehaviorBtn, SIGNAL(clicked()),
+			this, SLOT(editBehaviorButtonClicked()));
 	QObject::connect(_removeBehaviorBtn, SIGNAL(clicked()),
 			this, SLOT(removeBehaviorButtonClicked()));
 }
@@ -148,9 +155,11 @@ void GenericPhraseTab::onPhraseGroupLoaded(const std::map<std::string, PhraseGro
 	setPhraseGroup(group);
 
 	_addPhraseBtn->setEnabled(true);
+	_editPhraseBtn->setEnabled(false);
 	_removePhraseBtn->setEnabled(false);
 
 	_addBehaviorBtn->setEnabled(true);
+	_editBehaviorBtn->setEnabled(false);
 	_removeBehaviorBtn->setEnabled(false);
 }
 
@@ -158,6 +167,8 @@ void GenericPhraseTab::onPhraseGroupRetrieved(const PhraseGroupData& data)
 {
 	setCurrentPhraseGroup(data);
 
+	_editPhraseBtn->setEnabled(false);
+	_editBehaviorBtn->setEnabled(false);
 	_removePhraseBtn->setEnabled(false);
 	_removeBehaviorBtn->setEnabled(false);
 }
@@ -202,23 +213,65 @@ void GenericPhraseTab::phraseGroupBoxIndexChanged(const QString& text)
 
 void GenericPhraseTab::onPhraseListItemChanged()
 {
+	_editPhraseBtn->setEnabled(true);
 	_removePhraseBtn->setEnabled(true);
 }
 
 void GenericPhraseTab::addPhraseButtonClicked()
 {
-	_addPhraseDialog->exec();
+	QString title = "Add phrase";
+	_inputDialog->setTitle(title);
 
-	if (_addPhraseDialog->getResult() == TextInputDialog::CREATED){
-		QString qKey = _phraseGroupBox->currentText();
+	QString lbl = "Phrase name:";
+	_inputDialog->setLabelName(lbl);
 
-		std::string key = qKey.toStdString();
-		std::string phrase = _addPhraseDialog->getInput();
+	_inputDialog->exec();
 
-		//Add to the phrase list
-		_phrasesList->addItem(_addPhraseDialog->getQInput());
+	if (_inputDialog->getResult() == TextInputDialog::CREATED){
+		std::string phrase = _inputDialog->getInput();
 
-		emit onPhraseCreated(key, phrase);
+		if (phrase != ""){
+			QString qKey = _phraseGroupBox->currentText();
+			std::string key = qKey.toStdString();
+
+			//Add to the phrase list
+			_phrasesList->addItem(_inputDialog->getQInput());
+
+			emit onPhraseCreated(key, phrase);
+		}else{
+			QMessageBox::information(this, "Error", "Unable to add phrase as nothing was entered.");
+		}
+	}
+}
+
+void GenericPhraseTab::editPhraseButtonClicked()
+{
+	QString title = "Edit phrase";
+	_inputDialog->setTitle(title);
+
+	QString lbl = "Phrase name:";
+	_inputDialog->setLabelName(lbl);
+
+	QString input = _phrasesList->currentItem()->text();
+	_inputDialog->setInput(input);
+
+	_inputDialog->exec();
+
+	if (_inputDialog->getResult() == TextInputDialog::CREATED){
+		std::string phrase = _inputDialog->getInput();
+
+		if (phrase != ""){
+			QString qKey = _phraseGroupBox->currentText();
+			std::string key = qKey.toStdString();
+
+			std::string oldPhrase = _phrasesList->currentItem()->text().toStdString();
+			_phrasesList->currentItem()->setText(_inputDialog->getQInput());
+
+			emit onPhraseRemoved(key, oldPhrase);
+			emit onPhraseCreated(key, phrase);
+		}else{
+			QMessageBox::information(this, "Error", "Unable to edit phrase as nothing was entered.");
+		}
 	}
 }
 
@@ -239,23 +292,65 @@ void GenericPhraseTab::removePhraseButtonClicked()
 
 void GenericPhraseTab::onBehaviorListItemChanged()
 {
+	_editBehaviorBtn->setEnabled(true);
 	_removeBehaviorBtn->setEnabled(true);
 }
 
 void GenericPhraseTab::addBehaviorButtonClicked()
 {
-	_addBehaviorDialog->exec();
+	QString title = "Add behavior";
+	_inputDialog->setTitle(title);
 
-	if (_addBehaviorDialog->getResult() == TextInputDialog::CREATED){
-		QString qKey = _phraseGroupBox->currentText();
+	QString lbl = "Behavior name:";
+	_inputDialog->setLabelName(lbl);
 
-		std::string key = qKey.toStdString();
-		std::string behavior = _addBehaviorDialog->getInput();
+	_inputDialog->exec();
 
-		//Add to the behavior list
-		_behaviorList->addItem(_addBehaviorDialog->getQInput());
+	if (_inputDialog->getResult() == TextInputDialog::CREATED){
+		std::string behavior = _inputDialog->getInput();
 
-		emit onPhraseBehaviorCreated(key, behavior);
+		if (behavior != ""){
+			QString qKey = _phraseGroupBox->currentText();
+			std::string key = qKey.toStdString();
+
+			//Add to the behavior list
+			_behaviorList->addItem(_inputDialog->getQInput());
+
+			emit onPhraseBehaviorCreated(key, behavior);
+		}else{
+			QMessageBox::information(this, "Error", "Unable to add behavior as nothing was entered.");
+		}
+	}
+}
+
+void GenericPhraseTab::editBehaviorButtonClicked()
+{
+	QString title = "Edit behavior";
+	_inputDialog->setTitle(title);
+
+	QString lbl = "Behavior name:";
+	_inputDialog->setLabelName(lbl);
+
+	QString input = _behaviorList->currentItem()->text();
+	_inputDialog->setInput(input);
+
+	_inputDialog->exec();
+
+	if (_inputDialog->getResult() == TextInputDialog::CREATED){
+		std::string behavior = _inputDialog->getInput();
+
+		if (behavior != ""){
+			QString qKey = _phraseGroupBox->currentText();
+			std::string key = qKey.toStdString();
+
+			std::string oldBehavior = _behaviorList->currentItem()->text().toStdString();
+			_behaviorList->currentItem()->setText(_inputDialog->getQInput());
+
+			emit onPhraseBehaviorRemoved(key, oldBehavior);
+			emit onPhraseBehaviorCreated(key, behavior);
+		}else{
+			QMessageBox::information(this, "Error", "Unable to edit behavior as nothing was entered.");
+		}
 	}
 }
 

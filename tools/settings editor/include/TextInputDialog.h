@@ -10,6 +10,7 @@
 
 #include <QString>
 #include <QDialog>
+#include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 
@@ -25,6 +26,14 @@ public:
 
 	};
 
+	TextInputDialog() : QDialog()
+	{
+		QString title = "";
+		QString lblName = "";
+
+		init(title, lblName);
+	}
+
 	TextInputDialog(QString& title, QString& labelName) : QDialog()
 	{
 		init(title, labelName);
@@ -33,12 +42,25 @@ public:
 	virtual int exec();
 
 	Result getResult() const;
+
+	void setLabelName(QString& text);
+	void setLabelName(std::string& text);
+
+	void setTitle(QString& text);
+	void setTitle(std::string& text);
+
+	void setInput(QString& input);
+	void setInput(std::string& input);
+
 	QString getQInput() const;
 	std::string getInput() const;
 
 private:
+	bool _noClear;
+
 	Result _result;
 
+	QLabel* _label;
 	QLineEdit* _lineEdit;
 
 	QPushButton* _submitBtn;

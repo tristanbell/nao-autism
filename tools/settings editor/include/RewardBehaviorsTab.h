@@ -8,8 +8,9 @@
 #ifndef REWARDBEHAVIORSTAB_H_
 #define REWARDBEHAVIORSTAB_H_
 
-#include <QTabWidget>
+#include <TextInputDialog.h>
 
+#include <QTabWidget>
 #include <QListWidget>
 #include <QPushButton>
 #include <QLabel>
@@ -28,6 +29,8 @@ public:
 	}
 
 private:
+	TextInputDialog* _behaviorDialog;
+
 	QListWidget* _behaviorList;
 
 	QPushButton* _addBehaviorBtn;
@@ -35,6 +38,18 @@ private:
 	QPushButton* _removeBehaviorBtn;
 
 	void init();
+
+private slots:
+	void onBehaviorListLoaded(const std::list<std::string>&);
+	void onBehaviorListItemChanged();
+
+	void onAddBehaviorBtnClicked();
+	void onEditBehaviorBtnClicked();
+	void onRemoveBehaviorBtnClicked();
+
+signals:
+	void addBehavior(const std::string&);
+	void removeBehavior(const std::string&);
 
 };
 

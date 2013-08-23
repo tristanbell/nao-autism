@@ -111,3 +111,13 @@ void Controller::onRequestGameBehaviors(const std::string& name)
 {
 	_model->retrieveGameBehavior(name);
 }
+
+void Controller::onAddRewardBehavior(const std::string& name)
+{
+	_model->addRewardBehavior(name);
+}
+
+void Controller::onRemoveRewardBehavior(const std::string& name)
+{
+	_model->removeRewardBehavior(name);
+}

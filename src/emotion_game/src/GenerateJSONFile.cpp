@@ -1,11 +1,4 @@
-/*
- * This ROS node is used to generate the required JSON files.
- *
- * The node must be ran as follows:
- * 		rosrun emotion_game gen_json <file>
- * Where <file> is the path to the file that the json data will be
- * wrote to.
- */
+#include <GenerateJSONFile.h>
 
 #include <json/json.h>
 
@@ -17,150 +10,51 @@
 
 #include <Keys.h>
 
-#define DEFAULT_WAIT 3
-#define DEFAULT_TIMEOUT 15
-#define DEFAULT_PROMPTS 2
-#define DEFAULT_CONFIDENCE 0.3f
-
-#define HAPPY_BEHAVIOR_NAME "happy_1"
-#define HAPPY_BEHAVIOR_ACTUAL "happy"
-#define HAPPY_BEHAVIOR_CLASSIFICATION 1
-
-#define SAD_BEHAVIOR_NAME "sad_1"
-#define SAD_BEHAVIOR_ACTUAL "sad"
-#define SAD_BEHAVIOR_CLASSIFICATION 2
-
-#define SCARED_BEHAVIOR_NAME "scared_1"
-#define SCARED_BEHAVIOR_ACTUAL "scared"
-#define SCARED_BEHAVIOR_CLASSIFICATION 3
-
-#define ANGRY_BEHAVIOR_NAME "angry_1"
-#define ANGRY_BEHAVIOR_ACTUAL "angry"
-#define ANGRY_BEHAVIOR_CLASSIFICATION 4
-
-#define REWARD_1_BEHAVIOR_NAME "reward_1"
-#define REWARD_2_BEHAVIOR_NAME "reward_2"
-#define REWARD_3_BEHAVIOR_NAME "reward_3"
-
-#define MIMIC_PROMPT_COPY_BEHAVIOR "arms_up"
-
-#define KINECT_PROMPT_PHRASE "Copy the robot"
-#define POSITIVE_PHRASE "Well done"
-#define INTRODUCTION_PHRASE "Lets play"
-#define REWARD_PROMPT_PHRASE "Lets dance"
-
-#define GUESS_INTRODUCTION_PHRASE "Guess the emotion"
-#define GUESS_INSTRUCTION_PHRASE "The robot will do an emotion and you will have to guess what it is"
-#define GUESS_NEXT_PHRASE "Next emotion"
-#define GUESS_QUESTION_1 "Was the robot % or %?"
-#define GUESS_CORRECT_ANSWER_1 "Well done, you guessed the robot was %"
-#define GUESS_PROMPT_ANSWER_1 "Try again"
-#define GUESS_INCORRECT_ANSWER_1 "Lets try another emotion"
-#define GUESS_CONTINUE_QUESTION_1 "Shall we play the guessing game again?"
-#define GUESS_FINISH_PHRASE "Guess the emotion is finished"
-
-#define MIMIC_INTRODUCTION_PHRASE "Copy the robot"
-#define MIMIC_INSTRUCTION_PHRASE "The robot will do an emotion and you will have to copy the emotion when the robot asks you to"
-#define MIMIC_EMOTION_PHRASE "The robot is %"
-#define MIMIC_PROMPT_FOLLOW_PHRASE "Do the same"
-#define MIMIC_PROMPT_COPY_PHRASE "Do what the robot is doing"
-#define MIMIC_CORRECT_PHRASE "Well done"
-#define MIMIC_PROMPT_PHRASE "Try again"
-#define MIMIC_INCORRECT_PHRASE "Better luck next time"
-#define MIMIC_CONTINUE_QUESTION_1 "Shall we play the mimic game again?"
-#define MIMIC_FINISH_PHRASE "Copy the robot is finished."
-
-#define QUESTION_PHRASE_BEHAVIOR_1 "prompt_1"
-#define INFORM_PHRASE_BEHAVIOR_1 "prompt_2"
-#define CORRECT_ANSWER_BEHAVIOR_1 "right_1"
-#define INCORRECT_ANSWER_BEHAVIOR_1 "incorrect_1"
-
-Json::Value generateBehaviorList();
-Json::Value generateRewardBehaviorsList();
-
-void generateBehavior(Json::Value&, const std::string, const std::string, int);
-
-Json::Value generateGenericPhrases();
-Json::Value generateGuessGamePhrases();
-Json::Value generateMimicGamePhrases();
-
-int main(int argc, char** argv)
+Json::Value generateAllData()
 {
-	ros::init(argc, argv, "json_gen");
+	Json::Value doc(Json::objectValue);
 
-	if (argc == 2){
-		std::cout << "Generating JSON data." << std::endl;
+	//Generate the base settings
+	Json::Value& baseSettings = doc[BASE_SETTINGS_KEY];
+	Json::Value& waitSetting = baseSettings[SPEECH_WAIT_SETTING_KEY];
+	waitSetting = DEFAULT_WAIT;
 
-		Json::Value doc(Json::objectValue);
+	Json::Value& timeoutSetting = baseSettings[TIMEOUT_SETTING_KEY];
+	timeoutSetting = DEFAULT_TIMEOUT;
 
-		//Generate the base settings
-		Json::Value& baseSettings = doc[BASE_SETTINGS_KEY];
-		Json::Value& waitSetting = baseSettings[SPEECH_WAIT_SETTING_KEY];
-		waitSetting = DEFAULT_WAIT;
+	Json::Value& maxTimesPrompted = baseSettings[MAX_PROMPT_KEY];
+	maxTimesPrompted = DEFAULT_PROMPTS;
 
-		Json::Value& timeoutSetting = baseSettings[TIMEOUT_SETTING_KEY];
-		timeoutSetting = DEFAULT_TIMEOUT;
+	Json::Value& confidence = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
+	confidence = DEFAULT_CONFIDENCE;
 
-		Json::Value& maxTimesPrompted = baseSettings[MAX_PROMPT_KEY];
-		maxTimesPrompted = DEFAULT_PROMPTS;
+	//Generate generic phrases
+	Json::Value& genericPhrases = doc[PHRASE_KEY];
+	genericPhrases = generateGenericPhrases();
 
-		Json::Value& confidence = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
-		confidence = DEFAULT_CONFIDENCE;
+	//Generate guess game settings
+	Json::Value& guessGameSettings = doc[GUESS_GAME_KEY];
 
-		//Generate generic phrases
-		Json::Value& genericPhrases = doc[PHRASE_KEY];
-		genericPhrases = generateGenericPhrases();
+	//Generate phrases for guess game
+	Json::Value& guessGamePhrases = guessGameSettings[PHRASE_KEY];
+	guessGamePhrases = generateGuessGamePhrases();
 
-		//Generate guess game settings
-		Json::Value& guessGameSettings = doc[GUESS_GAME_KEY];
+	//Generate mimic game settings
+	Json::Value& mimicGameSettings = doc[MIMIC_GAME_KEY];
 
-		//Generate phrases for guess game
-		Json::Value& guessGamePhrases = guessGameSettings[PHRASE_KEY];
-		guessGamePhrases = generateGuessGamePhrases();
+	//Generate phrase for mimic game
+	Json::Value& mimicGamePhrases = mimicGameSettings[PHRASE_KEY];
+	mimicGamePhrases = generateMimicGamePhrases();
 
-		//Generate mimic game settings
-		Json::Value& mimicGameSettings = doc[MIMIC_GAME_KEY];
+	//Generate behavior list
+	Json::Value& behaviorList = doc[BEHAVIOR_KEY];
+	behaviorList = generateBehaviorList();
 
-		//Generate phrase for mimic game
-		Json::Value& mimicGamePhrases = mimicGameSettings[PHRASE_KEY];
-		mimicGamePhrases = generateMimicGamePhrases();
+	//Generate reward behavior list
+	Json::Value& rewardBehaviorList = doc[REWARD_BEHAVIOR_LIST_KEY];
+	rewardBehaviorList = generateRewardBehaviorsList();
 
-		//Generate behavior list
-		Json::Value& behaviorList = doc[BEHAVIOR_KEY];
-		behaviorList = generateBehaviorList();
-
-		//Generate reward behavior list
-		Json::Value& rewardBehaviorList = doc[REWARD_BEHAVIOR_LIST_KEY];
-		rewardBehaviorList = generateRewardBehaviorsList();
-
-		Json::StyledWriter writer;
-		std::string result = writer.write(doc);
-
-		std::cout << "Generation finished." << std::endl;
-
-		//Write json data to file
-		std::fstream fs;
-		fs.open(argv[1], std::fstream::out);
-
-		std::cout << "Writing json data to " << argv[1] << std::endl;
-
-		//Write the json data and flush to ensure complete write
-		fs << result;
-		fs.flush();
-
-		std::cout << "Successfully wrote generated json data.\n";
-
-		//Close stream
-		fs.close();
-	}else{
-		std::cout << "Invalid number of arguments, the following format must be used:" << std::endl;
-		std::cout << "\trosrun emotion_game gen_json <file>" << std::endl;
-		std::cout << "Where <file> is the file name to write the json data to." << std::endl;
-	}
-
-	ros::shutdown();
-
-	return 0;
+	return doc;
 }
 
 /**

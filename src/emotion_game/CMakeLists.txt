@@ -32,12 +32,14 @@ set(start_game_HDRS
 
 set(gen_json_SRCS
 	src/GenerateJSONFile.cpp
+	src/GenerateJSONNode.cpp
 
 	src/jsoncpp.cpp
 )
 
 set(gen_json_HDRS
 	include/json/json.h
+	include/GenerateJSONFile.h
 	include/Keys.h
 )
 

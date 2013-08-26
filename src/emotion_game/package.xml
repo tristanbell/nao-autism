@@ -45,6 +45,7 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>nao_msgs</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>nao_autism_messages</build_depend>
   <run_depend>nao_control</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>

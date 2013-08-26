@@ -14,6 +14,8 @@ add_message_files(
   	FILES
    	PoseClassification.msg
   	Record.msg
+  	ExecutionStatus.msg
+  	SetExecutionStatus.msg
 )
 
 add_action_files(

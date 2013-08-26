@@ -9,6 +9,9 @@
 #include <std_srvs/Empty.h>
 #include <std_msgs/Empty.h>
 
+#include <nao_autism_messages/ExecutionStatus.h>
+#include <nao_autism_messages/SetExecutionStatus.h>
+
 #include <tf/tfMessage.h>
 #include <geometry_msgs/TransformStamped.h>
 
@@ -54,8 +57,18 @@ Game* guessGame;
 Game* mimicGame;
 
 //Variables required to handle the overriding of the game loop if required
+enum ExecutionStatus{
+	GAME_RUNNING,
+	GAME_PAUSED,
+	GAME_STOPPED
+};
+
+ExecutionStatus executionStatus;
+
 ros::Subscriber naoStopSubscriber;
-bool naoStop = false;
+
+ros::Subscriber setExecutionStatusSubscriber;
+ros::Publisher executionStatusPublisher;
 
 //Methods required for running the game
 void runGameLoop();
@@ -75,6 +88,8 @@ void tfCallback(const tf::tfMessage);
  * is used to prevent damage to the Nao because of overheating joints/low battery.
  */
 void stopNaoCallback(const std_msgs::Empty&);
+
+void setExecutionStatusCallback(const nao_autism_messages::SetExecutionStatus&);
 
 //Methods required for loading settings
 std::vector<Behavior> getBehaviorList(Json::Value& behaviorRoot);
@@ -217,7 +232,10 @@ int main(int argc, char** argv)
 
 		//Create subscriber to allow for overriding game control and stop the nao
 		ros::NodeHandle nh("~");
-		naoStopSubscriber = nh.subscribe("stop", 100, stopNaoCallback);
+		naoStopSubscriber = nh.subscribe("stop", 100, stopNaoCallback); //This will be changed in the future
+
+		setExecutionStatusSubscriber = nh.subscribe("set_execution_status", 1, setExecutionStatusCallback);
+		executionStatusPublisher = nh.advertise<nao_autism_messages::ExecutionStatus>("execution_status", 1);
 
 		//Create settings and instances of games
 		GameSettings guessGameSettings;
@@ -267,7 +285,12 @@ void runGameLoop()
 	ros::Rate loopRate(40);
 	//All checks are done, start game loop
 	while (ros::ok()){
-		if (naoStop){
+		if (executionStatus == GAME_STOPPED){
+			//Send stopping message
+			nao_autism_messages::ExecutionStatus msg;
+			msg.status = nao_autism_messages::ExecutionStatus::STOPPING;
+			executionStatusPublisher.publish(msg);
+
 			std::cout << "Recieved stop message, stopping the nao and returning to safe position\n";
 
 			rewardBehaviorControl.say("I don't feel too well, I am going to sit down.");
@@ -276,7 +299,19 @@ void runGameLoop()
 			rewardBehaviorControl.perform(SAFE_POS_BEHAVIOR);
 
 			break;
+		}else if (executionStatus == GAME_PAUSED){
+			//Send paused message
+			nao_autism_messages::ExecutionStatus msg;
+			msg.status = nao_autism_messages::ExecutionStatus::PAUSED;
+			executionStatusPublisher.publish(msg);
+
+			loopRate.sleep();
 		}else{
+			//Send running message
+			nao_autism_messages::ExecutionStatus msg;
+			msg.status = nao_autism_messages::ExecutionStatus::RUNNING;
+			executionStatusPublisher.publish(msg);
+
 			if (!currentGame->isDone){
 				currentGame->perform();
 			}else{
@@ -296,11 +331,11 @@ void runGameLoop()
 				//Start the new game
 				currentGame->startGame();
 			}
-
-			//Spin once to enable call backs, etc.
-			ros::spinOnce();
-			loopRate.sleep();
 		}
+
+		//Spin once to enable call backs, etc.
+		ros::spinOnce();
+		loopRate.sleep();
 	}
 
 	//Force speech recognition to stop
@@ -450,7 +485,33 @@ bool checkRunningNodes(std::vector<std::string>& node_names)
 
 void stopNaoCallback(const std_msgs::Empty& emptyMsg)
 {
-	naoStop = true;
+	executionStatus = GAME_STOPPED;
+}
+
+void setExecutionStatusCallback(const nao_autism_messages::SetExecutionStatus& msg)
+{
+	//Change execution status of the game based on what status has been sent in the message
+	switch (msg.newStatus){
+
+		case nao_autism_messages::SetExecutionStatus::ACTIVE:{
+			executionStatus = GAME_RUNNING;
+
+			break;
+		}
+
+		case nao_autism_messages::SetExecutionStatus::INACTIVE:{
+			executionStatus = GAME_PAUSED;
+
+			break;
+		}
+
+		case nao_autism_messages::SetExecutionStatus::STOP:{
+			executionStatus = GAME_STOPPED;
+
+			break;
+		}
+
+	}
 }
 
 std::map<std::string, std::vector<Phrase> > getPhraseMap(Json::Value& phraseRoot)

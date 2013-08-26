@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(emotion_game_diagnostics)
 
-find_package(catkin REQUIRED COMPONENTS nao_control nao_msgs roscpp std_msgs)
+find_package(catkin REQUIRED COMPONENTS nao_control nao_msgs roscpp std_msgs nao_autism_messages)
 find_package(Boost REQUIRED COMPONENTS system)
 
 find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
@@ -10,10 +10,12 @@ include(${QT_USE_FILE})
 set(gui_SRCS
 	src/main.cpp
 	src/NodeBox.cpp
+	src/ExecutionControlBox.cpp
 )
 
 set(gui_HDRS
 	include/NodeBox.h
+	include/ExecutionControlBox.h
 )
 
 qt4_wrap_cpp(gui_MOCS ${gui_HDRS})

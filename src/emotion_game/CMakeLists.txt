@@ -4,7 +4,7 @@ project(emotion_game)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS nao_control nao_msgs roscpp std_msgs visualization_msgs tf)
+find_package(catkin REQUIRED COMPONENTS nao_autism_messages nao_control nao_msgs roscpp std_msgs visualization_msgs tf)
 find_package(Boost REQUIRED COMPONENTS system)
 
 set(start_game_SRCS

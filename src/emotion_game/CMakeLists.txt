@@ -66,3 +66,26 @@ target_link_libraries(mimicker ${catkin_LIBRARIES})
 
 add_executable(dump_diagnostic src/Diagnostics.cpp)
 target_link_libraries(dump_diagnostic ${catkin_LIBRARIES})
+
+set(INSTALL_TARGETS
+	start_game
+	mimicker
+	gen_json
+)
+
+message(${CATKIN_PACKAGE_SHARE_DESTINATION})
+
+install(TARGETS ${INSTALL_TARGETS}
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY launch/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
+)
+
+
+
+
+

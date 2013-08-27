@@ -1,6 +1,8 @@
 #include <ros/ros.h>
+
 #include <NodeBox.h>
 #include <ExecutionControlBox.h>
+#include <GeneralInformationBox.h>
 
 #include <QApplication>
 #include <QPlastiqueStyle>
@@ -18,7 +20,9 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "nao_diagnostic_gui");
 
 	//NodeBox* box = new NodeBox;
-	ExecutionControlBox* box = new ExecutionControlBox;
+	//ExecutionControlBox* box = new ExecutionControlBox;
+	GeneralInformationBox* box = new GeneralInformationBox;
+
 	box->setVisible(true);
 
 	return app.exec();

@@ -9,22 +9,14 @@
 #include <iostream>
 #include <fstream>
 
-#include <std_msgs/Empty.h>
-#include <diagnostic_msgs/DiagnosticArray.h>
-#include <diagnostic_msgs/DiagnosticStatus.h>
-#include <diagnostic_msgs/KeyValue.h>
-
-int _chargeLimit = 10;
-int _jointTemperatureLimit = 70;
-
-ros::Subscriber _diagnosticsSubscriber;
-ros::Publisher _diagnosticsPublisher;
-
-void diagnosticsCallback(const diagnostic_msgs::DiagnosticArray& msg);
+#include <NaoDiagnostics.h>
 
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "checker_node");
+
+	int _chargeLimit = 10;
+	int _jointTemperatureLimit = 70;
 
 	//Check for parameters
 	if (argc > 1){
@@ -58,61 +50,15 @@ int main(int argc, char** argv)
 		}
 	}
 
+	NaoDiagnostics naoDiagnostics;
+
+	naoDiagnostics.setBatteryLevelLimit(_chargeLimit);
+	naoDiagnostics.setJointTemperatureLimit(_jointTemperatureLimit);
+
 	ros::NodeHandle nh;
-	_diagnosticsSubscriber = nh.subscribe("diagnostics", 100, diagnosticsCallback);
-	_diagnosticsPublisher = nh.advertise<std_msgs::Empty>("emotion_game/stop", 1);
+	ros::Subscriber subscriber = nh.subscribe("/diagnostics", 1, &NaoDiagnostics::diagnosticMessageCallback, &naoDiagnostics);
 
 	ros::spin();
 
 	return 0;
 }
-
-void diagnosticsCallback(const diagnostic_msgs::DiagnosticArray& msg)
-{
-	bool sendStop = false;
-
-	for (int i=0;i<msg.status.size();i++){
-		const diagnostic_msgs::DiagnosticStatus& status = msg.status[i];
-
-		if (status.name == "nao_power: Battery"){
-			for (int i=0;i<status.values.size();i++){
-				const diagnostic_msgs::KeyValue& value = status.values[i];
-
-				if (value.key == "Percentage"){
-					float val = strtof(value.value.c_str(), NULL);
-
-					if (val <= _chargeLimit){
-						std::cout << "Battery doesn't have enough charge, sending stop message.\n";
-
-						sendStop = true;
-						break;
-					}
-				}
-			}
-		}else if (status.name.find("Roll") != std::string::npos || status.name.find("Pitch") != std::string::npos || status.name.find("Yaw") != std::string::npos){
-			for (int i=0;i<status.values.size();i++){
-				const diagnostic_msgs::KeyValue& value = status.values[i];
-
-				if (value.key == "Temperature"){
-					float val = strtof(value.value.c_str(), NULL);
-
-					if (val >= _jointTemperatureLimit){
-						std::cout << "The following joints: " << status.name << " exceeds the temperature threshold (" << _jointTemperatureLimit << "), sending stop message.\n";
-
-						sendStop = true;
-						break;
-					}
-				}
-			}
-		}
-
-		if (sendStop){
-			std_msgs::Empty emptyMsg;
-			_diagnosticsPublisher.publish(emptyMsg);
-
-			break;
-		}
-	}
-}
-
-

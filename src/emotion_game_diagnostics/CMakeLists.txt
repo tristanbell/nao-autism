@@ -9,11 +9,15 @@ include(${QT_USE_FILE})
 
 set(gui_SRCS
 	src/main.cpp
+	src/NaoDiagnostics.cpp
+	src/GeneralInformationBox.cpp
 	src/NodeBox.cpp
 	src/ExecutionControlBox.cpp
 )
 
 set(gui_HDRS
+	include/NaoDiagnostics.h
+	include/GeneralInformationBox.h
 	include/NodeBox.h
 	include/ExecutionControlBox.h
 )
@@ -21,7 +25,12 @@ set(gui_HDRS
 qt4_wrap_cpp(gui_MOCS ${gui_HDRS})
 
 set(checker_SRCS
+	src/NaoDiagnostics.cpp
 	src/CheckerNode.cpp
+)
+
+set(checker_HDRS
+	include/NaoDiagnostics.h
 )
 
 # add_message_files(
@@ -55,5 +64,5 @@ include_directories(include
 add_executable(run_gui ${gui_SRCS} ${gui_MOCS})
 target_link_libraries(run_gui ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES})
 
-add_executable(run_checker ${checker_SRCS})
+add_executable(run_checker ${checker_SRCS} ${checker_HDRS})
 target_link_libraries(run_checker ${catkin_LIBRARIES} ${Boost_LIBRARIES})

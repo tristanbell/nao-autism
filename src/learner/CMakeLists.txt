@@ -4,7 +4,7 @@ project(learner)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf std_msgs message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf std_msgs message_generation nao_autism_messages)
 find_package(Boost REQUIRED COMPONENTS system filesystem date_time)
 #find_package(LibSVM REQUIRED)
 

@@ -1,0 +1,133 @@
+{
+   "Available reward behaviors" : {
+      "Behavior names" : [ "reward_1", "reward_2", "reward_3" ]
+   },
+   "Base settings" : {
+      "Maxiumum prompts" : 2,
+      "Speech recognition confidence" : 0.3000000119209290,
+      "Speech wait" : 3,
+      "Timeout" : 15
+   },
+   "Behaviors" : [
+      {
+         "Actual name" : "happy",
+         "Behavior names" : [ "happy_1" ],
+         "Classification" : 1
+      },
+      {
+         "Actual name" : "scared",
+         "Behavior names" : [ "scared_1" ],
+         "Classification" : 3
+      },
+      {
+         "Actual name" : "sad",
+         "Behavior names" : [ "sad_1" ],
+         "Classification" : 2
+      },
+      {
+         "Actual name" : "angry",
+         "Behavior names" : [ "angry_1" ],
+         "Classification" : 4
+      }
+   ],
+   "Guess game" : {
+      "Phrases" : {
+         "Continue playing question" : {
+            "Behaviors" : [ "prompt_1" ],
+            "Phrases" : [ "Shall we play the guessing game again?" ]
+         },
+         "Correct answer phrases" : {
+            "Behaviors" : [ "right_1" ],
+            "Phrases" : [ "Well done, you guessed the robot was %" ]
+         },
+         "Finish" : {
+            "Behaviors" : [ "prompt_2" ],
+            "Phrases" : [ "Guess the emotion is finished" ]
+         },
+         "Incorrect answer phrases" : {
+            "Behaviors" : [ "incorrect_1" ],
+            "Phrases" : [ "Lets try another emotion" ]
+         },
+         "Instruction" : {
+            "Behaviors" : [ "prompt_2" ],
+            "Phrases" : [ "The robot will do an emotion and you will have to guess what it is" ]
+         },
+         "Next question phrase" : {
+            "Behaviors" : [ "prompt_2" ],
+            "Phrases" : [ "Next emotion" ]
+         },
+         "Prompts" : {
+            "Behaviors" : [ "prompt_2" ],
+            "Phrases" : [ "Try again" ]
+         },
+         "Questions" : {
+            "Behaviors" : [ "prompt_1" ],
+            "Phrases" : [ "Was the robot % or %?" ]
+         },
+         "Start" : {
+            "Behaviors" : [ "prompt_2" ],
+            "Phrases" : [ "Guess the emotion" ]
+         }
+      }
+   },
+   "Mimic game" : {
+      "Phrases" : {
+         "Continue playing question" : {
+            "Behaviors" : [ "prompt_1" ],
+            "Phrases" : [ "Shall we play the mimic game again?" ]
+         },
+         "Correct answer phrases" : {
+            "Behaviors" : [ "right_1" ],
+            "Phrases" : [ "Well done" ]
+         },
+         "Finish" : {
+            "Behaviors" : [ "prompt_2" ],
+            "Phrases" : [ "Copy the robot is finished." ]
+         },
+         "Incorrect answer phrases" : {
+            "Behaviors" : [ "incorrect_1" ],
+            "Phrases" : [ "Better luck next time" ]
+         },
+         "Instruction" : {
+            "Behaviors" : [ "prompt_2" ],
+            "Phrases" : [
+               "The robot will do an emotion and you will have to copy the emotion when the robot asks you to"
+            ]
+         },
+         "Prompt to copy for kinect" : {
+            "Behaviors" : [ "arms_up" ],
+            "Phrases" : [ "Do what the robot is doing" ]
+         },
+         "Prompt to follow" : {
+            "Behaviors" : [ "prompt_1" ],
+            "Phrases" : [ "Do the same" ]
+         },
+         "Say emotion" : {
+            "Behaviors" : [ "prompt_2" ],
+            "Phrases" : [ "The robot is %" ]
+         },
+         "Start" : {
+            "Behaviors" : [ "prompt_1" ],
+            "Phrases" : [ "Copy the robot" ]
+         }
+      }
+   },
+   "Phrases" : {
+      "Introduction" : {
+         "Behaviors" : [ "prompt_2" ],
+         "Phrases" : [ "Lets play" ]
+      },
+      "Kinect tracking prompt" : {
+         "Behaviors" : [ "prompt_1" ],
+         "Phrases" : [ "Copy the robot" ]
+      },
+      "Positive phrases" : {
+         "Behaviors" : [ "right_1" ],
+         "Phrases" : [ "Well done" ]
+      },
+      "Reward prompt" : {
+         "Behaviors" : null,
+         "Phrases" : [ "Lets dance" ]
+      }
+   }
+}

@@ -1,5 +1,4 @@
 <launch>
-	<!--include file="$(find emotion_game)/launch/run_nao.launch" /-->
 	<include file="$(find pocketsphinx)/emotion_game/emotion_game.launch" />
 	<node name="tracker" pkg="openni_tracker" type="openni_tracker" output="screen" />
 	<node name="svm" pkg="learner" type="svm_node" args="$(find learner)/svm/nao_autism.model" output="screen" />

@@ -24,17 +24,47 @@ The NaoQi SDK can be downloaded from https://community.aldebaran-robotics.com/re
 
 -----nao_components stuff here-----
 
-Running the Games
------------------
+Running the Emotion Games
+-------------------------
 
-ROS programs are normally run through the command line. In order for our program to run, several others must also be running at the same time.
+ROS programs are normally run through the command line. In order for our program to run, several others must also be running at the same time. The Kinect must also be running in order for the Copy the Robot game to work
 
 1. First, plug in the Kinect to a USB port
 2. To start the Kinect, open a Terminal window and type `roslaunch openni_launch openni.launch`
-3. Then, in a new Terminal window, make sure you are in the nao-autism directory (`cd ~/nao-autism`) then type `source devel/setup.bash`
-4. Start Kinect skeleton tracking and pose detection with `roslaunch emotion_game emotion_game.launch`
+3. In a new terminal window, type
+```bash
+source ~/nao-tools/setup.bash
+LD_LIBRARY_PATH=$NAOQI_LIBRARY_PATH
+roslaunch ~/nao-autism/launch/run_nao.launch
+```
+4. Then, in a new Terminal window, make sure you are in the nao-autism directory (`cd ~/nao-autism`) then type `source devel/setup.bash`
+5. When running for the first time, you will need a configuration file for the game. To make one, type `tools/settings\ editor/settings_editor` to open the settings editor, then click File > New to generate a basic configuration file. Adjust any of the settings as you see fit, and when you're finished click File > Save As. Save your new configuration file (name it something like "data.json") in the nao-autism folder. Then close the settings editor
+6. Start the emotion recognition games with `roslaunch emotion_game emotion_game.launch data.json` (substitute data.json for whatever you named your configuration file)
 
+Running the Motion Controller
+-----------------------------
 
+The Mimicker program allows a user to control the Nao using a Kinect. To run it, do the following:
+
+1. With the Kinect plugged in to a USB port, open a Terminal window and type `roslaunch openni_launch openni.launch`
+2. In a new Terminal window, type
+```bash
+source ~/nao-autism/devel/setup.bash
+roslaunch emotion_game kinect_control.launch
+```
+
+Once it is running, put your right hand on your head. Once the Kinect recognises someone doing this gesture, it will initialise a virtual 'control box' around this user, giving them control over the robot.
+
+Using the Motion Controller
+---------------------------
+
+The kinect motion controller (Mimicker) works in two ways: moving the Nao's arms and making the Nao walk. While stationary, move your arms and the Nao will copy your movements. There are various motions to make it walk:
+
++ Step forward with either foot to make the Nao walk forward
++ Step backward with either foot to make the Nao walk backward
++ Step to the left with your left foot to make the Nao shuffle to the left
++ Step to the right with your right foot to make the Nao shuffle to the right
++ Turning left or right will make the Nao turn left or right, respectively. This also works while the Nao is walking forwards or backwards
 
 Things to do
 ------------

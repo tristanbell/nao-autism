@@ -29,9 +29,10 @@ Running the Games
 
 ROS programs are normally run through the command line. In order for our program to run, several others must also be running at the same time.
 
-First, plug in the Kinect to a USB port
-To start the Kinect, open a Terminal window and type `roslaunch openni_launch openni.launch`
-
+1. First, plug in the Kinect to a USB port
+2. To start the Kinect, open a Terminal window and type `roslaunch openni_launch openni.launch`
+3. Then, in a new Terminal window, make sure you are in the nao-autism directory (`cd ~/nao-autism`) then type `source devel/setup.bash`
+4. Start Kinect skeleton tracking and pose detection with `roslaunch emotion_game emotion_game.launch`
 
 
 

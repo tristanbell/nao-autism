@@ -101,6 +101,8 @@ bool loadPhraseMaps(Json::Value& doc, std::map<std::string, std::vector<Phrase> 
 
 int main(int argc, char** argv)
 {
+	ros::init(argc, argv, NODE_NAME);
+
 	if (argc != 2){
 		std::cout << "Invalid arguments. The arguments should be as follows:\n"
 				<< "\t<file>\n"
@@ -111,8 +113,6 @@ int main(int argc, char** argv)
 
 	//Initialise random seed
 	srand (time(NULL));
-
-	ros::init(argc, argv, NODE_NAME);
 
 	std::vector<std::string> node_names;
 	ros::master::getNodes(node_names);

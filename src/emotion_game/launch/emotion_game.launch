@@ -1,0 +1,6 @@
+<launch>
+	<!--include file="$(find emotion_game)/launch/run_nao.launch" /-->
+	<node name="tracker" pkg="openni_tracker" type="openni_tracker" output="screen" />
+	<node name="svm" pkg="learner" type="svm_node" args="$(find learner)/svm/nao_autism.model" output="screen" />
+	<!--node name="game" pkg="emotion_game" type="start_game" args="$(find emotion_game)/data.json" output="screen" /-->
+</launch>

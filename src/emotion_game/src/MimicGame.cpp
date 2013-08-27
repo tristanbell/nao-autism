@@ -223,7 +223,8 @@ void MimicGame::setOverallClassification(void) {
 
 /**
  * Receives PoseClassification messages, pushes them to a queue and
- * calculates the most likely classification from the queue.
+ * (depending on current state) calculates the most likely classification
+ * from the queue or sets user to track.
  */
 void MimicGame::classificationCallback(const nao_autism_messages::PoseClassification poseClass) {
 	if (_currentState == WAITING_MIMIC) {
@@ -232,7 +233,7 @@ void MimicGame::classificationCallback(const nao_autism_messages::PoseClassifica
 		}
 
 		_poseQueue.push_back(poseClass);
-	}else if (_currentState == WAITING_TRACK) {
+	} else if (_currentState == WAITING_TRACK) {
 		_poseQueue.push_back(poseClass);
 	}
 }
@@ -240,8 +241,8 @@ void MimicGame::classificationCallback(const nao_autism_messages::PoseClassifica
 #define TRACK_POSE_DIST 0.6
 
 /**
- * Put the Nao in a pose for the user to copy (hands on head).
- * Whichever use copies it correctly first is then the user to
+ * Assumes Nao is in a pose for the user to copy (hands on head).
+ * Whichever user copies it correctly first is then the user to
  * be tracked. All other users' classifications will be ignored
  * after this point.
  */

@@ -35,6 +35,7 @@ void GeneralInformationBox::init()
 	_batteryLevelSpinner->setMinimum(10);
 	_batteryLevelSpinner->setMaximum(100);
 	_batteryLevelSpinner->setSuffix("%");
+	_batteryLevelSpinner->setValue(_naoDiagnostics.getBatteryLevelLimit());
 	layout->addWidget(_batteryLevelSpinner, 3, 1);
 	QObject::connect(_batteryLevelSpinner, SIGNAL(valueChanged(int)),
 			this, SLOT(batteryLevelSpinnerChanged(int)));
@@ -45,6 +46,7 @@ void GeneralInformationBox::init()
 	_averageTempSpinner = new QSpinBox();
 	_averageTempSpinner->setMinimum(30);
 	_averageTempSpinner->setMaximum(70);
+	_averageTempSpinner->setValue(_naoDiagnostics.getJointTemperatureLimit());
 	QObject::connect(_averageTempSpinner, SIGNAL(valueChanged(int)),
 			this, SLOT(averageTemperatureSpinnerChanged(int)));
 

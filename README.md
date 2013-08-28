@@ -12,7 +12,6 @@ It is assumed that ROS (the Robot Operating System) is already installed on your
 + openni_tracker
 + Aldebaran NaoQi SDK
 + nao humanoid_stacks
-+ nao package by the Birmingham Autonomous Robotics Club
 
 Openni packages can be installed via the command line (on Linux) as follows:
 ```bash
@@ -27,30 +26,30 @@ The NaoQi SDK can be downloaded from https://community.aldebaran-robotics.com/re
 Running the Emotion Games
 -------------------------
 
-ROS programs are normally run through the command line. In order for our program to run, several others must also be running at the same time. The Kinect must also be running in order for the Copy the Robot game to work
+ROS programs are normally run through the command line. In order for our program to run, several others must also be running at the same time. The Kinect must also be running in order for the Copy the Robot game to work.
 
-1. First, plug in the Kinect to a USB port
-2. To start the Kinect, open a Terminal window and type `roslaunch openni_launch openni.launch`
+1. First, plug in the Kinect to a USB port.
+2. To start the Kinect, open a terminal window and type `roslaunch openni_launch openni.launch`
 3. In a new terminal window, type
 ```bash
-source ~/nao-tools/setup.bash
-LD_LIBRARY_PATH=$NAOQI_LIBRARY_PATH
-roslaunch ~/nao-autism/launch/run_nao.launch
+    source ~/nao-tools/setup.bash
+    LD_LIBRARY_PATH=$NAOQI_LIBRARY_PATH
+    roslaunch ~/nao-autism/launch/run_nao.launch
 ```
-4. Then, in a new Terminal window, make sure you are in the nao-autism directory (`cd ~/nao-autism`) then type `source devel/setup.bash`
-5. When running for the first time, you will need a configuration file for the game. To make one, type `tools/settings\ editor/settings_editor` to open the settings editor, then click File > New to generate a basic configuration file. Adjust any of the settings as you see fit, and when you're finished click File > Save As. Save your new configuration file (name it something like "data.json") in the nao-autism folder. Then close the settings editor
-6. Start the emotion recognition games with `roslaunch emotion_game emotion_game.launch data.json` (substitute data.json for whatever you named your configuration file)
+4. Then, in a new terminal window, make sure you are in the nao-autism directory (`cd ~/nao-autism`) then type `source devel/setup.bash`
+5. When running for the first time, you will need a configuration file for the game. To make one, type `tools/settings\ editor/settings_editor` to open the settings editor, then click File > New to generate a basic configuration file. Adjust any of the settings as you see fit, and when you're finished click File > Save As. Save your new configuration file (name it something like "data.json") in the nao-autism folder. Then close the settings editor.
+6. Start the emotion recognition games with `roslaunch emotion_game emotion_game.launch data.json` (substitute data.json for whatever you named your configuration file).
 
 Running the Motion Controller
 -----------------------------
 
 The Mimicker program allows a user to control the Nao using a Kinect. To run it, do the following:
 
-1. With the Kinect plugged in to a USB port, open a Terminal window and type `roslaunch openni_launch openni.launch`
-2. In a new Terminal window, type
+1. With the Kinect plugged in to a USB port, open a terminal window and type `roslaunch openni_launch openni.launch`
+2. In a new terminal window, type
 ```bash
-source ~/nao-autism/devel/setup.bash
-roslaunch emotion_game kinect_control.launch
+    source ~/nao-autism/devel/setup.bash
+    roslaunch emotion_game kinect_control.launch
 ```
 
 Once it is running, put your right hand on your head. Once the Kinect recognises someone doing this gesture, it will initialise a virtual 'control box' around this user, giving them control over the robot.

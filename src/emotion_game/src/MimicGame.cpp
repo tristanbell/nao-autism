@@ -93,7 +93,9 @@ void MimicGame::perform(void) {
 				}
 				sleep(_settings.getWait());
 
+				_userToTrack = 0;
 				_currentState = ASK_QUESTION_CONTINUE;
+
 				break;
 			}
 

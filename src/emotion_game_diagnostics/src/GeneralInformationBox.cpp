@@ -39,7 +39,7 @@ void GeneralInformationBox::init()
 	QObject::connect(_batteryLevelSpinner, SIGNAL(valueChanged(int)),
 			this, SLOT(batteryLevelSpinnerChanged(int)));
 
-	QLabel* stopTempLabel = new QLabel("Stop when average joint temperature is greater than: ");
+	QLabel* stopTempLabel = new QLabel("Stop when a single joint temperature is greater than: ");
 	layout->addWidget(stopTempLabel, 4, 0);
 
 	_averageTempSpinner = new QSpinBox();

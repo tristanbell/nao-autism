@@ -2,5 +2,5 @@
 	<include file="$(find emotion_game)/launch/pocketsphinx/emotion_game_speech.launch" />
 	<node name="tracker" pkg="openni_tracker" type="openni_tracker" output="screen" />
 	<node name="svm" pkg="learner" type="svm_node" args="$(find learner)/svm/nao_autism.model" output="screen" />
-	<node name="game" pkg="emotion_game" type="start_game" args="$(find emotion_game)/launch/data.json" output="screen" />
+	<node name="emotion_game" pkg="emotion_game" type="start_game" args="$(find emotion_game)/launch/data.json" output="screen" />
 </launch>

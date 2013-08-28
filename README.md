@@ -11,17 +11,56 @@ It is assumed that ROS (the Robot Operating System) is already installed on your
 + openni_launch
 + openni_tracker
 + Aldebaran NaoQi SDK
++ Pocketsphinx speech recognition engine
 + nao humanoid_stacks
 
+####Openni####
 Openni packages can be installed via the command line (on Linux) as follows:
 ```bash
 sudo apt-get install ros-groovy-openni-launch 
 sudo apt-get install ros-groovy-openni-tracker
 ```
 
+####NaoQi####
 The NaoQi SDK can be downloaded from https://community.aldebaran-robotics.com/resources. Bear in mind that you need to be a registered developer in order to access this. Select NAOQI C++ SDK 1.14.5 Linux (32 bits or 64 bits depending on your operating system).
 
------nao_components stuff here-----
+####Speech Recognition####
+Pocketsphinx is used for speech recognition. To install, type the following into the terminal: `sudo apt-get install ros-groovy-pocketsphinx`
+
+The recognizer.py node that this installs is not executable by default, so we need to manually make it executable:
+```bash
+roscd pocketsphinx/nodes
+sudo chmod +x recognizer.py
+```
+
+####Nao Autism Games####
+To install the games, create a new directory for them and cd into it:
+```bash
+mkdir ~/nao-autism
+cd ~/nao-autism
+```
+Then make a new file called rosinstall.txt and paste the following inside it:
+```bash
+- git:
+    uri: https://github.com/ahornung/humanoid_msgs
+    local-name: stacks/humanoid_msgs
+- git:
+    uri: https://github.com/ahornung/nao_robot
+    local-name: stacks/nao_robot
+- git:
+    uri: https://github.com/ahornung/nao_common
+    local-name: stacks/nao_common
+- git:
+    uri: https://github.com/tristanbell/nao-autism
+    local-name: nao-autism
+```
+Save and close the file, then run rosinstall to install the relevant packages:
+```bash
+rosinstall . /opt/ros/groovy rosinstall.txt
+rosdep install humanoid_msgs nao_robot nao_common
+rosmake humanoid_msgs nao_robot nao_common
+catkin_make -C nao-autism
+```
 
 Running the Emotion Games
 -------------------------

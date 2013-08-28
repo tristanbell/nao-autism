@@ -1,0 +1,8 @@
+<launch>
+
+  <node name="recognizer" pkg="pocketsphinx" type="recognizer.py">
+    <param name="lm" value="emotion_game.lm"/>
+    <param name="dict" value="emotion_game.dic"/>
+  </node>
+
+</launch>

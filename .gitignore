@@ -19,10 +19,10 @@ CMakeFiles
 src/CMakeLists.txt
 
 ## Settings editor build files
-settings editor/CMakeCache.txt
-settings editor/Makefile
-settings editor/cmake_install.cmake
-settings editor/settings_editor
+tools/settings editor/CMakeCache.txt
+tools/settings editor/Makefile
+tools/settings editor/cmake_install.cmake
+tools/settings editor/settings_editor
 
 ## Temp files created by gedit
 *.*~

@@ -6,6 +6,8 @@
 
 void ExecutionControlBox::init()
 {
+	setTitle("Emotion game controls");
+
 	//Initialise ros subcribers/publishers
 	_nodeHandle = ros::NodeHandle();
 

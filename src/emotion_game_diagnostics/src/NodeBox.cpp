@@ -41,7 +41,7 @@ void NodeBox::init()
 		NodeInformationGroup grp;
 		grp._layout = new QGridLayout;
 		grp._nameLabel = new QLabel(QString::fromStdString(current._name));
-		grp._statusLabel = new QLabel("Unknown.");
+		grp._statusLabel = new QLabel("Unknown");
 
 		_nodeMap.insert(std::pair<std::string, NodeInformationGroup>(current._name, grp));
 

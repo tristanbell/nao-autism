@@ -49,11 +49,11 @@ private:
 	void run();
 	void diagnosticsCallback(const diagnostic_msgs::DiagnosticArray&);
 
-	void batteryLevelSpinnerChanged(int value);
-	void averageTemperatureSpinnerChanged(int value);
-
 private slots:
 	void onUpdate();
+
+	void batteryLevelSpinnerChanged(int value);
+	void averageTemperatureSpinnerChanged(int value);
 
 signals:
 	void requestUpdate();

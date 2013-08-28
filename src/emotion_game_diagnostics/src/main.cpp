@@ -12,6 +12,8 @@
 #include <vector>
 #include <string>
 
+#include <Window.h>
+
 int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
@@ -19,11 +21,7 @@ int main(int argc, char** argv)
 
 	ros::init(argc, argv, "nao_diagnostic_gui");
 
-	//NodeBox* box = new NodeBox;
-	//ExecutionControlBox* box = new ExecutionControlBox;
-	GeneralInformationBox* box = new GeneralInformationBox;
-
-	box->setVisible(true);
+	Window* window = new Window;
 
 	return app.exec();
 }

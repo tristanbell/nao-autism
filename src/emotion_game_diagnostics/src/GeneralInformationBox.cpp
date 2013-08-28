@@ -25,6 +25,9 @@ void GeneralInformationBox::init()
 	_averageJointTemperatureLabel = new QLabel("Unknown");
 	layout->addWidget(_averageJointTemperatureLabel, 1, 1);
 
+	QLabel* emptyWidget = new QLabel;
+	layout->addWidget(emptyWidget, 2, 0);
+
 	QLabel* stopBatteryLabel = new QLabel("Stop when battery level is less than: ");
 	layout->addWidget(stopBatteryLabel, 3, 0);
 

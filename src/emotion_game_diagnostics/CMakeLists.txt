@@ -9,6 +9,7 @@ include(${QT_USE_FILE})
 
 set(gui_SRCS
 	src/main.cpp
+	src/Window.cpp
 	src/NaoDiagnostics.cpp
 	src/GeneralInformationBox.cpp
 	src/NodeBox.cpp
@@ -16,6 +17,7 @@ set(gui_SRCS
 )
 
 set(gui_HDRS
+	include/Window.h
 	include/NaoDiagnostics.h
 	include/GeneralInformationBox.h
 	include/NodeBox.h

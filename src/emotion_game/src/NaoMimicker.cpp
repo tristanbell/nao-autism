@@ -3,19 +3,7 @@
  *  Created on: Aug 5, 2013
  *      Author: Tristan Bell
  *
- * Notes on joint correspondence (minus denotes inverse):
- * 		Kinect Data			Nao
- * 		--------------		-------------
- * 		LShoudler Roll		LShoulder Roll
- * 		LShoudler -Yaw		LShoulder Pitch
- * 		LElbow -Pitch		LElbow Yaw
- * 		LElbow -Yaw			LElbow Roll
- *
- * 		RShoudler -Roll		RShoulder Roll
- * 		RShoudler Yaw		RShoulder Pitch
- * 		RElbow -Pitch		RElbow Yaw
- * 		RElbow -Yaw			RElbow Roll
- *
+ * Nao Joint Reference:
  *
  * Joint name		Motion									Range (degrees)		Range (radians)
  * --------------	-------------------------------------	---------------		---------------
@@ -60,7 +48,8 @@ enum RobotMovements {
 
 enum NaoPose {
 	SITTING,
-	STANDING
+	STANDING,
+	WALKING
 };
 
 /*
@@ -187,32 +176,33 @@ void constructAndPublishMsg(std::vector<std::string> &joints, std::vector<float>
 void constructAndPublishMovement(void) {
 	geometry_msgs::Twist msg;
 
-//	std::cout << "Movement: ";
-
 	if (_leftXMotionControl == FORWARD || _rightXMotionControl == FORWARD) {
-//		std::cout << "forward  " << "\r";
 		msg.linear.x = 1;
+		_naoPose = WALKING;
 	} else if (_leftXMotionControl == BACKWARD || _rightXMotionControl == BACKWARD) {
-//		std::cout << "backward " << "\r";
 		msg.linear.x = -1;
+		_naoPose = WALKING;
 	}
 	if (_leftXMotionControl == STOPX && _rightXMotionControl == STOPX) {
-//		std::cout << "stop    " << "\r";
 		msg.linear.x = 0;
+
+		// Only say it's standing still when not moving in any direction
+		if (_leftYMotionControl == STOPY && _rightYMotionControl == STOPY) {
+			_naoPose = STANDING;
+		}
 	}
 
 	// Only move left or right if not already moving forward or back
 	if (msg.linear.x == 0) {
 		if (_leftYMotionControl == LEFT) {
-//			std::cout << "left     " << "\r";
 			msg.linear.y = 1;
+			_naoPose = WALKING;
 		} else if (_rightYMotionControl == RIGHT) {
-//			std::cout << "right    " << "\r";
 			msg.linear.y = -1;
+			_naoPose = WALKING;
 		}
 
 		if (_leftYMotionControl == STOPY && _rightYMotionControl == STOPY) {
-//			std::cout << "stopY" << std::endl;
 			msg.linear.y = 0;
 		}
 	} else {
@@ -221,13 +211,13 @@ void constructAndPublishMovement(void) {
 
 	if (_torsoRotation > _initTorsoRotation + ROTATION_BOUNDARY) {
 		// Turn right
-//		std::cout << "Turn right      " << "\r";
 		msg.angular.z = 1;
+		_naoPose = WALKING;
 	}
 	else if (_torsoRotation < _initTorsoRotation - ROTATION_BOUNDARY) {
 		// Turn left
-//		std::cout << "Turn left       " << "\r";
 		msg.angular.z = -1;
+		_naoPose = WALKING;
 	}
 
 	if (_reverse) {
@@ -495,7 +485,7 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 			_pose.leftFoot = new tf::Vector3(origin);
 	}
 
-	if (toPublish) {
+	if (toPublish && _naoPose == STANDING) { // Only move arms when standing still
 		constructAndPublishMsg(joints, angles);
 	}
 }
@@ -550,6 +540,9 @@ void lookForStartGesture(const geometry_msgs::TransformStamped& transform,
 
 #define SITTING_DISTANCE 0.4
 
+/*
+ * TODO: check torso distance instead of hip distance?
+ */
 void checkSitting(void)
 {
 	if (_pose.leftHip && _pose.leftFoot && _pose.rightHip && _pose.rightFoot) {
@@ -623,13 +616,8 @@ int main(int argc, char **argv) {
 	}
 
 	ROS_INFO("All set up, go!");
+	// Put Nao in start position (hand on head) here
 	ros::spin();
-
-	// Send message to stop moving once the program has finished
-	geometry_msgs::Twist stopMsg;
-	stopMsg.linear.x = 0.0;
-	stopMsg.linear.y = 0.0;
-	_walk_pub.publish(stopMsg);
 
 	return 0;
 }

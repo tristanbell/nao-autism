@@ -45,8 +45,10 @@ void MimicGame::perform(void) {
 
 		case WAITING_TRACK: {
 			setUserToTrack();
-			if (_userToTrack != 0)
+			if (_userToTrack != 0) {
 				_currentState = PERFORM_EMOTION;
+				_naoControl.perform("init");
+			}
 
 			break;
 		}

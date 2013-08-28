@@ -70,6 +70,7 @@ ROS programs are normally run through the command line. In order for our program
 1. First, plug in the Kinect to a USB port.
 2. To start the Kinect, open a terminal window and type `roslaunch openni_launch openni.launch`
 3. In a new terminal window, type
+
 ```bash
     source ~/nao-tools/setup.bash
     LD_LIBRARY_PATH=$NAOQI_LIBRARY_PATH
@@ -86,6 +87,7 @@ The Mimicker program allows a user to control the Nao using a Kinect. To run it,
 
 1. With the Kinect plugged in to a USB port, open a terminal window and type `roslaunch openni_launch openni.launch`
 2. In a new terminal window, type
+
 ```bash
     source ~/nao-autism/devel/setup.bash
     roslaunch emotion_game kinect_control.launch

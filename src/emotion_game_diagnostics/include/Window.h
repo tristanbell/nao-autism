@@ -10,6 +10,10 @@
 
 #include <QWidget>
 
+#include <NodeBox.h>
+#include <GeneralInformationBox.h>
+#include <ExecutionControlBox.h>
+
 class Window : public QWidget
 {
 
@@ -20,6 +24,10 @@ public:
 	}
 
 private:
+	NodeBox* _nodeBox;
+	GeneralInformationBox* _generalInformationBox;
+	ExecutionControlBox* _executionControlBox;
+
 	void init();
 
 };

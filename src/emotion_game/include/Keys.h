@@ -11,6 +11,7 @@
 #define BASE_SETTINGS_KEY "Base settings"
 #define SPEECH_WAIT_SETTING_KEY "Speech wait"
 #define TIMEOUT_SETTING_KEY "Timeout"
+#define EMOTIONS_BEFORE_QUESTION_KEY "Number of emotions before question"
 #define MAX_PROMPT_KEY "Maxiumum prompts"
 #define SPEECH_RECOGNITION_CONFIDENCE_KEY "Speech recognition confidence"
 

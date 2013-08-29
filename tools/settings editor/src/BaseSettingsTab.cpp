@@ -38,6 +38,15 @@ void BaseSettingsTab::init()
 	layout->addWidget(_triesBox, rowNumber, 0);
 	rowNumber++;
 
+	QLabel* emotionsBeforeQuestionLabel = new QLabel("Number of emotions before ask to continue question:");
+	layout->addWidget(emotionsBeforeQuestionLabel, rowNumber, 0);
+	rowNumber++;
+
+	_emotionsBeforeQuestionBox = new QSpinBox;
+	_emotionsBeforeQuestionBox->setEnabled(false);
+	layout->addWidget(_emotionsBeforeQuestionBox, rowNumber, 0);
+	rowNumber++;
+
 	QLabel* confidenceLabel = new QLabel("Speech recognition confidence (%):");
 	layout->addWidget(confidenceLabel, rowNumber, 0);
 	rowNumber++;
@@ -57,6 +66,7 @@ void BaseSettingsTab::onValueUpdated(int value)
 	data._timeout = _timeoutBox->value();
 	data._tries = _triesBox->value();
 	data._wait = _waitBox->value();
+	data._emotionsBeforeQuestion = _emotionsBeforeQuestionBox->value();
 	data._confidence = _confidenceBox->value() / 100.0f;
 
 	emit onSettingsUpdated(data);
@@ -77,6 +87,9 @@ void BaseSettingsTab::onSettingsLoaded(const BaseSettingsData& data)
 	_waitBox->setValue(data._wait);
 	_waitBox->setEnabled(true);
 
+	_emotionsBeforeQuestionBox->setValue(data._emotionsBeforeQuestion);
+	_emotionsBeforeQuestionBox->setEnabled(true);
+
 	_confidenceBox->setValue(data._confidence * 100);
 	_confidenceBox->setEnabled(true);
 
@@ -91,6 +104,8 @@ void BaseSettingsTab::connectAll()
 			this, SLOT(onValueUpdated(int)));
 	QObject::connect(_waitBox, SIGNAL(valueChanged(int)),
 			this, SLOT(onValueUpdated(int)));
+	QObject::connect(_emotionsBeforeQuestionBox, SIGNAL(valueChanged(int)),
+			this, SLOT(onValueUpdated(int)));
 	QObject::connect(_confidenceBox, SIGNAL(valueChanged(int)),
 			this, SLOT(onValueUpdated(int)));
 }
@@ -102,6 +117,8 @@ void BaseSettingsTab::disconnectAll()
 	QObject::disconnect(_triesBox, SIGNAL(valueChanged(int)),
 			this, SLOT(onValueUpdated(int)));
 	QObject::disconnect(_waitBox, SIGNAL(valueChanged(int)),
+			this, SLOT(onValueUpdated(int)));
+	QObject::disconnect(_emotionsBeforeQuestionBox, SIGNAL(valueChanged(int)),
 			this, SLOT(onValueUpdated(int)));
 	QObject::disconnect(_confidenceBox, SIGNAL(valueChanged(int)),
 			this, SLOT(onValueUpdated(int)));

@@ -69,6 +69,8 @@ void GuessGame::perform(void) {
 		startSpeechRecognition();
 		time(&_startWaitTime);
 
+		_recognizedWords.clear();
+
 		break;
 	}
 
@@ -82,18 +84,17 @@ void GuessGame::perform(void) {
 			//Check for correct answer
 			if (word == _performedBehavior->getActualName()){
 				handleCorrectAnswer();
-
 				return;
-			}else if (checkIncorrectAnswer(word)){ //Check for incorrect answer, if found then break out of loop
-				handleIncorrectAnswer();
-
-				break;
 			}
+
+//			}else if (checkIncorrectAnswer(word)){ //Check for incorrect answer, if found then break out of loop
+//				handleIncorrectAnswer();
+//
+//				break;
+//			}
 
 			it++;
 		}
-
-		_recognizedWords.clear();
 
 		//Check to see if the duration of time has exceeded the maximum wait
 		//if so, prompt the child and ask the question again.
@@ -119,11 +120,14 @@ void GuessGame::perform(void) {
 
 	case ASK_QUESTION_CONTINUE:{
 		askToContinue();
+		_recognizedWords.clear();
+
 		break;
 	}
 
 	case WAITING_ANSWER_CONTINUE:{
 		waitToContinue();
+
 		break;
 	}
 
@@ -178,6 +182,8 @@ void GuessGame::askQuestion()
 
 void GuessGame::handleCorrectAnswer()
 {
+	stopSpeechRecognition();
+
 	std::list<std::string> parts;
 	parts.push_back(_performedBehavior->getActualName());
 
@@ -203,6 +209,8 @@ void GuessGame::handleCorrectAnswer()
 
 bool GuessGame::checkIncorrectAnswer(const std::string& answer)
 {
+	stopSpeechRecognition();
+
 	for (int i=0;i<_settings.getBehaviorVector().size();i++){
 		const Behavior& current = _settings.getBehaviorVector()[i];
 
@@ -223,6 +231,8 @@ void GuessGame::handleIncorrectAnswer()
 
 void GuessGame::handleTimeout()
 {
+	stopSpeechRecognition();
+
 	//Collect last performed behaviors name, as incorrect phrase may require it
 	std::list<std::string> parts;
 	parts.push_back(_performedBehavior->getActualName());
@@ -241,7 +251,6 @@ void GuessGame::handleTimeout()
 	sleep(_settings.getWait());
 
 	_currentState = PERFORM_EMOTION;
-	stopSpeechRecognition();
 
 	_recognizedWords.clear();
 	_timesPrompted = 0;
@@ -249,6 +258,8 @@ void GuessGame::handleTimeout()
 
 void GuessGame::promptChild()
 {
+	stopSpeechRecognition();
+
 	std::vector<Phrase> phraseVector;
 	if (_settings.getPhraseVector(PROMPT_KEY, phraseVector)){
 		const Phrase& phrase = sayAny(phraseVector);
@@ -262,7 +273,6 @@ void GuessGame::promptChild()
 	sleep(_settings.getWait());
 
 	_currentState = ASK_QUESTION;
-	stopSpeechRecognition();
 }
 
 

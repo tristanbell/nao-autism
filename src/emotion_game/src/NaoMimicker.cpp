@@ -554,7 +554,7 @@ void checkSitting(void)
 			if (_nao_control->perform("sit_down"))
 				_naoPose = SITTING;
 		}
-		else if (_naoPose != STANDING && lDist >= SITTING_DISTANCE && rDist >= SITTING_DISTANCE) {
+		else if (_naoPose == SITTING && lDist >= SITTING_DISTANCE && rDist >= SITTING_DISTANCE) {
 			if (_nao_control->perform("stand_up"))
 				_naoPose = STANDING;
 		}

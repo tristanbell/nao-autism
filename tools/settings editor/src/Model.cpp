@@ -77,6 +77,21 @@ void Model::saveAs(const std::string& location)
 void Model::saveData(const std::string& location)
 {
 	if (location != ""){
+		std::string actualLocation;
+
+		int pos = location.find(".");
+		if (pos != std::string::npos){
+			if (location.find(".json") == std::string::npos){
+				//We need to remove original extension and add .json
+				actualLocation = location.substr(0, pos) + ".json";
+			}else{
+				actualLocation = location;
+			}
+		}else{
+			//We need to add json extension
+			actualLocation = location + ".json";
+		}
+
 		//Create new JSON document
 		Json::Value doc(Json::objectValue);
 
@@ -93,6 +108,9 @@ void Model::saveData(const std::string& location)
 
 		Json::Value& speechWaitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
 		speechWaitVal = _settingsData._wait;
+
+		Json::Value& emotionsBeforeQuestion = baseSettings[EMOTIONS_BEFORE_QUESTION_KEY];
+		emotionsBeforeQuestion = _settingsData._emotionsBeforeQuestion;
 
 		Json::Value& confidenceVal = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
 		confidenceVal = _settingsData._confidence;
@@ -113,7 +131,7 @@ void Model::saveData(const std::string& location)
 
 		//Write generated json string to file and flush
 		std::fstream fs;
-		fs.open(location.c_str(), std::fstream::out);
+		fs.open(actualLocation.c_str(), std::fstream::out);
 
 		fs << output;
 		fs.flush();
@@ -121,8 +139,11 @@ void Model::saveData(const std::string& location)
 		//Close stream
 		fs.close();
 
+		//Set file location for future saves
+		_fileLocation = actualLocation;
+
 		//Alert slots about successful save
-		emit successfulSave(location);
+		emit successfulSave(actualLocation);
 	}else{
 		emit unsuccessfulSave("Unable to save file, no location specified.");
 	}
@@ -386,6 +407,9 @@ void Model::loadData(Json::Value& docRoot){
 
 		Json::Value& waitVal = baseSettings[SPEECH_WAIT_SETTING_KEY];
 		_settingsData._wait = waitVal.asInt();
+
+		Json::Value& emotionsBeforeQuestion = baseSettings[EMOTIONS_BEFORE_QUESTION_KEY];
+		_settingsData._emotionsBeforeQuestion = emotionsBeforeQuestion.asInt();
 
 		Json::Value& confidenceVal = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
 		_settingsData._confidence = confidenceVal.asFloat();

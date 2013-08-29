@@ -10,7 +10,6 @@
 void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Model> model)
 {
 	setWindowTitle(WINDOW_TITLE);
-	setVisible(true);
 
 	QWidget* layoutWidget = new QWidget;
 
@@ -147,4 +146,8 @@ void Window::init(boost::shared_ptr<Controller> controller, boost::shared_ptr<Mo
 
 	QObject::connect(model.get(), SIGNAL(rewardBehaviorsLoaded(const std::list<std::string>&)),
 			rewardBehaviorTab, SLOT(onBehaviorListLoaded(const std::list<std::string>&)));
+
+	setBaseSize(500, 500);
+	setMinimumSize(500, 500);
+	setVisible(true);
 }

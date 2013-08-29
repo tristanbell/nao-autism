@@ -25,6 +25,9 @@ Json::Value generateAllData()
 	Json::Value& maxTimesPrompted = baseSettings[MAX_PROMPT_KEY];
 	maxTimesPrompted = DEFAULT_PROMPTS;
 
+	Json::Value& emotionsBeforeQuestion = baseSettings[EMOTIONS_BEFORE_QUESTION_KEY];
+	emotionsBeforeQuestion = DEFAULT_EMOTIONS_QUESTION;
+
 	Json::Value& confidence = baseSettings[SPEECH_RECOGNITION_CONFIDENCE_KEY];
 	confidence = DEFAULT_CONFIDENCE;
 

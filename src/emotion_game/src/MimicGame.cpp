@@ -95,7 +95,6 @@ void MimicGame::perform(void) {
 				}
 				sleep(_settings.getWait());
 
-				_userToTrack = 0;
 				_currentState = ASK_QUESTION_CONTINUE;
 
 				break;
@@ -160,6 +159,12 @@ void MimicGame::perform(void) {
 
 		case WAITING_ANSWER_CONTINUE: {
 			waitToContinue();
+
+			// I'm not proud of this.
+			if (_currentState == PERFORM_EMOTION) {
+				_userToTrack = 0;
+				_currentState = WAITING_TRACK;
+			}
 			break;
 		}
 

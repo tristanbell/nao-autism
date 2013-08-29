@@ -4,8 +4,12 @@ project(emotion_game)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
+
 find_package(catkin REQUIRED COMPONENTS nao_autism_messages nao_control nao_msgs roscpp std_msgs visualization_msgs tf)
 find_package(Boost REQUIRED COMPONENTS system)
+
+find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
+include(${QT_USE_FILE})
 
 set(start_game_SRCS
 	src/jsoncpp.cpp ## JSON C++ Library
@@ -55,7 +59,7 @@ include_directories(
 )
 
 add_executable(start_game ${start_game_SRCS} ${start_game_HDRS})
-target_link_libraries(start_game ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(start_game ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES})
 add_dependencies(start_game nao_msgs_generate_msg_cpp)
 
 add_executable(gen_json ${gen_json_SRCS} ${gen_json_HDRS})

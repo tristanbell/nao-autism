@@ -9,6 +9,10 @@
 #include <std_srvs/Empty.h>
 #include <std_msgs/Empty.h>
 
+#include <QApplication>
+#include <QString>
+#include <QFileDialog>
+
 #include <nao_autism_messages/ExecutionStatus.h>
 #include <nao_autism_messages/SetExecutionStatus.h>
 
@@ -103,12 +107,26 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, NODE_NAME);
 
-	if (argc != 2){
-		std::cout << "Invalid arguments. The arguments should be as follows:\n"
-				<< "\t<file>\n"
-				<< "Where <file> is the location of the JSON data file.\n";
+	std::string fileName;
 
-		return -1;
+	if (argc != 2){
+		QApplication app(argc, argv);
+
+		QString qLoc = QFileDialog::getOpenFileName(NULL, "Choose game data file (.json)", ".", "JSON Data (*.json)");
+		std::string loc = qLoc.toStdString();
+
+		if (loc == ""){
+			std::cout << "No file selected.\n";
+
+			return 1;
+		}else{
+			fileName = loc;
+		}
+
+		app.closeAllWindows();
+		app.exit(0);
+	}else{
+		fileName = std::string(argv[1]);
 	}
 
 	//Initialise random seed
@@ -124,12 +142,10 @@ int main(int argc, char** argv)
 	settings.setTimeout(5);
 
 	//Read in json file
-	char* fileName = argv[1];
-
 	std::string jsonData;
 
 	std::fstream ifs;
-	ifs.open(fileName, std::fstream::in);
+	ifs.open(fileName.c_str(), std::fstream::in);
 
 	ifs.seekg(0, std::ios::end);
 	jsonData.resize(ifs.tellg());
@@ -287,7 +303,7 @@ void runGameLoop()
 	rewardBehaviorControl.perform("init");
 
 	//Set current game and start it.
-	Game* currentGame = guessGame;
+	Game* currentGame = mimicGame;
 	currentGame->startGame();
 
 	ros::Rate loopRate(40);

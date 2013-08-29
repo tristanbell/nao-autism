@@ -22,6 +22,7 @@ void MimicGame::startGame(void) {
 	_currentState = INTRODUCTION;
 	isDone = false;
 	_userToTrack = 0;
+	_emotionsPerformed = 0;
 }
 
 void MimicGame::perform(void) {
@@ -30,6 +31,12 @@ void MimicGame::perform(void) {
 		case INTRODUCTION: {
 			introduction();
 
+			_currentState = START_WAITING_TRACK;
+
+			break;
+		}
+
+		case START_WAITING_TRACK: {
 			//Prompt child to copy robot and perform required behavior
 			std::vector<Phrase> phraseVector;
 			if(_settings.getPhraseVector(MIMIC_PROMPT_COPY_KEY, phraseVector)){
@@ -48,7 +55,9 @@ void MimicGame::perform(void) {
 			setUserToTrack();
 			if (_userToTrack != 0) {
 				_currentState = PERFORM_EMOTION;
+
 				_naoControl.perform("init");
+				sleep(_settings.getWait());
 			}
 
 			break;
@@ -56,7 +65,6 @@ void MimicGame::perform(void) {
 
 		case PERFORM_EMOTION: {
 			performEmotion();
-			_emotionsPerformed++;
 
 			_currentState = PROMPT_MIMIC;
 
@@ -103,8 +111,12 @@ void MimicGame::perform(void) {
 					_currentState = ASK_QUESTION_CONTINUE;
 					_emotionsPerformed = 0;
 				}else{
-					_currentState = WAITING_TRACK;
+					_emotionsPerformed++;
+					_userToTrack = 0;
+					_currentState = START_WAITING_TRACK;
 				}
+
+				_poseQueue.clear();
 
 				break;
 			}
@@ -136,9 +148,11 @@ void MimicGame::perform(void) {
 					}
 					sleep(_settings.getWait());
 
-					_currentState = PERFORM_EMOTION;
-
+					_currentState = START_WAITING_TRACK;
+					_userToTrack = 0;
 					_timesPrompted = 0;
+
+					_poseQueue.clear();
 
 					break;
 				} else {
@@ -154,6 +168,7 @@ void MimicGame::perform(void) {
 					}
 					sleep(_settings.getWait());
 
+					_naoControl.perform(_performedBehavior->getName());
 					_currentState = PROMPT_MIMIC;
 				}
 			}
@@ -172,8 +187,9 @@ void MimicGame::perform(void) {
 			// I'm not proud of this.
 			if (_currentState == PERFORM_EMOTION) {
 				_userToTrack = 0;
-				_currentState = WAITING_TRACK;
+				_currentState = START_WAITING_TRACK;
 			}
+
 			break;
 		}
 
@@ -237,7 +253,7 @@ void MimicGame::setOverallClassification(void) {
 	_poseQueue.clear();
 }
 
-#define MAX_QUEUE_SIZE 15
+#define MAX_QUEUE_SIZE 60
 
 /**
  * Receives PoseClassification messages, pushes them to a queue and
@@ -292,34 +308,3 @@ void MimicGame::setUserToTrack(void)
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

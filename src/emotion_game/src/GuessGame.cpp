@@ -27,6 +27,7 @@ void GuessGame::startGame(void) {
 	isDone = false;
 	_performedEmotion = false;
 	_timesPrompted = 0;
+	_emotionsPerformed = 0;
 }
 
 void GuessGame::perform(void) {
@@ -38,7 +39,7 @@ void GuessGame::perform(void) {
 	}
 
 	case PERFORM_EMOTION:{
-		if (_emotionsPerformed >= _settings.getNumberOfEmotionsBeforeQuestion()){
+		if (_emotionsPerformed < _settings.getNumberOfEmotionsBeforeQuestion()){
 			//Inform child that a new emotion is being performed
 			if (_performedEmotion){
 				std::vector<Phrase> phraseVector;
@@ -210,7 +211,7 @@ void GuessGame::handleCorrectAnswer()
 	_recognizedWords.clear();
 
 	//We shall ask the child here if they wish to continue with the current game
-	_currentState = ASK_QUESTION_CONTINUE;
+	_currentState = PERFORM_EMOTION;
 
 	_timesPrompted = 0;
 }

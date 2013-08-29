@@ -151,6 +151,7 @@ int main(int argc, char** argv)
 		speechWait = 3;
 		int timeout = 5;
 		int maxPrompts = 2;
+		int emotionsBeforeQuestion = 1;
 		float confidenceValue = 0.3;
 
 		std::vector<Behavior> allBehaviorList;
@@ -175,6 +176,11 @@ int main(int argc, char** argv)
 			Json::Value maxPromptVal = baseSettings.get(MAX_PROMPT_KEY, Json::Value::null);
 			if (maxPromptVal.type() != Json::Value::null.type()){
 				maxPrompts = maxPromptVal.asInt();
+			}
+
+			Json::Value emotionsBeforeQuestionVal = baseSettings.get(EMOTIONS_BEFORE_QUESTION_KEY, Json::Value::null);
+			if (emotionsBeforeQuestionVal != Json::Value::null.type()){
+				emotionsBeforeQuestion = emotionsBeforeQuestionVal.asInt();
 			}
 
 			Json::Value confidenceVal = baseSettings.get(SPEECH_RECOGNITION_CONFIDENCE_KEY, Json::Value::null);
@@ -245,6 +251,7 @@ int main(int argc, char** argv)
 		guessGameSettings.setMaxPromptAmount(maxPrompts);
 		guessGameSettings.setBehaviorVector(allBehaviorList);
 		guessGameSettings.setPhraseMap(guessGamePhraseMap);
+		guessGameSettings.setNumberOfEmotionsBeforeQuestion(emotionsBeforeQuestion);
 		guessGameSettings.setConfidenceThreshold(confidenceValue);
 
 		GameSettings mimicGameSettings;
@@ -254,6 +261,7 @@ int main(int argc, char** argv)
 		mimicGameSettings.setBehaviorVector(allBehaviorList);
 		mimicGameSettings.setMaxPromptAmount(maxPrompts);
 		mimicGameSettings.setPhraseMap(mimicGamePhraseMap);
+		mimicGameSettings.setNumberOfEmotionsBeforeQuestion(emotionsBeforeQuestion);
 		mimicGameSettings.setConfidenceThreshold(confidenceValue);
 
 		guessGame = new GuessGame(guessGameSettings);

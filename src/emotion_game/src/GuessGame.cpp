@@ -38,24 +38,32 @@ void GuessGame::perform(void) {
 	}
 
 	case PERFORM_EMOTION:{
-		//Inform child that a new emotion is being performed
-		if (_performedEmotion){
-			std::vector<Phrase> phraseVector;
-			if (getGameSettings().getPhraseVector(GUESS_NEXT_KEY, phraseVector)){
-				const Phrase& phrase = sayAny(phraseVector);
+		if (_emotionsPerformed >= _settings.getNumberOfEmotionsBeforeQuestion()){
+			//Inform child that a new emotion is being performed
+			if (_performedEmotion){
+				std::vector<Phrase> phraseVector;
+				if (getGameSettings().getPhraseVector(GUESS_NEXT_KEY, phraseVector)){
+					const Phrase& phrase = sayAny(phraseVector);
 
-				if (phrase.getNumberOfBehaviors() != 0){
-					std::string behavior = phrase.getRandomBehaviorName();
+					if (phrase.getNumberOfBehaviors() != 0){
+						std::string behavior = phrase.getRandomBehaviorName();
 
-					_naoControl.perform(behavior);
+						_naoControl.perform(behavior);
+					}
 				}
+			}else{
+				_performedEmotion = true;
 			}
+
+			performEmotion();
+			_emotionsPerformed++;
+
+			_currentState = ASK_QUESTION;
 		}else{
-			_performedEmotion = true;
+			_emotionsPerformed = 0;
+			_currentState = ASK_QUESTION_CONTINUE;
 		}
 
-		performEmotion();
-		_currentState = ASK_QUESTION;
 		break;
 	}
 

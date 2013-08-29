@@ -86,6 +86,7 @@ protected:
 	std::list<std::string> _recognizedWords;
 	time_t _startWaitTime; // For timeouts
 	int _timesPrompted;
+	int _emotionsPerformed;
 
 	void introduction(void);
 	void performEmotion(void);

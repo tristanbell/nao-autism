@@ -66,6 +66,16 @@ bool GameSettings::getPhraseVector(const std::string& key, std::vector<Phrase>& 
 	return false;
 }
 
+void GameSettings::setNumberOfEmotionsBeforeQuestion(int number)
+{
+	this->emotionsUntilQuestion = number;
+}
+
+int GameSettings::getNumberOfEmotionsBeforeQuestion()
+{
+	return emotionsUntilQuestion;
+}
+
 void GameSettings::setConfidenceThreshold(float confidenceThreshold)
 {
 	this->confidenceThreshold = confidenceThreshold;

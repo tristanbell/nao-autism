@@ -26,6 +26,7 @@ void MimicGame::startGame(void) {
 
 void MimicGame::perform(void) {
 	switch (_currentState) {
+
 		case INTRODUCTION: {
 			introduction();
 
@@ -55,7 +56,10 @@ void MimicGame::perform(void) {
 
 		case PERFORM_EMOTION: {
 			performEmotion();
+			_emotionsPerformed++;
+
 			_currentState = PROMPT_MIMIC;
+
 			break;
 		}
 
@@ -95,7 +99,12 @@ void MimicGame::perform(void) {
 				}
 				sleep(_settings.getWait());
 
-				_currentState = ASK_QUESTION_CONTINUE;
+				if (_emotionsPerformed >= _settings.getNumberOfEmotionsBeforeQuestion()){
+					_currentState = ASK_QUESTION_CONTINUE;
+					_emotionsPerformed = 0;
+				}else{
+					_currentState = WAITING_TRACK;
+				}
 
 				break;
 			}

@@ -11,7 +11,7 @@ const std::string BEHAVIOR_MANAGER_SERVER = "nao_behaviors/run_behavior";
  *
  * Node: assumes that ros::init(int, char**, string) was already called.
  */
-nao_control::NaoControl::NaoControl() :
+nao_control::NaoControl::NaoControl(bool loadSpeech) :
 		nodeHandle(),
 		behaviorTimeout(20.0),
 		behaviorActionClient(BEHAVIOR_MANAGER_SERVER, true)
@@ -23,15 +23,17 @@ nao_control::NaoControl::NaoControl() :
 
 	ros::Rate loopRate(10);
 
-	printf("Waiting until speech publisher is ready...\n");
-	while (speechPublisher.getNumSubscribers() == 0){
-		if (!ros::ok()){
-			return;
-		}
+	if (loadSpeech) {
+		printf("Waiting until speech publisher is ready...\n");
+		while (speechPublisher.getNumSubscribers() == 0) {
+			if (!ros::ok()) {
+				return;
+			}
 
-		loopRate.sleep();
+			loopRate.sleep();
+		}
+		printf("Speech publisher is ready.\n");
 	}
-	printf("Speech publisher is ready.\n");
 
 	printf("Waiting for behavior manager to start.\n");
 	while (!behaviorActionClient.isServerConnected()){

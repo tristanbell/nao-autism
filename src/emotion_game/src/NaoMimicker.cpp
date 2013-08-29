@@ -137,7 +137,8 @@ void init(geometry_msgs::TransformStamped initTransform, bool shouldReverse = fa
 	_leftYMotionControl = STOPY;
 	_rightYMotionControl = STOPY;
 
-	_nao_control = new nao_control::NaoControl();
+	_nao_control = new nao_control::NaoControl(false); // Don't load speech
+	_nao_control->perform("stand_up");
 	_naoPose = STANDING;
 
 	_reverse = shouldReverse;
@@ -185,11 +186,6 @@ void constructAndPublishMovement(void) {
 	}
 	if (_leftXMotionControl == STOPX && _rightXMotionControl == STOPX) {
 		msg.linear.x = 0;
-
-		// Only say it's standing still when not moving in any direction
-		if (_leftYMotionControl == STOPY && _rightYMotionControl == STOPY) {
-			_naoPose = STANDING;
-		}
 	}
 
 	// Only move left or right if not already moving forward or back
@@ -226,6 +222,11 @@ void constructAndPublishMovement(void) {
 
 		if (msg.angular.z != 0)
 			msg.angular.z *= -1;
+	}
+
+	// Only say it's standing still when not moving in any direction
+	if (msg.linear.x == 0 && msg.linear.y == 0 && msg.angular.z == 0) {
+		_naoPose = STANDING;
 	}
 
 	std::flush(std::cout);
@@ -549,16 +550,21 @@ void checkSitting(void)
 		float lDist = _pose.leftHip->distance(*_pose.leftFoot);
 		float rDist = _pose.rightHip->distance(*_pose.rightFoot);
 
-		if (_naoPose == STANDING && (lDist < SITTING_DISTANCE || rDist < SITTING_DISTANCE)) {
+		if (_naoPose != SITTING && (lDist < SITTING_DISTANCE || rDist < SITTING_DISTANCE)) {
 			if (_nao_control->perform("sit_down"))
 				_naoPose = SITTING;
 		}
-		else if (_naoPose == SITTING && lDist >= SITTING_DISTANCE && rDist >= SITTING_DISTANCE) {
+		else if (_naoPose != STANDING && lDist >= SITTING_DISTANCE && rDist >= SITTING_DISTANCE) {
 			if (_nao_control->perform("stand_up"))
 				_naoPose = STANDING;
 		}
 
-		printf("%s        \r", (_naoPose == SITTING ? "SITTING" : "STANDING"));
+		if (_naoPose == SITTING)
+			printf("%s        \r", "SITTING");
+		if (_naoPose == STANDING)
+			printf("%s        \r", "STANDING");
+		if (_naoPose == WALKING)
+			printf("%s        \r", "WALKING");
 		std::flush(std::cout);
 	}
 }

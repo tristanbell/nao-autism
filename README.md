@@ -14,15 +14,25 @@ It is assumed that ROS (the Robot Operating System) is already installed on your
 + Pocketsphinx speech recognition engine
 + nao humanoid_stacks
 
-####Openni####
-Openni packages can be installed via the command line (on Linux) as follows:
+####OpenNI####
+OpenNI packages can be installed via the command line (on Linux) as follows:
 ```bash
 sudo apt-get install ros-groovy-openni-launch 
 sudo apt-get install ros-groovy-openni-tracker
 ```
 
 ####NaoQi####
-The NaoQi SDK can be downloaded from https://community.aldebaran-robotics.com/resources. Bear in mind that you need to be a registered developer in order to access this. Select NAOQI C++ SDK 1.14.5 Linux (32 bits or 64 bits depending on your operating system).
+The NaoQi SDK can be downloaded from https://community.aldebaran-robotics.com/resources. Bear in mind that you need to register as a developer with Aldebaran in order to access this. Select NAOQI C++ SDK 1.14.5 Linux (32 bits or 64 bits depending on your operating system), then extract it somewhere on your machine (for our examples we have placed it under /opt/naoqi). Next, we need to define some environment variables that we'll use later when running the games and add the NaoQi lib directory to our PYTHONPATH so ROS can access it. To avoid having to repeat lots of typing, add the following to the end of your `~/.bashrc`:
+```bash
+# Wherever the NAOqi SDK is installed
+export NAOQI_HOME=/opt/naoqi/naoqi-sdk-1.14.5-linux64
+export NAOQI_LIBS=$NAOQI_HOME/lib
+
+# Add NAOqi to your python path
+export PYTHONPATH=$PYTHONPATH:$NAOQI_LIBS
+# Define the library path for running ROS Nao components
+export NAOQI_LIBRARY_PATH=$NAOQI_LIBS:$LD_LIBRARY_PATH
+```
 
 ####Speech Recognition####
 Pocketsphinx is used for speech recognition. To install, type the following into the terminal: `sudo apt-get install ros-groovy-pocketsphinx`
@@ -34,7 +44,15 @@ sudo chmod +x recognizer.py
 ```
 
 ####Nao Autism Games####
-To install the games, create a new directory for them and cd into it:
+
+#####Easy Installation#####
+The simplest way to install is to use the installation script: [link here]. Download and double click the script to run it, and the games will be installed to the correct directory.
+
+#####Manual Installation#####
+
+If you would prefer to install manually, or if the easy installation does not work for any reason, follow these steps to install the games.
+
+First, create a new directory for them and cd into it:
 ```bash
 mkdir ~/nao-autism
 cd ~/nao-autism
@@ -72,7 +90,6 @@ ROS programs are normally run through the command line. In order for our program
 3. In a new terminal window, type
 
 ```bash
-    source ~/nao-tools/setup.bash
     LD_LIBRARY_PATH=$NAOQI_LIBRARY_PATH
     roslaunch ~/nao-autism/launch/run_nao.launch
 ```

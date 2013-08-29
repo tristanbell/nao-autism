@@ -18,7 +18,7 @@ const std::string INIT_BEHAVIOR = "init";
 class NaoControl{
 
 public:
-	NaoControl();
+	NaoControl(bool loadSpeech = true);
 
 	void say(const std::string&);
 	void sayPreviousSpeech();

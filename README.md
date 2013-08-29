@@ -35,7 +35,10 @@ export NAOQI_LIBRARY_PATH=$NAOQI_LIBS:$LD_LIBRARY_PATH
 ```
 
 ####Speech Recognition####
-Pocketsphinx is used for speech recognition. To install, type the following into the terminal: `sudo apt-get install ros-groovy-pocketsphinx`
+Pocketsphinx is used for speech recognition. To install, type the following into the terminal:
+```bash 
+sudo apt-get install ros-groovy-pocketsphinx
+```
 
 The recognizer.py node that this installs is not executable by default, so we need to manually make it executable:
 ```bash
@@ -95,7 +98,7 @@ ROS programs are normally run through the command line. In order for our program
 ```
 4. Then, in a new terminal window, make sure you are in the nao-autism directory (`cd ~/nao-autism`) then type `source devel/setup.bash`
 5. When running for the first time, you will need a configuration file for the game. To make one, type `tools/settings\ editor/settings_editor` to open the settings editor, then click File > New to generate a basic configuration file. Adjust any of the settings as you see fit, and when you're finished click File > Save As. Save your new configuration file (name it something like "data.json") in the nao-autism folder. Then close the settings editor.
-6. Start the emotion recognition games with `roslaunch emotion_game emotion_game.launch data.json` (substitute data.json for whatever you named your configuration file).
+6. Start the emotion recognition games with `roslaunch emotion_game emotion_game.launch`.
 
 Running the Motion Controller
 -----------------------------
@@ -103,7 +106,8 @@ Running the Motion Controller
 The Mimicker program allows a user to control the Nao using a Kinect. To run it, do the following:
 
 1. With the Kinect plugged in to a USB port, open a terminal window and type `roslaunch openni_launch openni.launch`
-2. In a new terminal window, type
+2. In another window, do `roslaunch nao_driver nao_driver.launch`
+3. Finally, in a new terminal window, type
 
 ```bash
     source ~/nao-autism/devel/setup.bash

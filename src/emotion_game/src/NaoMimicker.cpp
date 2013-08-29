@@ -625,6 +625,9 @@ int main(int argc, char **argv) {
 	// Put Nao in start position (hand on head) here
 	ros::spin();
 
+	geometry_msgs::Twist stopMsg;
+	_walk_pub.publish(stopMsg);
+
 	return 0;
 }
 

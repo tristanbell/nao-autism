@@ -1,0 +1,14 @@
+<!-- 
+This launch file launches the required ros nodes to get the kinect control working.
+-->
+
+<launch>
+	<env name="PYTHONPATH" value="$(env PYTHONPATH)" />
+	
+	<arg name="nao_ip" default="$(optenv NAO_IP 127.0.0.1)" />
+  	<arg name="nao_port" default="$(optenv NAO_PORT 9559)" />
+
+	<node name="nao_behaviors" pkg="nao_driver" type="nao_behaviors.py" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
+	<node name="nao_walker" pkg="nao_driver" type="nao_walker.py" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
+	<node name="nao_controller" pkg="nao_driver" type="nao_controller.py" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
+</launch>

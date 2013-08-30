@@ -139,24 +139,29 @@ bool Game::startSpeechRecognition()
 
 	ros::NodeHandle nh;
 
-	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(START_NAO_SPEECH_RECOGNITION_NAME);
+//	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(START_NAO_SPEECH_RECOGNITION_NAME);
 	ros::ServiceClient client2 = nh.serviceClient<std_srvs::Empty>(START_PS_SPEECH_RECOGNITION_NAME);
 	std_srvs::Empty emptySrv;
 
-	return client1.call(emptySrv) && client2.call(emptySrv);
+//	bool c1 =  client1.call(emptySrv);
+	bool c2 = client2.call(emptySrv);
+	return c2;
 }
 
 bool Game::stopSpeechRecognition()
 {
 	std::cout << "Stopping speech recognition." << std::endl;
+	_recognizedWords.clear();
 
 	ros::NodeHandle nh;
 
-	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(STOP_NAO_SPEECH_RECOGNITION_NAME);
+//	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(STOP_NAO_SPEECH_RECOGNITION_NAME);
 	ros::ServiceClient client2 = nh.serviceClient<std_srvs::Empty>(STOP_PS_SPEECH_RECOGNITION_NAME);
 	std_srvs::Empty emptySrv;
 
-	return client1.call(emptySrv) && client2.call(emptySrv);
+//	bool c1 =  client1.call(emptySrv);
+	bool c2 = client2.call(emptySrv);
+	return c2;
 }
 
 const Phrase& Game::sayRandParts(const Phrase& phrase, std::list<std::string> parts)

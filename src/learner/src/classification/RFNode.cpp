@@ -295,7 +295,7 @@ int main(int argc, char** argv)
 	                                       false, // compute surrogate split, no missing data
 	                                       5, // max number of categories (use sub-optimal algorithm for larger numbers)
 	                                       priors, // the array of priors
-	                                       false,  // calculate variable importance
+	                                       true,  // calculate variable importance
 	                                       attributeSample,       // number of variables randomly selected at node and used to find the best split(s).
 	                                       forestSize,	 // max number of trees in the forest
 	                                       forestAccuracy,				// forrest accuracy
@@ -305,6 +305,15 @@ int main(int argc, char** argv)
     _rTrees = new CvRTrees;
     _rTrees->train(instancesMatrix, CV_ROW_SAMPLE, classificationMatrix,
                  cv::Mat(), cv::Mat(), var_type, cv::Mat(), params);
+    std::cout << "Training error: " << _rTrees->get_train_error() << std::endl;
+    float val = 0;
+    cv::Mat varImportance = _rTrees->get_var_importance();
+
+    int nextCol = 0;
+    for (int col=0;col<varImportance.cols;col=nextCol){
+    	nextCol = col + 1;
+    	std::cout << "Variable importance of attribute " << nextCol << " : " << (varImportance.at<float>(0, col)*100) << "%"<< std::endl;
+    }
 
     std::cout << "Setting up Node.\n";
 

@@ -182,12 +182,40 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "rf_node");
 
+	int forestSize = 1000;
+	int attributeSample = 16; //three suggested values 0.5*sqrt(n), sqrt(n), 2*sqrt(n) where n is equal to number of attributes
+	float forestAccuracy = 0.01f;
+
 	char* fileName = getArgValue(argc, argv, "--file-location");
 
 	if (fileName == NULL){
 		std::cout << "No --file-location argument has been supplied. Exiting.\n";
 
 		return 1;
+	}
+
+	char* forestSizeChar = getArgValue(argc, argv, "--forest-size");
+
+	if (forestSizeChar != NULL){
+		forestSize = strtol(forestSizeChar, NULL, 10);
+
+		std::cout << "Using forest size: " << forestSize << std::endl;
+	}
+
+	char* attributeSampleChar = getArgValue(argc, argv, "--attribute-sample");
+
+	if (attributeSampleChar != NULL){
+		attributeSample = strtol(attributeSampleChar, NULL, 10);
+
+		std::cout << "Using attribute sample (m): " << attributeSample << std::endl;
+	}
+
+	char* forestAccuracyChar = getArgValue(argc, argv, "--forest-accuracy");
+
+	if (forestAccuracyChar != NULL){
+		forestAccuracy = atof(forestAccuracyChar);
+
+		std::cout << "Using forest accuracy (OOB error): " << forestAccuracy << std::endl;
 	}
 
 	std::cout << "Loading data from: " << fileName << std::endl;
@@ -259,18 +287,18 @@ int main(int argc, char** argv)
 
 	float priors[] = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f};
 
-	//TODO: Allow user to input parameters through program arguments
+	//TODO: Perform some form of grid search to find optimal depth and min sample count.
 
 	CvRTParams params = CvRTParams(25, // max depth
 	                                       5, // min sample count
 	                                       0, // regression accuracy: N/A here
 	                                       false, // compute surrogate split, no missing data
-	                                       15, // max number of categories (use sub-optimal algorithm for larger numbers)
+	                                       5, // max number of categories (use sub-optimal algorithm for larger numbers)
 	                                       priors, // the array of priors
 	                                       false,  // calculate variable importance
-	                                       8,       // number of variables randomly selected at node and used to find the best split(s).
-	                                       1000,	 // max number of trees in the forest
-	                                       0.001f,				// forrest accuracy
+	                                       attributeSample,       // number of variables randomly selected at node and used to find the best split(s).
+	                                       forestSize,	 // max number of trees in the forest
+	                                       forestAccuracy,				// forrest accuracy
 	                                       CV_TERMCRIT_ITER |	CV_TERMCRIT_EPS // termination cirteria
 	                              );
 

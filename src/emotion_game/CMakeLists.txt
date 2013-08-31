@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(emotion_game)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
-
 find_package(catkin REQUIRED COMPONENTS nao_autism_messages nao_control nao_msgs roscpp std_msgs visualization_msgs tf)
 find_package(Boost REQUIRED COMPONENTS system)
 
@@ -70,6 +66,9 @@ target_link_libraries(mimicker ${catkin_LIBRARIES})
 
 add_executable(dump_diagnostic src/Diagnostics.cpp)
 target_link_libraries(dump_diagnostic ${catkin_LIBRARIES})
+
+add_executable(filetest src/FileTest.cpp)
+target_link_libraries(filetest ${catkin_LIBRARIES})
 
 set(INSTALL_TARGETS
 	start_game

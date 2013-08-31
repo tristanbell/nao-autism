@@ -112,7 +112,7 @@ int main(int argc, char** argv)
 	if (argc != 2){
 		QApplication app(argc, argv);
 
-		QString qLoc = QFileDialog::getOpenFileName(NULL, "Choose game data file (.json)", ".", "JSON Data (*.json)");
+		QString qLoc = QFileDialog::getOpenFileName(NULL, QString("Choose game data file (.json)"), QString("."), QString("JSON Data (*.json)"), NULL, QFileDialog::DontUseNativeDialog);
 		std::string loc = qLoc.toStdString();
 
 		if (loc == ""){
@@ -123,8 +123,8 @@ int main(int argc, char** argv)
 			fileName = loc;
 		}
 
-		app.closeAllWindows();
-		app.exit(0);
+//		QApplication::closeAllWindows();
+//		app.exit(0);
 	}else{
 		fileName = std::string(argv[1]);
 	}
@@ -302,20 +302,25 @@ void runGameLoop()
 	rewardBehaviorControl.perform("stand_up");
 	rewardBehaviorControl.perform("init");
 
+	printf("\nStarting game...\n");
+
 	//Set current game and start it.
 	Game* currentGame = mimicGame;
 	currentGame->startGame();
 
+	printf("\nGO!\n\n");
+
 	ros::Rate loopRate(40);
 	//All checks are done, start game loop
 	while (ros::ok()){
+
 		if (executionStatus == GAME_STOPPED){
 			//Send stopping message
 			nao_autism_messages::ExecutionStatus msg;
 			msg.status = nao_autism_messages::ExecutionStatus::STOPPING;
 			executionStatusPublisher.publish(msg);
 
-			std::cout << "Recieved stop message, stopping the nao and returning to safe position\n";
+			std::cout << "Received stop message, stopping the nao and returning to safe position\n";
 
 			rewardBehaviorControl.say("I don't feel too well, I am going to sit down.");
 

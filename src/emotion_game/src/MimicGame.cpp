@@ -9,6 +9,11 @@
 #include <MimicGame.h>
 #include <Keys.h>
 #include <boost/foreach.hpp>
+#include <iostream>
+#include <fstream>
+#include <nao_autism_messages/Record.h>
+
+const char* LOG_FILE_NAME = "timestamps2.log";
 
 MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 {
@@ -19,6 +24,21 @@ MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 }
 
 void MimicGame::startGame(void) {
+	// Start recording
+	printf("Starting to record data. Waiting for subscriber...\n");
+	ros::NodeHandle nh;
+	ros::Publisher rec_pub = nh.advertise<nao_autism_messages::Record>("record", 10);
+
+	ros::Rate rate(10);
+	while (rec_pub.getNumSubscribers() == 0){
+		rate.sleep();
+	}
+	printf("Subscriber found. Start recording.\n");
+
+	nao_autism_messages::Record msg;
+	msg.record = true;
+	rec_pub.publish(msg);
+
 	_currentState = INTRODUCTION;
 	isDone = false;
 	_userToTrack = 0;
@@ -66,6 +86,8 @@ void MimicGame::perform(void) {
 		case PERFORM_EMOTION: {
 			performEmotion();
 
+			writeToLogBehavior();
+
 			_currentState = PROMPT_MIMIC;
 
 			break;
@@ -80,6 +102,8 @@ void MimicGame::perform(void) {
 			// Initialise time for mimic timeout
 			time(&_startWaitTime);
 
+			writeToLogPrompt();
+
 			_currentState = WAITING_MIMIC;
 
 			break;
@@ -90,6 +114,7 @@ void MimicGame::perform(void) {
 			// continuously updating _currentPoseClassification
 			int desiredClassification = _performedBehavior->getClassification();
 
+			// Correct pose
 			if (_currentPoseClassification == desiredClassification) {
 				// Say well done
 				std::list<std::string> parts;
@@ -116,6 +141,8 @@ void MimicGame::perform(void) {
 					_currentState = START_WAITING_TRACK;
 				}
 
+				writeToLogAnswer(true);
+
 				_poseQueue.clear();
 
 				break;
@@ -128,8 +155,8 @@ void MimicGame::perform(void) {
 			if (currentTime - _startWaitTime >= _settings.getTimeout()){
 				_timesPrompted++;
 
-				//Check to see if the number of prompts exceeds the max number
-				//if so, assume incorrect and perform another emotion
+				// Check to see if the number of prompts exceeds the max number.
+				// If so, assume incorrect and perform another emotion.
 				if (_timesPrompted > _settings.getMaxPromptAmount()) {
 					//Collect last performed behaviors name, as incorrect phrase may require it
 					std::list<std::string> parts;
@@ -148,6 +175,8 @@ void MimicGame::perform(void) {
 					}
 					sleep(_settings.getWait());
 
+					writeToLogAnswer(false);
+
 					_currentState = START_WAITING_TRACK;
 					_userToTrack = 0;
 					_timesPrompted = 0;
@@ -155,7 +184,7 @@ void MimicGame::perform(void) {
 					_poseQueue.clear();
 
 					break;
-				} else {
+				} else { // Prompt again
 					std::vector<Phrase> phraseVector;
 					if (_settings.getPhraseVector(PROMPT_KEY, phraseVector)){
 						const Phrase& phrase = sayAny(phraseVector);
@@ -307,4 +336,57 @@ void MimicGame::setUserToTrack(void)
 			break;
 		}
 	}
+}
+
+void MimicGame::writeToLogBehavior()
+{
+	std::ofstream stream;
+
+	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
+
+	stream << "[" << ros::Time::now() << "] ";
+
+	stream << "BEHAVIOR_BUTTON ";
+
+	stream << "BEHAVIOR_NAME=" << _performedBehavior->getName() << ' ';
+
+	stream << "PROMPT_ENABLED=TRUE\n";
+
+	stream.close();
+}
+
+void MimicGame::writeToLogPrompt()
+{
+	printf("Writing prompt.\n");
+	std::ofstream stream;
+
+	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
+
+	stream << "[" << ros::Time::now() << "] ";
+
+	stream << "PROMPT_BUTTON ";
+
+	stream << "BEHAVIOR_NAME=" << _performedBehavior->getName() << '\n';
+
+	stream.close();
+	printf("Prompt written.\n");
+}
+
+void MimicGame::writeToLogAnswer(const bool& ans)
+{
+	std::ofstream stream;
+
+	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
+
+	stream << "[" << ros::Time::now() << "] ";
+
+	if (ans){
+		stream << "CORRECT_BUTTON ";
+	}else{
+		stream << "INCORRECT_BUTTON ";
+	}
+
+	stream << "BEHAVIOR_NAME=" << _performedBehavior->getName() << '\n';
+
+	stream.close();
 }

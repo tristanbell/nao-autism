@@ -38,6 +38,9 @@ private:
 	void setOverallClassification(void);
 	void classificationCallback(const nao_autism_messages::PoseClassification poseClass);
 	void setUserToTrack(void);
+	void writeToLogBehavior(void);
+	void writeToLogPrompt(void);
+	void writeToLogAnswer(const bool& answer);
 };
 
 #endif /* MIMICGAME_H_ */

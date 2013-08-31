@@ -29,8 +29,8 @@ public:
 							_naoControl(),
 							_recognizedWords()
 	{
-		_speechSubscriber = _nodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 0, &Game::onSpeechRecognized, this);
-		_speechSubscriber2 = _nodeHandle.subscribe(SPEECH_TOPIC, 0, &Game::onSpeech, this);
+		_speechSubscriber = _nodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 4, &Game::onSpeechRecognized, this);
+		_speechSubscriber2 = _nodeHandle.subscribe(SPEECH_TOPIC, 4, &Game::onSpeech, this);
 	}
 
 	virtual ~Game() { }

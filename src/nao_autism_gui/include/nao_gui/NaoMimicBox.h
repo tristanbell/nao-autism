@@ -75,7 +75,7 @@ private:
 	 * The following writes to the timestamps.log file (this file isn't
 	 * binary), the format for each entry is the following:
 	 *
-	 * [TIMESTAMP] NAME PAREMETER_LIST
+	 * [TIMESTAMP] NAME PARAMETER_LIST
 	 *
 	 * The TIMESTAMP is of the following form: dd-mm.hh:mm:ss
 	 *

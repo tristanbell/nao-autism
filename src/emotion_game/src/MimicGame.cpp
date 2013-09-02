@@ -20,14 +20,15 @@ MimicGame::MimicGame(GameSettings& settings) : Game(settings)
 	_performedBehavior = NULL;
 	_currentState = INTRODUCTION;
 	_performedEmotion = false;
+
 	_classSubscriber = _nodeHandle.subscribe("/classification", 15, &MimicGame::classificationCallback, this);
+	rec_pub = _nodeHandle.advertise<nao_autism_messages::Record>("record", 10);
 }
 
 void MimicGame::startGame(void) {
 	// Start recording
 	printf("Starting to record data. Waiting for subscriber...\n");
-	ros::NodeHandle nh;
-	ros::Publisher rec_pub = nh.advertise<nao_autism_messages::Record>("record", 10);
+//	ros::NodeHandle nh;
 
 	ros::Rate rate(10);
 	while (rec_pub.getNumSubscribers() == 0){
@@ -38,11 +39,12 @@ void MimicGame::startGame(void) {
 	nao_autism_messages::Record msg;
 	msg.record = true;
 	rec_pub.publish(msg);
+	ros::spinOnce();
 
 	_currentState = INTRODUCTION;
 	isDone = false;
 	_userToTrack = 0;
-	_emotionsPerformed = 0;
+	_emotionsPerformed = 1;
 }
 
 void MimicGame::perform(void) {
@@ -103,7 +105,7 @@ void MimicGame::perform(void) {
 			time(&_startWaitTime);
 
 			writeToLogPrompt();
-
+			usleep(650000);
 			_currentState = WAITING_MIMIC;
 
 			break;
@@ -134,7 +136,7 @@ void MimicGame::perform(void) {
 
 				if (_emotionsPerformed >= _settings.getNumberOfEmotionsBeforeQuestion()){
 					_currentState = ASK_QUESTION_CONTINUE;
-					_emotionsPerformed = 0;
+					_emotionsPerformed = 1;
 				}else{
 					_emotionsPerformed++;
 					_userToTrack = 0;

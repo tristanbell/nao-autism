@@ -1,0 +1,5 @@
+<launch>
+	<node name="tracker" pkg="openni_tracker" type="openni_tracker" output="screen" />
+	<node name="recordy" pkg="rosbag_recorder" type="run_rosbag_recorder" output="screen" />
+	<node name="rectest" pkg="rosbag_recorder" type="recorder_test" output="screen" />
+</launch>

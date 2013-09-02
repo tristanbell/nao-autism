@@ -129,7 +129,6 @@ include_directories(include
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-
 add_executable(run_rosbag_recorder src/recorder.cpp)
 target_link_libraries(run_rosbag_recorder ${catkin_LIBRARIES})
 add_dependencies(run_rosbag_recorder nao_autism_messages_generate_message_cpp)

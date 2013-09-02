@@ -9,14 +9,14 @@
 #include <boost/thread.hpp>
 
 const float Recorder::RECORDING_DURATION = 25.0; // Currently unused
-const uint32_t Recorder::RECORDING_SIZE = 1073741824;
+const uint32_t Recorder::RECORDING_SIZE = 1073741824; // Record a gigabyte before splitting
 int recorderResult; // Currently unused
 bool currentlyRecording;
 
 Recorder::Recorder(void)
 {
 	// Set topics to subscribe to
-	std::vector<std::string> topicsToRecord(5);
+	std::vector<std::string> topicsToRecord;
 	topicsToRecord.push_back("/tf");
 	topicsToRecord.push_back("camera/rgb/image_raw");
 	topicsToRecord.push_back("camera/rgb/camera_info");

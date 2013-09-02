@@ -35,6 +35,8 @@ private:
 	std::vector<nao_autism_messages::PoseClassification> _poseQueue;
 	int _currentPoseClassification;
 
+	ros::Publisher rec_pub;
+
 	void setOverallClassification(void);
 	void classificationCallback(const nao_autism_messages::PoseClassification poseClass);
 	void setUserToTrack(void);

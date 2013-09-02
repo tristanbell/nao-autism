@@ -141,64 +141,67 @@ void MimicGame::perform(void) {
 					_currentState = START_WAITING_TRACK;
 				}
 
+				std::cout << "Emotions performed: " << _emotionsPerformed << "\n";
+
 				writeToLogAnswer(true);
 
 				_poseQueue.clear();
 
 				break;
-			}
+			}else{
 
-			// Timeout for incorrect poses
-			time_t currentTime;
-			time(&currentTime);
+				// Timeout for incorrect poses
+				time_t currentTime;
+				time(&currentTime);
 
-			if (currentTime - _startWaitTime >= _settings.getTimeout()){
-				_timesPrompted++;
+				if (currentTime - _startWaitTime >= _settings.getTimeout()){
+					_timesPrompted++;
 
-				// Check to see if the number of prompts exceeds the max number.
-				// If so, assume incorrect and perform another emotion.
-				if (_timesPrompted > _settings.getMaxPromptAmount()) {
-					//Collect last performed behaviors name, as incorrect phrase may require it
-					std::list<std::string> parts;
-					parts.push_back(_performedBehavior->getActualName());
+					// Check to see if the number of prompts exceeds the max number.
+					// If so, assume incorrect and perform another emotion.
+					if (_timesPrompted > _settings.getMaxPromptAmount()) {
+						//Collect last performed behaviors name, as incorrect phrase may require it
+						std::list<std::string> parts;
+						parts.push_back(_performedBehavior->getActualName());
 
-					//Alert child
-					std::vector<Phrase> phraseVector;
-					if (_settings.getPhraseVector(INCORRECT_ANSWER_KEY, phraseVector)){
-						const Phrase& phrase = sayAny(phraseVector, parts);
+						//Alert child
+						std::vector<Phrase> phraseVector;
+						if (_settings.getPhraseVector(INCORRECT_ANSWER_KEY, phraseVector)){
+							const Phrase& phrase = sayAny(phraseVector, parts);
 
-						if (phrase.getNumberOfBehaviors() != 0){
-							std::string behavior = phrase.getRandomBehaviorName();
+							if (phrase.getNumberOfBehaviors() != 0){
+								std::string behavior = phrase.getRandomBehaviorName();
 
-							_naoControl.perform(behavior);
+								_naoControl.perform(behavior);
+							}
 						}
-					}
-					sleep(_settings.getWait());
+						sleep(_settings.getWait());
 
-					writeToLogAnswer(false);
+						writeToLogAnswer(false);
 
-					_currentState = START_WAITING_TRACK;
-					_userToTrack = 0;
-					_timesPrompted = 0;
+						_currentState = START_WAITING_TRACK;
+						_userToTrack = 0;
+						_timesPrompted = 0;
 
-					_poseQueue.clear();
+						_poseQueue.clear();
 
-					break;
-				} else { // Prompt again
-					std::vector<Phrase> phraseVector;
-					if (_settings.getPhraseVector(PROMPT_KEY, phraseVector)){
-						const Phrase& phrase = sayAny(phraseVector);
+						break;
+					} else { // Prompt again
+						std::vector<Phrase> phraseVector;
+						if (_settings.getPhraseVector(PROMPT_KEY, phraseVector)){
+							const Phrase& phrase = sayAny(phraseVector);
 
-						if (phrase.getNumberOfBehaviors() != 0){
-							std::string behavior = phrase.getRandomBehaviorName();
+							if (phrase.getNumberOfBehaviors() != 0){
+								std::string behavior = phrase.getRandomBehaviorName();
 
-							_naoControl.perform(behavior);
+								_naoControl.perform(behavior);
+							}
 						}
-					}
-					sleep(_settings.getWait());
+						sleep(_settings.getWait());
 
-					_naoControl.perform(_performedBehavior->getName());
-					_currentState = PROMPT_MIMIC;
+						_naoControl.perform(_performedBehavior->getName());
+						_currentState = PROMPT_MIMIC;
+					}
 				}
 			}
 

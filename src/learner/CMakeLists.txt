@@ -5,6 +5,7 @@ project(learner)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf std_msgs message_generation nao_autism_messages)
+find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem date_time)
 #find_package(LibSVM REQUIRED)
 
@@ -55,6 +56,10 @@ set(knn_node_SRCS
 		src/classification/PlainDataStore.cpp
 		src/classification/KNearestNeighbourNode.cpp)
 		
+set(rf_node_SRCS
+	src/classification/RFNode.cpp
+)
+		
 set(svm_node_SRCS
 		src/classification/SVMNode.cpp
 		libsvm-3.17/svm.cpp)
@@ -82,6 +87,10 @@ add_dependencies(classification_listener nao_autism_messages_generate_msg_cpp)
 add_executable(knn_node ${knn_node_SRCS} ${learner_HDRS})
 target_link_libraries(knn_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(knn_node nao_autism_messages_generate_msg_cpp)
+
+add_executable(rf_node ${rf_node_SRCS} ${learner_HDRS})
+target_link_libraries(rf_node ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${OpenCV_LIBS})
+add_dependencies(rf_node nao_autism_messages_generate_msg_cpp)
 
 add_executable(svm_export ${svm_export_SRCS} ${learner_HDRS})
 target_link_libraries(svm_export ${catkin_LIBRARIES} ${Boost_LIBRARIES})

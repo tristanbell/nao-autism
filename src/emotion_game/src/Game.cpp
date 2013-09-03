@@ -1,7 +1,6 @@
 #include <Game.h>
 
 #include <ros/ros.h>
-#include <std_srvs/Empty.h>
 #include <boost/algorithm/string.hpp>
 
 #define START_NAO_SPEECH_RECOGNITION_NAME "nao_speech/start_recognition"
@@ -83,16 +82,15 @@ void Game::askToContinue(void)
 	}
 	sleep(_settings.getWait());
 
-	startSpeechRecognition();
-
-	_currentState = WAITING_ANSWER_CONTINUE;
+	_currentState = START_SPEECH_RECOGNITION;
+	_stateBuffer = WAITING_ANSWER_CONTINUE;
 }
 
 /**
  * Waits until yes/no is 'heard'. If yes, change state to perform emotion.
  * If no, signal that game is done.
  */
-void Game::waitToContinue(void)
+Game::Response Game::waitToContinue(void)
 {
 	std::list<std::string>::iterator it = _recognizedWords.begin();
 
@@ -100,23 +98,15 @@ void Game::waitToContinue(void)
 		std::string word = *it;
 
 		if (word == "yes"){
-			_currentState = PERFORM_EMOTION;
-			stopSpeechRecognition();
-
-			_recognizedWords.clear();
-			return;
+			return POSITIVE;
 		}else if (word == "no"){
-			_currentState = END_GAME;
-			stopSpeechRecognition();
-
-			_recognizedWords.clear();
-			return;
+			return NEGATIVE;
 		}
 
 		it++;
 	}
 
-	_recognizedWords.clear();
+	return NONE;
 }
 
 void Game::endGameSpeech()
@@ -135,33 +125,48 @@ void Game::endGameSpeech()
 
 bool Game::startSpeechRecognition()
 {
-	std::cout << "Starting speech recognition." << std::endl;
+	std::cout << "Attempting to start speech recognition.\n";
 
-	ros::NodeHandle nh;
+	bool naoSpeechRecognition = false;
+	if (_startNaoSpeechService.exists() && _startNaoSpeechService.isValid()){
+		std_srvs::Empty emptySrv;
 
-//	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(START_NAO_SPEECH_RECOGNITION_NAME);
-	ros::ServiceClient client2 = nh.serviceClient<std_srvs::Empty>(START_PS_SPEECH_RECOGNITION_NAME);
-	std_srvs::Empty emptySrv;
+		naoSpeechRecognition = _startNaoSpeechService.call(emptySrv);
+	}
 
-//	bool c1 =  client1.call(emptySrv);
-	bool c2 = client2.call(emptySrv);
-	return c2;
+	bool psSpeechRecognition = false;
+	if (_startPsSpeechService.exists() && _startPsSpeechService.isValid()){
+		std_srvs::Empty emptySrv;
+
+		psSpeechRecognition = _startPsSpeechService.call(emptySrv);
+	}
+
+	_recognizedWords.clear();
+
+	return naoSpeechRecognition || psSpeechRecognition;
 }
 
 bool Game::stopSpeechRecognition()
 {
-	std::cout << "Stopping speech recognition." << std::endl;
+	std::cout << "Attempting to stop speech recognition.\n";
+
+	bool naoSpeechRecognition = false;
+	if (_startNaoSpeechService.exists() && _startNaoSpeechService.isValid()){
+		std_srvs::Empty emptySrv;
+
+		naoSpeechRecognition = _stopNaoSpeechService.call(emptySrv);
+	}
+
+	bool psSpeechRecognition = false;
+	if (_startPsSpeechService.exists() && _startPsSpeechService.isValid()){
+		std_srvs::Empty emptySrv;
+
+		psSpeechRecognition = _stopPsSpeechService.call(emptySrv);
+	}
+
 	_recognizedWords.clear();
 
-	ros::NodeHandle nh;
-
-//	ros::ServiceClient client1 = nh.serviceClient<std_srvs::Empty>(STOP_NAO_SPEECH_RECOGNITION_NAME);
-	ros::ServiceClient client2 = nh.serviceClient<std_srvs::Empty>(STOP_PS_SPEECH_RECOGNITION_NAME);
-	std_srvs::Empty emptySrv;
-
-//	bool c1 =  client1.call(emptySrv);
-	bool c2 = client2.call(emptySrv);
-	return c2;
+	return naoSpeechRecognition || psSpeechRecognition;
 }
 
 const Phrase& Game::sayRandParts(const Phrase& phrase, std::list<std::string> parts)

@@ -75,36 +75,12 @@ void GuessGame::perform(void) {
 		//_recognizedWords.push_back(std::pair<std::string, float>(_performedBehavior->getActualName(), 0));
 
 		//Set the start time for waiting (used to calculate timeouts)
-		startSpeechRecognition();
 		time(&_startWaitTime);
-
-		_recognizedWords.clear();
 
 		break;
 	}
 
 	case WAITING_ANSWER_QUESTION:{
-		std::list<std::string>::iterator it = _recognizedWords.begin();
-
-		//Wait until answer is given
-		while (it != _recognizedWords.end()){
-			std::string& word = *it;
-
-			//Check for correct answer
-			if (word == _performedBehavior->getActualName()){
-				handleCorrectAnswer();
-				return;
-			}
-
-//			}else if (checkIncorrectAnswer(word)){ //Check for incorrect answer, if found then break out of loop
-//				handleIncorrectAnswer();
-//
-//				break;
-//			}
-
-			it++;
-		}
-
 		//Check to see if the duration of time has exceeded the maximum wait
 		//if so, prompt the child and ask the question again.
 		time_t currentTime;
@@ -122,6 +98,27 @@ void GuessGame::perform(void) {
 			}else{
 				promptChild();
 			}
+		}else{
+			std::list<std::string>::iterator it = _recognizedWords.begin();
+
+			//Wait until answer is given
+			while (it != _recognizedWords.end()){
+				std::string& word = *it;
+
+				//Check for correct answer
+				if (word == _performedBehavior->getActualName()){
+					handleCorrectAnswer();
+					return;
+				}
+
+	//			}else if (checkIncorrectAnswer(word)){ //Check for incorrect answer, if found then break out of loop
+	//				handleIncorrectAnswer();
+	//
+	//				break;
+	//			}
+
+				it++;
+			}
 		}
 
 		break;
@@ -129,13 +126,58 @@ void GuessGame::perform(void) {
 
 	case ASK_QUESTION_CONTINUE:{
 		askToContinue();
-		_recognizedWords.clear();
 
 		break;
 	}
 
 	case WAITING_ANSWER_CONTINUE:{
-		waitToContinue();
+		Response response = waitToContinue();
+
+		if (response == POSITIVE){
+			_currentState = STOP_SPEECH_RECOGNITION;
+			_stateBuffer = PERFORM_EMOTION;
+		}else if (response == NEGATIVE){
+			_currentState = STOP_SPEECH_RECOGNITION;
+			_stateBuffer = END_GAME;
+		}
+
+		break;
+	}
+
+	case START_SPEECH_RECOGNITION:{
+		bool val = startSpeechRecognition();
+
+		if (val){
+			std::cout << "Successfully started speech recognition.\n";
+
+			if (_stateBuffer != UNKNOWN){
+				_currentState = _stateBuffer;
+				_stateBuffer = UNKNOWN;
+			}else{
+				std::cout << "No state to go to from START_SPEECH_RECOGNITION.\n";
+			}
+		}else{
+			std::cout << "Unable to start speech recognition, retrying.\n";
+		}
+
+		break;
+	}
+
+	case STOP_SPEECH_RECOGNITION:{
+		bool val = stopSpeechRecognition();
+
+		if (val){
+			std::cout << "Successfully stopped speech recognition.\n";
+
+			if (_stateBuffer != UNKNOWN){
+				_currentState = _stateBuffer;
+				_stateBuffer = UNKNOWN;
+			}else{
+				std::cout << "No state to go to from STOP_SPEECH_RECOGNITION.\n";
+			}
+		}else{
+			std::cout << "Unable to stop speech recognition, retrying.\n";
+		}
 
 		break;
 	}
@@ -186,13 +228,12 @@ void GuessGame::askQuestion()
 		}
 	}
 
-	_currentState = WAITING_ANSWER_QUESTION;
+	_currentState = START_SPEECH_RECOGNITION;
+	_stateBuffer = WAITING_ANSWER_QUESTION;
 }
 
 void GuessGame::handleCorrectAnswer()
 {
-	stopSpeechRecognition();
-
 	std::list<std::string> parts;
 	parts.push_back(_performedBehavior->getActualName());
 
@@ -208,18 +249,15 @@ void GuessGame::handleCorrectAnswer()
 	}
 	sleep(_settings.getWait());
 
-	_recognizedWords.clear();
-
 	//We shall ask the child here if they wish to continue with the current game
-	_currentState = PERFORM_EMOTION;
+	_currentState = STOP_SPEECH_RECOGNITION;
+	_stateBuffer = PERFORM_EMOTION;
 
 	_timesPrompted = 0;
 }
 
 bool GuessGame::checkIncorrectAnswer(const std::string& answer)
 {
-	stopSpeechRecognition();
-
 	for (int i=0;i<_settings.getBehaviorVector().size();i++){
 		const Behavior& current = _settings.getBehaviorVector()[i];
 
@@ -240,8 +278,6 @@ void GuessGame::handleIncorrectAnswer()
 
 void GuessGame::handleTimeout()
 {
-	stopSpeechRecognition();
-
 	//Collect last performed behaviors name, as incorrect phrase may require it
 	std::list<std::string> parts;
 	parts.push_back(_performedBehavior->getActualName());
@@ -258,17 +294,14 @@ void GuessGame::handleTimeout()
 		}
 	}
 	sleep(_settings.getWait());
-
-	_currentState = PERFORM_EMOTION;
-
-	_recognizedWords.clear();
 	_timesPrompted = 0;
+
+	_currentState = STOP_SPEECH_RECOGNITION;
+	_stateBuffer = PERFORM_EMOTION;
 }
 
 void GuessGame::promptChild()
 {
-	stopSpeechRecognition();
-
 	std::vector<Phrase> phraseVector;
 	if (_settings.getPhraseVector(PROMPT_KEY, phraseVector)){
 		const Phrase& phrase = sayAny(phraseVector);
@@ -281,7 +314,8 @@ void GuessGame::promptChild()
 	}
 	sleep(_settings.getWait());
 
-	_currentState = ASK_QUESTION;
+	_currentState = STOP_SPEECH_RECOGNITION;
+	_stateBuffer = ASK_QUESTION;
 }
 
 

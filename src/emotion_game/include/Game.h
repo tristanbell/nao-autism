@@ -12,6 +12,7 @@
 #include <GameSettings.h>
 #include <nao_control/NaoControl.h>
 #include <nao_msgs/WordRecognized.h>
+#include <std_srvs/Empty.h>
 #include <Phrase.h>
 #include <Keys.h>
 
@@ -22,6 +23,11 @@
 #define WORD_RECOGNIZED_TOPIC "word_recognized"
 #define SPEECH_TOPIC "recognizer/output"
 
+#define START_NAO_SPEECH_RECOGNITION_NAME "nao_speech/start_recognition"
+#define STOP_NAO_SPEECH_RECOGNITION_NAME "nao_speech/stop_recognition"
+#define START_PS_SPEECH_RECOGNITION_NAME "recognizer/start"
+#define STOP_PS_SPEECH_RECOGNITION_NAME "recognizer/stop"
+
 class Game {
 public:
 	Game(GameSettings gs) : _settings(gs),
@@ -29,8 +35,13 @@ public:
 							_naoControl(),
 							_recognizedWords()
 	{
-		_speechSubscriber = _nodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 4, &Game::onSpeechRecognized, this);
-		_speechSubscriber2 = _nodeHandle.subscribe(SPEECH_TOPIC, 4, &Game::onSpeech, this);
+		_naoSpeechSubscriber = _nodeHandle.subscribe(WORD_RECOGNIZED_TOPIC, 4, &Game::onSpeechRecognized, this);
+		_startNaoSpeechService = _nodeHandle.serviceClient<std_srvs::Empty>(START_NAO_SPEECH_RECOGNITION_NAME);
+		_stopNaoSpeechService = _nodeHandle.serviceClient<std_srvs::Empty>(STOP_NAO_SPEECH_RECOGNITION_NAME);
+
+		_psSpeechSubscriber = _nodeHandle.subscribe(SPEECH_TOPIC, 4, &Game::onSpeech, this);
+		_startPsSpeechService = _nodeHandle.serviceClient<std_srvs::Empty>(START_PS_SPEECH_RECOGNITION_NAME);
+		_stopPsSpeechService = _nodeHandle.serviceClient<std_srvs::Empty>(STOP_PS_SPEECH_RECOGNITION_NAME);
 	}
 
 	virtual ~Game() { }
@@ -61,8 +72,13 @@ protected:
 	enum State
 	{
 		INTRODUCTION,
+
 		START_WAITING_TRACK,
 		WAITING_TRACK,
+
+		START_SPEECH_RECOGNITION,
+		STOP_SPEECH_RECOGNITION,
+
 		PERFORM_EMOTION,
 		ASK_QUESTION,
 		WAITING_ANSWER_QUESTION,
@@ -70,18 +86,34 @@ protected:
 		WAITING_ANSWER_CONTINUE,
 		PROMPT_MIMIC,
 		WAITING_MIMIC,
-		END_GAME
+		END_GAME,
+		UNKNOWN
+	};
+
+	enum Response
+	{
+		POSITIVE,
+		NEGATIVE,
+		NONE
 	};
 
 	// General settings/control
 	nao_control::NaoControl _naoControl;
 	GameSettings _settings;
 	ros::NodeHandle _nodeHandle;
-	ros::Subscriber _speechSubscriber;
-	ros::Subscriber _speechSubscriber2;
+
+	ros::Subscriber _naoSpeechSubscriber;
+	ros::ServiceClient _startNaoSpeechService;
+	ros::ServiceClient _stopNaoSpeechService;
+
+	ros::Subscriber _psSpeechSubscriber;
+	ros::ServiceClient _startPsSpeechService;
+	ros::ServiceClient _stopPsSpeechService;
 
 	// Behaviors, speech
 	State _currentState;
+	State _stateBuffer; //Used for storing state required after a certain state has finished
+
 	bool _performedEmotion;
 	Behavior* _performedBehavior;
 	std::list<std::string> _recognizedWords;
@@ -92,7 +124,7 @@ protected:
 	void introduction(void);
 	void performEmotion(void);
 	void askToContinue(void);
-	void waitToContinue(void);
+	Response waitToContinue(void);
 	void endGameSpeech();
 
 	void onSpeechRecognized(const nao_msgs::WordRecognized msg);

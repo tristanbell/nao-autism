@@ -291,7 +291,7 @@ int main(int argc, char** argv)
 
 	//TODO: Perform some form of grid search to find optimal depth and min sample count.
 
-	CvRTParams params = CvRTParams(25, // max depth
+	CvRTParams params = CvRTParams(20, // max depth
 	                                       5, // min sample count
 	                                       0, // regression accuracy: N/A here
 	                                       false, // compute surrogate split, no missing data
@@ -406,50 +406,62 @@ void tfCallback(const tf::tfMessage msg)
 						//Convert the pose data into matrix notation
 						cv::Mat data(1, NUMBER_OF_ATTRIBUTES, CV_32F);
 
-						data.at<float>(0, 0) = point.head->transform.rotation.x;
-						data.at<float>(0, 1) = point.head->transform.rotation.y;
-						data.at<float>(0, 2) = point.head->transform.rotation.z;
-						data.at<float>(0, 3) = point.head->transform.rotation.w;
+						std::vector<geometry_msgs::TransformStamped> joints = poseData.getJoints();
 
-						data.at<float>(0, 4) = point.neck->transform.rotation.x;
-						data.at<float>(0, 5) = point.neck->transform.rotation.y;
-						data.at<float>(0, 6) = point.neck->transform.rotation.z;
-						data.at<float>(0, 7) = point.neck->transform.rotation.w;
+						for (int i=0;i<joints.size();i++){
+							geometry_msgs::TransformStamped& joint = joints[i];
 
-						data.at<float>(0, 8) = point.torso->transform.rotation.x;
-						data.at<float>(0, 9) = point.torso->transform.rotation.y;
-						data.at<float>(0, 10) = point.torso->transform.rotation.z;
-						data.at<float>(0, 11) = point.torso->transform.rotation.w;
+							int actualIndex = i*4;
+							data.at<float>(0, actualIndex) = joint.transform.rotation.x;
+							data.at<float>(0, actualIndex+1) = joint.transform.rotation.y;
+							data.at<float>(0, actualIndex+2) = joint.transform.rotation.z;
+							data.at<float>(0, actualIndex+3) = joint.transform.rotation.w;
+						}
 
-						data.at<float>(0, 12) = point.left_shoulder->transform.rotation.x;
-						data.at<float>(0, 13) = point.left_shoulder->transform.rotation.y;
-						data.at<float>(0, 14) = point.left_shoulder->transform.rotation.z;
-						data.at<float>(0, 15) = point.left_shoulder->transform.rotation.w;
-
-						data.at<float>(0, 16) = point.left_elbow->transform.rotation.x;
-						data.at<float>(0, 17) = point.left_elbow->transform.rotation.y;
-						data.at<float>(0, 18) = point.left_elbow->transform.rotation.z;
-						data.at<float>(0, 19) = point.left_elbow->transform.rotation.w;
-
-						data.at<float>(0, 20) = point.left_hand->transform.rotation.x;
-						data.at<float>(0, 21) = point.left_hand->transform.rotation.y;
-						data.at<float>(0, 22) = point.left_hand->transform.rotation.z;
-						data.at<float>(0, 23) = point.left_hand->transform.rotation.w;
-
-						data.at<float>(0, 24) = point.right_shoulder->transform.rotation.x;
-						data.at<float>(0, 25) = point.right_shoulder->transform.rotation.y;
-						data.at<float>(0, 26) = point.right_shoulder->transform.rotation.z;
-						data.at<float>(0, 27) = point.right_shoulder->transform.rotation.w;
-
-						data.at<float>(0, 28) = point.right_elbow->transform.rotation.x;
-						data.at<float>(0, 29) = point.right_elbow->transform.rotation.y;
-						data.at<float>(0, 30) = point.right_elbow->transform.rotation.z;
-						data.at<float>(0, 31) = point.right_elbow->transform.rotation.w;
-
-						data.at<float>(0, 32) = point.right_hand->transform.rotation.x;
-						data.at<float>(0, 33) = point.right_hand->transform.rotation.y;
-						data.at<float>(0, 34) = point.right_hand->transform.rotation.z;
-						data.at<float>(0, 35) = point.right_hand->transform.rotation.w;
+//						data.at<float>(0, 0) = point.head->transform.rotation.x;
+//						data.at<float>(0, 1) = point.head->transform.rotation.y;
+//						data.at<float>(0, 2) = point.head->transform.rotation.z;
+//						data.at<float>(0, 3) = point.head->transform.rotation.w;
+//
+//						data.at<float>(0, 4) = point.neck->transform.rotation.x;
+//						data.at<float>(0, 5) = point.neck->transform.rotation.y;
+//						data.at<float>(0, 6) = point.neck->transform.rotation.z;
+//						data.at<float>(0, 7) = point.neck->transform.rotation.w;
+//
+//						data.at<float>(0, 8) = point.torso->transform.rotation.x;
+//						data.at<float>(0, 9) = point.torso->transform.rotation.y;
+//						data.at<float>(0, 10) = point.torso->transform.rotation.z;
+//						data.at<float>(0, 11) = point.torso->transform.rotation.w;
+//
+//						data.at<float>(0, 12) = point.left_shoulder->transform.rotation.x;
+//						data.at<float>(0, 13) = point.left_shoulder->transform.rotation.y;
+//						data.at<float>(0, 14) = point.left_shoulder->transform.rotation.z;
+//						data.at<float>(0, 15) = point.left_shoulder->transform.rotation.w;
+//
+//						data.at<float>(0, 16) = point.left_elbow->transform.rotation.x;
+//						data.at<float>(0, 17) = point.left_elbow->transform.rotation.y;
+//						data.at<float>(0, 18) = point.left_elbow->transform.rotation.z;
+//						data.at<float>(0, 19) = point.left_elbow->transform.rotation.w;
+//
+//						data.at<float>(0, 20) = point.left_hand->transform.rotation.x;
+//						data.at<float>(0, 21) = point.left_hand->transform.rotation.y;
+//						data.at<float>(0, 22) = point.left_hand->transform.rotation.z;
+//						data.at<float>(0, 23) = point.left_hand->transform.rotation.w;
+//
+//						data.at<float>(0, 24) = point.right_shoulder->transform.rotation.x;
+//						data.at<float>(0, 25) = point.right_shoulder->transform.rotation.y;
+//						data.at<float>(0, 26) = point.right_shoulder->transform.rotation.z;
+//						data.at<float>(0, 27) = point.right_shoulder->transform.rotation.w;
+//
+//						data.at<float>(0, 28) = point.right_elbow->transform.rotation.x;
+//						data.at<float>(0, 29) = point.right_elbow->transform.rotation.y;
+//						data.at<float>(0, 30) = point.right_elbow->transform.rotation.z;
+//						data.at<float>(0, 31) = point.right_elbow->transform.rotation.w;
+//
+//						data.at<float>(0, 32) = point.right_hand->transform.rotation.x;
+//						data.at<float>(0, 33) = point.right_hand->transform.rotation.y;
+//						data.at<float>(0, 34) = point.right_hand->transform.rotation.z;
+//						data.at<float>(0, 35) = point.right_hand->transform.rotation.w;
 
 //						data.at<float>(0, 36) = point.left_hip->transform.rotation.x;
 //						data.at<float>(0, 37) = point.left_hip->transform.rotation.y;
@@ -489,7 +501,7 @@ void tfCallback(const tf::tfMessage msg)
 
 						pc.user_number = val;
 						pc.classification = static_cast<int>(thisClass);
-						pc.pose_data = poseData.getJoints();
+						pc.pose_data = joints;
 
 						_classification_publisher.publish(pc);
 					}

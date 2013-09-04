@@ -15,36 +15,37 @@
 
 const char* LOG_FILE_NAME = "timestamps2.log";
 
-MimicGame::MimicGame(GameSettings& settings) : Game(settings)
+MimicGame::MimicGame(GameSettings& settings) : 	Game(settings),
+												_userToTrack(0),
+												_currentPoseClassification(-1)
 {
 	_performedBehavior = NULL;
 	_currentState = INTRODUCTION;
 	_performedEmotion = false;
 
 	_classSubscriber = _nodeHandle.subscribe("/classification", 15, &MimicGame::classificationCallback, this);
-	rec_pub = _nodeHandle.advertise<nao_autism_messages::Record>("record", 10);
+	_recorderPublisher = _nodeHandle.advertise<nao_autism_messages::Record>("record", 10);
 }
 
 void MimicGame::startGame(void) {
 	// Start recording
 	printf("Starting to record data. Waiting for subscriber...\n");
-//	ros::NodeHandle nh;
 
 	ros::Rate rate(10);
-	while (rec_pub.getNumSubscribers() == 0){
+	while (_recorderPublisher.getNumSubscribers() == 0){
 		rate.sleep();
 	}
 	printf("Subscriber found. Start recording.\n");
 
 	nao_autism_messages::Record msg;
 	msg.record = true;
-	rec_pub.publish(msg);
+	_recorderPublisher.publish(msg);
 	ros::spinOnce();
 
 	_currentState = INTRODUCTION;
 	isDone = false;
 	_userToTrack = 0;
-	_emotionsPerformed = 1;
+	_emotionsPerformed = 0;
 }
 
 void MimicGame::perform(void) {
@@ -52,7 +53,6 @@ void MimicGame::perform(void) {
 
 		case INTRODUCTION: {
 			introduction();
-
 			_currentState = START_WAITING_TRACK;
 
 			break;
@@ -67,7 +67,6 @@ void MimicGame::perform(void) {
 
 				sleep(_settings.getWait());
 			}
-
 			_currentState = WAITING_TRACK;
 
 			break;
@@ -134,16 +133,15 @@ void MimicGame::perform(void) {
 				}
 				sleep(_settings.getWait());
 
+				_emotionsPerformed++;
+
 				if (_emotionsPerformed >= _settings.getNumberOfEmotionsBeforeQuestion()){
 					_currentState = ASK_QUESTION_CONTINUE;
-					_emotionsPerformed = 1;
+					_emotionsPerformed = 0;
 				}else{
-					_emotionsPerformed++;
 					_userToTrack = 0;
 					_currentState = START_WAITING_TRACK;
 				}
-
-				std::cout << "Emotions performed: " << _emotionsPerformed << "\n";
 
 				writeToLogAnswer(true);
 
@@ -151,7 +149,6 @@ void MimicGame::perform(void) {
 
 				break;
 			}else{
-
 				// Timeout for incorrect poses
 				time_t currentTime;
 				time(&currentTime);
@@ -212,16 +209,21 @@ void MimicGame::perform(void) {
 
 		case ASK_QUESTION_CONTINUE: {
 			askToContinue();
+
 			break;
 		}
 
 		case WAITING_ANSWER_CONTINUE: {
-			waitToContinue();
+			Response response = waitToContinue();
+
+			_currentState = STOP_SPEECH_RECOGNITION;
 
 			// I'm not proud of this.
-			if (_currentState == PERFORM_EMOTION) {
+			if (response == POSITIVE) {
 				_userToTrack = 0;
-				_currentState = START_WAITING_TRACK;
+				_stateBuffer = START_WAITING_TRACK;
+			}else{
+				_stateBuffer = END_GAME;
 			}
 
 			break;
@@ -255,11 +257,10 @@ void MimicGame::setOverallClassification(void) {
 	std::map<int, int> votes;
 
 	// Get the number of times each pose appears in _poseQueue
-	for (int i = 0; i < _poseQueue.size(); i++) {
-		// Only pay attention to current user
-		if (_poseQueue[i].user_number == _userToTrack) {
-			votes[_poseQueue[i].classification]++;
-		}
+	std::list<nao_autism_messages::PoseClassification>::iterator queueIt = _poseQueue.begin();
+	for (;queueIt != _poseQueue.end();queueIt++){
+		//No need to check user number, it is checked in callback
+		votes[(*queueIt).classification]++;
 	}
 
 	// Get the pose with the highest number of votes
@@ -283,11 +284,10 @@ void MimicGame::setOverallClassification(void) {
 	}
 
 	_currentPoseClassification = highestPose;
-
-	_poseQueue.clear();
 }
 
-#define MAX_QUEUE_SIZE 60
+//Amount of frames to 'read' before classification is given
+#define MAX_QUEUE_SIZE 15
 
 /**
  * Receives PoseClassification messages, pushes them to a queue and
@@ -296,11 +296,19 @@ void MimicGame::setOverallClassification(void) {
  */
 void MimicGame::classificationCallback(const nao_autism_messages::PoseClassification poseClass) {
 	if (_currentState == WAITING_MIMIC) {
-		if (_poseQueue.size() >= MAX_QUEUE_SIZE) {
-			setOverallClassification();
-		}
+		//Ignore all users that aren't the current ones to track
+		if (poseClass.user_number == _userToTrack){
+			//Pose queue is continuous, so if it exceeds maximum size then pop front
+			//before pushing
+			if (_poseQueue.size() >= MAX_QUEUE_SIZE){
+				_poseQueue.pop_front();
+				_poseQueue.push_back(poseClass);
 
-		_poseQueue.push_back(poseClass);
+				setOverallClassification();
+			}else{
+				_poseQueue.push_back(poseClass);
+			}
+		}
 	} else if (_currentState == WAITING_TRACK) {
 		_poseQueue.push_back(poseClass);
 	}

@@ -35,6 +35,8 @@ void GuessGame::perform(void) {
 
 	case INTRODUCTION:{
 		introduction();
+		_currentState = PERFORM_EMOTION;
+
 		break;
 	}
 

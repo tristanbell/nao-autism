@@ -37,8 +37,6 @@ void Game::introduction(void)
 		}
 	}
 	sleep(_settings.getWait());
-
-	_currentState = PERFORM_EMOTION;
 }
 
 void Game::performEmotion(void)

@@ -94,7 +94,7 @@ void GeneralInformationBox::averageTemperatureSpinnerChanged(int value)
 void GeneralInformationBox::onUpdate()
 {
 	std::stringstream batteryLevelLimit;
-	batteryLevelLimit << _naoDiagnostics.getBatteryLevelLimit() << "%";
+	batteryLevelLimit << _naoDiagnostics.getCurrentBatteryLevel() << "%";
 	QString qBatteryLevel = QString::fromStdString(batteryLevelLimit.str());
 
 	std::stringstream jointLevelLimit;

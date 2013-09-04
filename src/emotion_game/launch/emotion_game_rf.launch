@@ -1,0 +1,7 @@
+<launch>
+	<include file="$(find emotion_game)/launch/pocketsphinx/emotion_game_speech.launch" />
+	<node name="openni_tracker" pkg="openni_tracker" type="openni_tracker" output="screen" />
+	<node name="classifier" pkg="learner" type="rf_node" args="--file-location $(find learner)/svm/nao_autism" output="screen" />
+	<node name="rosbag_recorder" pkg="rosbag_recorder" type="run_rosbag_recorder" output="screen" />
+	<node name="emotion_game" pkg="emotion_game" type="start_game" output="screen" />
+</launch>

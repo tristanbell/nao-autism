@@ -283,9 +283,9 @@ void tfCallback(const tf::tfMessage msg)
 }
 
 svm_node *convertToNode(PoseData data) {
-	svm_node *nodes = new svm_node[61];
-
 	std::vector<geometry_msgs::TransformStamped> joints = data.getJoints();
+	int nodesSize = joints.size()*4 + 1;
+	svm_node *nodes = new svm_node[nodesSize];
 	int indexCount = 1;
 
 	for (int i = 0; i < joints.size(); i++) {
@@ -310,7 +310,7 @@ svm_node *convertToNode(PoseData data) {
 
 	svm_node last;
 	last.index = -1;
-	nodes[60] = last;
+	nodes[nodesSize - 1] = last;
 
 	return nodes;
 }

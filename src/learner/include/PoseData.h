@@ -52,12 +52,12 @@ public:
 		joints.push_back(right_shoulder);
 		joints.push_back(right_elbow);
 		joints.push_back(right_hand);
-		joints.push_back(left_hip);
-		joints.push_back(left_knee);
-		joints.push_back(left_foot);
-		joints.push_back(right_hip);
-		joints.push_back(right_knee);
-		joints.push_back(right_foot);
+//		joints.push_back(left_hip);
+//		joints.push_back(left_knee);
+//		joints.push_back(left_foot);
+//		joints.push_back(right_hip);
+//		joints.push_back(right_knee);
+//		joints.push_back(right_foot);
 
 		return joints;
 	}

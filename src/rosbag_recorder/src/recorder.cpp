@@ -18,10 +18,10 @@ Recorder::Recorder(void)
 	// Set topics to subscribe to
 	std::vector<std::string> topicsToRecord;
 	topicsToRecord.push_back("/tf");
-	topicsToRecord.push_back("camera/rgb/image_raw");
-	topicsToRecord.push_back("camera/rgb/camera_info");
-	topicsToRecord.push_back("camera/depth_registered/image_raw");
-	topicsToRecord.push_back("camera/depth_registered/camera_info");
+//	topicsToRecord.push_back("camera/rgb/image_raw");
+//	topicsToRecord.push_back("camera/rgb/camera_info");
+//	topicsToRecord.push_back("camera/depth_registered/image_raw");
+//	topicsToRecord.push_back("camera/depth_registered/camera_info");
 	options.topics = topicsToRecord;
 
 	options.prefix = "recordings/";

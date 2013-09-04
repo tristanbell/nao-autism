@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 	behaviors.push_back(angry);
 
 	//No --no-record flag set, we shall record
-	if (record){
+//	if (record){
 		ROS_INFO("Starting to record data.");
 		ros::NodeHandle nh;
 		ros::Publisher pub = nh.advertise<nao_autism_messages::Record>("record", 10);
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 		nao_autism_messages::Record msg;
 		msg.record = true;
 		pub.publish(msg);
-	}
+//	}
 
 
 	//Init window and execute application

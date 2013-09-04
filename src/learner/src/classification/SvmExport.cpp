@@ -23,7 +23,7 @@
 int main(int argc, char** argv)
 {
 	if ((argc % 2) == 1 && argc > 1){
-		ros::init(argc, argv, "knn_node");
+		ros::init(argc, argv, "svm_export");
 
 		classification::TrainingData classifiedPoints;
 

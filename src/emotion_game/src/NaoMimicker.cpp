@@ -539,7 +539,7 @@ void lookForStartGesture(const geometry_msgs::TransformStamped& transform,
 	} catch (std::out_of_range& ex) { }
 }
 
-#define SITTING_DISTANCE 0.4
+#define SITTING_DISTANCE 0.2
 
 /*
  * TODO: check torso distance instead of hip distance?

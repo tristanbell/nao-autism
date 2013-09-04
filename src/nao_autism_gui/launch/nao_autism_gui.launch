@@ -1,8 +1,5 @@
 <launch>
-    <group ns="nao_autism_gui">
-      <include file="$(find openni_launch)/launch/openni.launch"/>
-      <node pkg="openni_tracker" name="tracker" type="openni_tracker"/>
-      <node pkg="rosbag_recorder" name="recorder" type="run_rosbag_recorder"/>
-      <node pkg="nao_autism_gui" name="gui" type="nao-autism-gui"/>
-    </group>
+   <node pkg="openni_tracker" name="tracker" type="openni_tracker" output="screen" />
+   <node pkg="rosbag_recorder" name="recorder" type="run_rosbag_recorder" output="screen" />
+   <node pkg="nao_autism_gui" name="gui" type="nao-autism-gui" output="screen" />
 </launch>

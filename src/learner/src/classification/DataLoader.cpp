@@ -303,10 +303,11 @@ void classification::DataLoader::filterData(string filename)
 
 		// Find the file that contains the timestamp
 		cout << "   Finding file..." << endl;
-//		string filepath = findFile("/home/tristan/nao-autism/recordings/",
-//				start.toBoost() + boost::posix_time::hours(1));
-		string filepath = findFile("/media/Partition 1/recordings/",
+		// 1 hour is added to start time because ROS records times an hour too early
+		string filepath = findFile("/home/parallels/nao-autism/recordings/",
 				start.toBoost() + boost::posix_time::hours(1));
+//		string filepath = findFile("/media/Partition 1/recordings/",
+//				start.toBoost() + boost::posix_time::hours(1));
 		cout << "   " << filepath << endl;
 
 		// Construct training data from that file

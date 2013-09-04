@@ -7,7 +7,14 @@ int main(int argc, char **argv)
 
 	ROS_INFO("Starting...\n");
 
-	classification::DataLoader::filterData("timestamps.log");
+	if (argc < 2) {
+		ROS_INFO("Please supply filename (i.e. 'rosrun learner dataLoader timestamps.log'");
+		return 1;
+	}
+
+	char *filename = argv[1];
+
+	classification::DataLoader::filterData(filename);
 
 	return 0;
 }

@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
 		using namespace std;
 
-		ofstream out("nao_autism");
+		ofstream out("nao_autism2");
 
 		vector<classification::PoseDataPoint*> pdata =
 				classification::PoseDataPoint::convertToPoses(classifiedPoints);

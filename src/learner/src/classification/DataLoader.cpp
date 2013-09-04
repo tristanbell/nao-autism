@@ -76,21 +76,58 @@ PoseData *classification::DataLoader::extractPose(
 
 	// Can either assume 'transforms' has joints in right order or check, I am assuming
 	// they are in order for speed.
-	pose->head = transforms[0];
-	pose->neck = transforms[1];
-	pose->torso = transforms[2];
-	pose->left_shoulder = transforms[3];
-	pose->left_elbow = transforms[4];
-	pose->left_hand = transforms[5];
-	pose->right_shoulder = transforms[6];
-	pose->right_elbow = transforms[7];
-	pose->right_hand = transforms[8];
-	pose->left_hip = transforms[9];
-	pose->left_knee = transforms[10];
-	pose->left_foot = transforms[11];
-	pose->right_hip = transforms[12];
-	pose->right_knee = transforms[13];
-	pose->right_foot = transforms[14];
+//	pose->head = transforms[0];
+//	pose->neck = transforms[1];
+//	pose->torso = transforms[2];
+//	pose->left_shoulder = transforms[3];
+//	pose->left_elbow = transforms[4];
+//	pose->left_hand = transforms[5];
+//	pose->right_shoulder = transforms[6];
+//	pose->right_elbow = transforms[7];
+//	pose->right_hand = transforms[8];
+//	pose->left_hip = transforms[9];
+//	pose->left_knee = transforms[10];
+//	pose->left_foot = transforms[11];
+//	pose->right_hip = transforms[12];
+//	pose->right_knee = transforms[13];
+//	pose->right_foot = transforms[14];
+
+	for (int i = 0; i < transforms.size(); i++) {
+		geometry_msgs::TransformStamped ts = transforms[i];
+		std::string str(ts.child_frame_id);
+
+		if (str.find("head") != std::string::npos){
+			pose->head = ts;
+		} else if (str.find("neck") != std::string::npos){
+			pose->neck = ts;
+		} else if (str.find("torso") != std::string::npos){
+			pose->torso = ts;
+		} else if (str.find("left_shoulder") != std::string::npos){
+			pose->left_shoulder = ts;
+		} else if (str.find("left_elbow") != std::string::npos){
+			pose->left_elbow = ts;
+		} else if (str.find("left_hand") != std::string::npos){
+			pose->left_hand = ts;
+		} else if (str.find("right_shoulder") != std::string::npos){
+			pose->right_shoulder = ts;
+		} else if (str.find("right_elbow") != std::string::npos){
+			pose->right_elbow = ts;
+		} else if (str.find("right_hand") != std::string::npos){
+			pose->right_hand = ts;
+		} else if (str.find("left_hip") != std::string::npos){
+			pose->left_hip = ts;
+		} else if (str.find("left_knee") != std::string::npos){
+			pose->left_knee = ts;
+		} else if (str.find("left_foot") != std::string::npos){
+			pose->left_foot = ts;
+		} else if (str.find("right_hip") != std::string::npos){
+			pose->right_hip = ts;
+		} else if (str.find("right_knee") != std::string::npos){
+			pose->right_knee = ts;
+		} else if (str.find("right_foot") != std::string::npos){
+			pose->right_foot = ts;
+		}
+	}
 
 	return pose;
 }

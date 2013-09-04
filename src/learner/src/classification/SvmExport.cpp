@@ -41,6 +41,8 @@ int main(int argc, char** argv)
 			}
 		}
 
+		ROS_INFO("Writing to file");
+
 		using namespace std;
 
 		ofstream out("nao_autism");
@@ -67,6 +69,8 @@ int main(int argc, char** argv)
 		}
 
 		out.close();
+
+		ROS_INFO("Done.");
 	} else {
 		ROS_INFO("Invalid arguments, The arguments should be supplied in pairs of <filename> and <classification>");
 		ROS_INFO("Where the filename is the name of the bag file containing solely tf transforms and the classification is some short integer.");

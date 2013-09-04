@@ -312,6 +312,17 @@ svm_node *convertToNode(PoseData data) {
 	last.index = -1;
 	nodes[nodesSize - 1] = last;
 
+//	std::ofstream out("nao_autism", std::ios::app);
+//
+//	out << "+0 ";
+//
+//	for (int i = 0; i < nodesSize-1; i++) {
+//		out << nodes[i].index << ":" << nodes[i].value << " ";
+//	}
+//
+//	out << "\n";
+//	out.close();
+
 	return nodes;
 }
 

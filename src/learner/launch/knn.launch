@@ -1,7 +1,0 @@
-<launch>
-    <!--group ns="knn"-->
-      <include file="$(find openni_launch)/launch/openni.launch"/>
-      <node pkg="openni_tracker" name="tracker" type="openni_tracker"/>
-      <node pkg="learner" name="knn_node" type="knn_node"/>
-    <!--/group-->
-</launch>

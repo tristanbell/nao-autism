@@ -1,12 +1,16 @@
 /*
  * TFMeasure.cpp
  *
+ * Measures either the position of a single tf::TransformStamped
+ * or the distance between two tf::TransformStamped.
+ *
  *  Created on: Aug 16, 2013
- *      Author: parallels
+ *      Author: Tristan Bell
  */
 
 #include <ros/ros.h>
 #include <tf/tfMessage.h>
+#include <tf/tf.h>
 #include <geometry_msgs/TransformStamped.h>
 #include <vector>
 #include <string>
@@ -21,10 +25,21 @@ tf::tfMessage* joint2;
 void tfCallback(const tf::tfMessage msg) {
 	geometry_msgs::TransformStamped transform = msg.transforms[0];
 	if (joints.size() == 1) {
-		printf("x: %f, y: %f, z: %f\r", transform.transform.translation.x,
-				transform.transform.translation.y,
-				transform.transform.translation.z);
-		flush(cout);
+		if (transform.child_frame_id == "/" + joints[0]) {
+//		printf("x: %f, y: %f, z: %f\r", transform.transform.rotation.x,
+//				transform.transform.rotation.y,
+//				transform.transform.rotation.z);
+			tf::Quaternion q(transform.transform.rotation.x,
+					transform.transform.rotation.y,
+					transform.transform.rotation.z,
+					transform.transform.rotation.w);
+			double roll, pitch, yaw;
+			tf::Matrix3x3 mat(q);
+			mat.getRPY(roll, pitch, yaw);
+
+			printf("roll: %f, pitch: %f, yaw: %f\r", roll, pitch, yaw);
+			flush(cout);
+		}
 	} else if (joints.size() == 2) {
 		if (transform.child_frame_id == "/" + joints[0])
 			joint1 = new tf::tfMessage(msg);

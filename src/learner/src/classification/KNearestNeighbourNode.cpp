@@ -308,6 +308,8 @@ void tfCallback(const tf::tfMessage msg)
 
 						pc.user_number = val;
 						pc.classification = classification;
+						pc.pose_data = poseData.getJoints();
+						pc.source = "knn";
 
 						_classification_publisher.publish(pc);
 					}

@@ -1,0 +1,12 @@
+<launch>
+	<node pkg="openni_tracker" name="tracker" type="openni_tracker" output="screen" />
+	<node name="knn" pkg="learner" type="knn_node" 
+		args="$(find learner)/resources/happy.bag 1 $(find learner)/resources/sad.bag 2 
+		$(find learner)/resources/scared.bag 3 $(find learner)/resources/angry2.bag 4 
+		$(find learner)/resources/angry3.bag 4 $(find learner)/resources/angry4.bag 4 
+		$(find learner)/resources/standing.bag 0 $(find learner)/resources/standing2.bag 0" />
+	<node name="svm" pkg="learner" type="svm_node" args="$(find learner)/resources/nao_autism3.model" />
+	<node name="rdf" pkg="learner" type="rf_node" args="--file-location $(find learner)/resources/nao_autism3 
+	--attribute-sample 0" />
+	<node name="accuracy_tester" pkg="learner" type="accuracy_checker" output="screen" />
+</launch>

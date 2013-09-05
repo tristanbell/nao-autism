@@ -1,3 +1,10 @@
+/**
+ * SvmExport.cpp
+ *
+ * This node takes rosbag files of tf data and their corresponding classifications
+ * and exports that data in a way that can be interpreted by LibSVM.
+ */
+
 #include <classification/Learner.h>
 #include <classification/KNearestNeighbour.h>
 #include <classification/DWKNearestNeighbour.h>
@@ -30,7 +37,7 @@ int main(int argc, char** argv)
 		ROS_INFO("Scanning argument(s)");
 		for (unsigned int i=1;i<argc;i+=2){
 			std::string fileName(argv[i]);
-			short classification = strtol(argv[i+1], NULL, 10);
+			int classification = strtol(argv[i+1], NULL, 10);
 
 			std::vector<classification::DataPoint*> dataPoints = classification::DataLoader::loadData(fileName);
 			for (unsigned int j=0;j<dataPoints.size();j++){
@@ -45,7 +52,7 @@ int main(int argc, char** argv)
 
 		using namespace std;
 
-		ofstream out("nao_autism2");
+		ofstream out("nao_autism3");
 
 		vector<classification::PoseDataPoint*> pdata =
 				classification::PoseDataPoint::convertToPoses(classifiedPoints);

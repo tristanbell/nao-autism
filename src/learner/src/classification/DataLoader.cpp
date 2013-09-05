@@ -31,13 +31,19 @@ vector<classification::DataPoint*> classification::DataLoader::loadData(
 
 	try {
 		rosbag::Bag bag(filename);
-		rosbag::View view(bag, rosbag::TopicQuery("/tf"));
+		rosbag::View *view;
+		view = new rosbag::View(bag, rosbag::TopicQuery("/tf"));
+
+		if (view->size() == 0) {
+			delete view;
+			view = new rosbag::View(bag, rosbag::TopicQuery("tf"));
+		}
 
 		// Vector for generating PoseData (re-used when each is created)
 		vector<geometry_msgs::TransformStamped> transforms;
 
 		// Iterate over all messages published to this topic and construct complete poses
-		BOOST_FOREACH(rosbag::MessageInstance const m, view){
+		BOOST_FOREACH(rosbag::MessageInstance const m, *view){
 			tf::tfMessage::ConstPtr i = m.instantiate<tf::tfMessage>();
 
 			if (i != NULL) {

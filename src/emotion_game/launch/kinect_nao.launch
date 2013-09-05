@@ -11,4 +11,5 @@ This launch file launches the required ros nodes to get the kinect control worki
 	<node name="nao_behaviors" pkg="nao_driver" type="nao_behaviors.py" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
 	<node name="nao_walker" pkg="nao_driver" type="nao_walker.py" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
 	<node name="nao_controller" pkg="nao_driver" type="nao_controller.py" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)" output="screen"/>
+	<node name="nao_speech" pkg="nao_driver" type="nao_speech.py" required="true" args="--pip=$(arg nao_ip) --pport=$(arg nao_port)"/>
 </launch>

@@ -271,6 +271,7 @@ void tfCallback(const tf::tfMessage msg)
 						pc.user_number = val;
 						pc.classification = (int) thisClass;
 						pc.pose_data = poseData.getJoints();
+						pc.source = "svm";
 
 						_classification_publisher.publish(pc);
 					}

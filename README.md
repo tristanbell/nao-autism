@@ -24,7 +24,7 @@ sudo apt-get install ros-groovy-openni-tracker
 ####NaoQi####
 The NaoQi SDK can be downloaded from https://community.aldebaran-robotics.com/resources. Bear in mind that you need to register as a developer with Aldebaran in order to access this. Select NAOQI C++ SDK 1.14.5 Linux (32 bits or 64 bits depending on your operating system), then extract it somewhere on your machine (for our examples we have placed it under /opt/naoqi). Next, we need to define some environment variables that we'll use later when running the games and add the NaoQi lib directory to our PYTHONPATH so ROS can access it. To avoid having to repeat lots of typing, add the following to the end of your `~/.bashrc`:
 ```bash
-# Wherever the NAOqi SDK is installed
+# Or wherever the NAOqi SDK is installed
 export NAOQI_HOME=/opt/naoqi/naoqi-sdk-1.14.5-linux64
 export NAOQI_LIBS=$NAOQI_HOME/lib
 
@@ -49,7 +49,7 @@ sudo chmod +x recognizer.py
 ####Nao Autism Games####
 
 #####Easy Installation#####
-The simplest way to install is to use the installation script: [link here]. Download and double click the script to run it, and the games will be installed to the correct directory.
+The simplest way to install is to use the installation script [here](https://dl.dropboxusercontent.com/u/50803462/installscript.sh). Download and double click the script to run it, and the games will be installed to the correct directory.
 
 #####Manual Installation#####
 
@@ -75,13 +75,17 @@ Then make a new file called rosinstall.txt and paste the following inside it:
     uri: https://github.com/tristanbell/nao-autism
     local-name: nao-autism
 ```
-Save and close the file, then run rosinstall to install the relevant packages:
+Save and close the file, then run rosinstall to install the relevant packages, then compile them:
 ```bash
 rosinstall . /opt/ros/groovy rosinstall.txt
+source setup.bash
 rosdep install humanoid_msgs nao_robot nao_common
 rosmake humanoid_msgs nao_robot nao_common
 catkin_make -C nao-autism
+cmake nao-autism/tools/settings\ editor/CMakeLists.txt
+make -C nao-autism/tools/settings\ editor
 ```
+If you wish to, add `source ~/nao-autism/setup.bash` to the end of your `~/.bashrc` in order to allow you to run the emotion games from any new terminal window.
 
 Running the Emotion Games
 -------------------------
@@ -96,7 +100,7 @@ ROS programs are normally run through the command line. In order for our program
     LD_LIBRARY_PATH=$NAOQI_LIBRARY_PATH
     roslaunch ~/nao-autism/launch/run_nao.launch
 ```
-4. Then, in a new terminal window, make sure you are in the nao-autism directory (`cd ~/nao-autism`) then type `source devel/setup.bash`
+4. Then, in a new terminal window, make sure you are in the nao-autism directory (`cd ~/nao-autism`) then type `source setup.bash`
 5. When running for the first time, you will need a configuration file for the game. To make one, type `tools/settings\ editor/settings_editor` to open the settings editor, then click File > New to generate a basic configuration file. Adjust any of the settings as you see fit, and when you're finished click File > Save As. Save your new configuration file (name it something like "data.json") in the nao-autism folder. Then close the settings editor.
 6. Start the emotion recognition games with `roslaunch emotion_game emotion_game.launch`.
 
@@ -106,13 +110,8 @@ Running the Motion Controller
 The Mimicker program allows a user to control the Nao using a Kinect. To run it, do the following:
 
 1. With the Kinect plugged in to a USB port, open a terminal window and type `roslaunch openni_launch openni.launch`
-2. In another window, do `roslaunch nao_driver nao_driver.launch`
-3. Finally, in a new terminal window, type
-
-```bash
-    source ~/nao-autism/devel/setup.bash
-    roslaunch emotion_game kinect_control.launch
-```
+2. In another window, do `roslaunch emotion_game kinect_nao.launch`
+3. Finally, in a new terminal window type `roslaunch emotion_game kinect_control.launch`
 
 Once it is running, put your right hand on your head. Once the Kinect recognises someone doing this gesture, it will initialise a virtual 'control box' around this user, giving them control over the robot.
 
@@ -126,12 +125,3 @@ The kinect motion controller (Mimicker) works in two ways: moving the Nao's arms
 + Step to the left with your left foot to make the Nao shuffle to the left
 + Step to the right with your right foot to make the Nao shuffle to the right
 + Turning left or right will make the Nao turn left or right, respectively. This also works while the Nao is walking forwards or backwards
-
-Things to do
-------------
-
-+ Adjust pocketsphinx language model to work with english accents (if too difficult, just map 'scared' to 'yes', seems to get that every time)
-+ Perhaps tune the SVM to make scared pose more accurate
-+ Finish GUI for running the nodes/diagnostics
-+ Write documentation
-+ Make sure mimicker sits/stands properly

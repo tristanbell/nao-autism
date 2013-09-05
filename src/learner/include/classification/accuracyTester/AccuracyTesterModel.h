@@ -25,6 +25,7 @@ public:
 	void setExpectedClass(int newClass) { _expected_class = newClass; }
 	int getExpectedClass() { return _expected_class; }
 	float getAccuracy(string learning_name, int classification);
+	void resetAccuracy();
 
 private:
 	ros::NodeHandle _nh;

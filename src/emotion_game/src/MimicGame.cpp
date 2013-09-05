@@ -28,19 +28,6 @@ MimicGame::MimicGame(GameSettings& settings) : 	Game(settings),
 }
 
 void MimicGame::startGame(void) {
-	// Start recording
-	printf("Starting to record data. Waiting for subscriber...\n");
-
-	ros::Rate rate(10);
-	while (_recorderPublisher.getNumSubscribers() == 0){
-		rate.sleep();
-	}
-	printf("Subscriber found. Start recording.\n");
-
-	nao_autism_messages::Record msg;
-	msg.record = true;
-	_recorderPublisher.publish(msg);
-	ros::spinOnce();
 
 	_currentState = INTRODUCTION;
 	isDone = false;
@@ -54,7 +41,6 @@ void MimicGame::perform(void) {
 		case INTRODUCTION: {
 			introduction();
 			_currentState = START_WAITING_TRACK;
-
 			break;
 		}
 
@@ -86,11 +72,7 @@ void MimicGame::perform(void) {
 
 		case PERFORM_EMOTION: {
 			performEmotion();
-
-			writeToLogBehavior();
-
 			_currentState = PROMPT_MIMIC;
-
 			break;
 		}
 
@@ -103,7 +85,6 @@ void MimicGame::perform(void) {
 			// Initialise time for mimic timeout
 			time(&_startWaitTime);
 
-			writeToLogPrompt();
 			usleep(650000);
 			_currentState = WAITING_MIMIC;
 
@@ -139,13 +120,11 @@ void MimicGame::perform(void) {
 					_currentState = ASK_QUESTION_CONTINUE;
 					_emotionsPerformed = 0;
 				}else{
-					_userToTrack = 0;
-					_currentState = START_WAITING_TRACK;
+					_currentState = PERFORM_EMOTION;
 				}
 
-				writeToLogAnswer(true);
-
 				_poseQueue.clear();
+				_timesPrompted = 0;
 
 				break;
 			}else{
@@ -176,10 +155,7 @@ void MimicGame::perform(void) {
 						}
 						sleep(_settings.getWait());
 
-						writeToLogAnswer(false);
-
-						_currentState = START_WAITING_TRACK;
-						_userToTrack = 0;
+						_currentState = PERFORM_EMOTION;
 						_timesPrompted = 0;
 
 						_poseQueue.clear();
@@ -218,12 +194,49 @@ void MimicGame::perform(void) {
 
 			_currentState = STOP_SPEECH_RECOGNITION;
 
-			// I'm not proud of this.
 			if (response == POSITIVE) {
 				_userToTrack = 0;
 				_stateBuffer = START_WAITING_TRACK;
 			}else{
 				_stateBuffer = END_GAME;
+			}
+
+			break;
+		}
+
+		case START_SPEECH_RECOGNITION:{
+			bool val = startSpeechRecognition();
+
+			if (val){
+				std::cout << "Successfully started speech recognition.\n";
+
+				if (_stateBuffer != UNKNOWN){
+					_currentState = _stateBuffer;
+					_stateBuffer = UNKNOWN;
+				}else{
+					std::cout << "No state to go to from START_SPEECH_RECOGNITION.\n";
+				}
+			}else{
+				std::cout << "Unable to start speech recognition, retrying.\n";
+			}
+
+			break;
+		}
+
+		case STOP_SPEECH_RECOGNITION:{
+			bool val = stopSpeechRecognition();
+
+			if (val){
+				std::cout << "Successfully stopped speech recognition.\n";
+
+				if (_stateBuffer != UNKNOWN){
+					_currentState = _stateBuffer;
+					_stateBuffer = UNKNOWN;
+				}else{
+					std::cout << "No state to go to from STOP_SPEECH_RECOGNITION.\n";
+				}
+			}else{
+				std::cout << "Unable to stop speech recognition, retrying.\n";
 			}
 
 			break;
@@ -236,12 +249,13 @@ void MimicGame::perform(void) {
 			break;
 		}
 
-		default:
+		default:{
+			std::cout << "Unimplemented state: " << _currentState << std::endl;
 			break;
+		}
 	}
 
 }
-
 
 void MimicGame::endGame(void) {
 	// Nothing to clean up
@@ -339,9 +353,6 @@ void MimicGame::setUserToTrack(void)
 		float lDist = sqrt(ldx*ldx + ldy*ldy + ldz*ldz);
 		float rDist = sqrt(rdx*rdx + rdy*rdy + rdz*rdz);
 
-		//printf("Left: %f, Right: %f   \n", lDist, rDist);
-//		std::flush(std::cout);
-
 		if (lDist < TRACK_POSE_DIST && rDist < TRACK_POSE_DIST) {
 			_userToTrack = pc.user_number;
 			printf("\n \nTracking user %d\n", _userToTrack);
@@ -349,57 +360,4 @@ void MimicGame::setUserToTrack(void)
 			break;
 		}
 	}
-}
-
-void MimicGame::writeToLogBehavior()
-{
-	std::ofstream stream;
-
-	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
-
-	stream << "[" << ros::Time::now() << "] ";
-
-	stream << "BEHAVIOR_BUTTON ";
-
-	stream << "BEHAVIOR_NAME=" << _performedBehavior->getName() << ' ';
-
-	stream << "PROMPT_ENABLED=TRUE\n";
-
-	stream.close();
-}
-
-void MimicGame::writeToLogPrompt()
-{
-	printf("Writing prompt.\n");
-	std::ofstream stream;
-
-	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
-
-	stream << "[" << ros::Time::now() << "] ";
-
-	stream << "PROMPT_BUTTON ";
-
-	stream << "BEHAVIOR_NAME=" << _performedBehavior->getName() << '\n';
-
-	stream.close();
-	printf("Prompt written.\n");
-}
-
-void MimicGame::writeToLogAnswer(const bool& ans)
-{
-	std::ofstream stream;
-
-	stream.open(LOG_FILE_NAME, std::ios::app | std::ios::out);
-
-	stream << "[" << ros::Time::now() << "] ";
-
-	if (ans){
-		stream << "CORRECT_BUTTON ";
-	}else{
-		stream << "INCORRECT_BUTTON ";
-	}
-
-	stream << "BEHAVIOR_NAME=" << _performedBehavior->getName() << '\n';
-
-	stream.close();
 }

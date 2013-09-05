@@ -159,7 +159,7 @@ struct Instance
 	std::vector<float> data;
 };
 
-#define NUMBER_OF_ATTRIBUTES 60 //Hard coded, for now (maybe? idk)
+#define NUMBER_OF_ATTRIBUTES 36 //Hard coded, for now (maybe? idk)
 
 char* getArgValue(int numberOfArguments, char** arguements, char* key)
 {
@@ -463,35 +463,35 @@ void tfCallback(const tf::tfMessage msg)
 //						data.at<float>(0, 34) = point.right_hand->transform.rotation.z;
 //						data.at<float>(0, 35) = point.right_hand->transform.rotation.w;
 
-						data.at<float>(0, 36) = point.left_hip->transform.rotation.x;
-						data.at<float>(0, 37) = point.left_hip->transform.rotation.y;
-						data.at<float>(0, 38) = point.left_hip->transform.rotation.z;
-						data.at<float>(0, 39) = point.left_hip->transform.rotation.w;
-
-						data.at<float>(0, 40) = point.left_knee->transform.rotation.x;
-						data.at<float>(0, 41) = point.left_knee->transform.rotation.y;
-						data.at<float>(0, 42) = point.left_knee->transform.rotation.z;
-						data.at<float>(0, 43) = point.left_knee->transform.rotation.w;
-
-						data.at<float>(0, 44) = point.left_foot->transform.rotation.x;
-						data.at<float>(0, 45) = point.left_foot->transform.rotation.y;
-						data.at<float>(0, 46) = point.left_foot->transform.rotation.z;
-						data.at<float>(0, 47) = point.left_foot->transform.rotation.w;
-
-						data.at<float>(0, 48) = point.right_hip->transform.rotation.x;
-						data.at<float>(0, 49) = point.right_hip->transform.rotation.y;
-						data.at<float>(0, 50) = point.right_hip->transform.rotation.z;
-						data.at<float>(0, 51) = point.right_hip->transform.rotation.w;
-
-						data.at<float>(0, 52) = point.right_knee->transform.rotation.x;
-						data.at<float>(0, 53) = point.right_knee->transform.rotation.y;
-						data.at<float>(0, 54) = point.right_knee->transform.rotation.z;
-						data.at<float>(0, 55) = point.right_knee->transform.rotation.w;
-
-						data.at<float>(0, 56) = point.right_foot->transform.rotation.x;
-						data.at<float>(0, 57) = point.right_foot->transform.rotation.y;
-						data.at<float>(0, 58) = point.right_foot->transform.rotation.z;
-						data.at<float>(0, 59) = point.right_foot->transform.rotation.w;
+//						data.at<float>(0, 36) = point.left_hip->transform.rotation.x;
+//						data.at<float>(0, 37) = point.left_hip->transform.rotation.y;
+//						data.at<float>(0, 38) = point.left_hip->transform.rotation.z;
+//						data.at<float>(0, 39) = point.left_hip->transform.rotation.w;
+//
+//						data.at<float>(0, 40) = point.left_knee->transform.rotation.x;
+//						data.at<float>(0, 41) = point.left_knee->transform.rotation.y;
+//						data.at<float>(0, 42) = point.left_knee->transform.rotation.z;
+//						data.at<float>(0, 43) = point.left_knee->transform.rotation.w;
+//
+//						data.at<float>(0, 44) = point.left_foot->transform.rotation.x;
+//						data.at<float>(0, 45) = point.left_foot->transform.rotation.y;
+//						data.at<float>(0, 46) = point.left_foot->transform.rotation.z;
+//						data.at<float>(0, 47) = point.left_foot->transform.rotation.w;
+//
+//						data.at<float>(0, 48) = point.right_hip->transform.rotation.x;
+//						data.at<float>(0, 49) = point.right_hip->transform.rotation.y;
+//						data.at<float>(0, 50) = point.right_hip->transform.rotation.z;
+//						data.at<float>(0, 51) = point.right_hip->transform.rotation.w;
+//
+//						data.at<float>(0, 52) = point.right_knee->transform.rotation.x;
+//						data.at<float>(0, 53) = point.right_knee->transform.rotation.y;
+//						data.at<float>(0, 54) = point.right_knee->transform.rotation.z;
+//						data.at<float>(0, 55) = point.right_knee->transform.rotation.w;
+//
+//						data.at<float>(0, 56) = point.right_foot->transform.rotation.x;
+//						data.at<float>(0, 57) = point.right_foot->transform.rotation.y;
+//						data.at<float>(0, 58) = point.right_foot->transform.rotation.z;
+//						data.at<float>(0, 59) = point.right_foot->transform.rotation.w;
 
 						//Classify point
 						float thisClass = _rTrees->predict(data);
@@ -502,6 +502,7 @@ void tfCallback(const tf::tfMessage msg)
 						pc.user_number = val;
 						pc.classification = static_cast<int>(thisClass);
 						pc.pose_data = joints;
+						pc.source = "rdf";
 
 						_classification_publisher.publish(pc);
 					}

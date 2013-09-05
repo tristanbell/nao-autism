@@ -6,7 +6,7 @@
       "Maxiumum prompts" : 2,
       "Number of emotions before question" : 3,
       "Speech recognition confidence" : 0.3000000119209290,
-      "Speech wait" : 3,
+      "Speech wait" : 1,
       "Timeout" : 15
    },
    "Behaviors" : [

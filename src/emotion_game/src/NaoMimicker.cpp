@@ -1,5 +1,8 @@
 /*
  * NaoMimicker.cpp
+ *
+ * Allows a user to control a Nao robot using a Kinect and openni_tracker.
+ *
  *  Created on: Aug 5, 2013
  *      Author: Tristan Bell
  *
@@ -56,6 +59,8 @@ enum NaoPose {
  * Stores a whole user pose (only relevant joints).
  */
 struct Pose {
+	tf::Vector3* initTorso;
+	tf::Vector3* torso;
 	tf::Vector3* leftHand;
 	tf::Vector3* leftElbow;
 	tf::Vector3* leftShoulder;
@@ -86,7 +91,6 @@ struct ControlBox {
 
 // For initial setup, determining which user will control the Nao
 std::string _userNumber = "";
-ros::Publisher _user_pub;
 // Links user numbers to hand and head positions
 std::map< std::string, std::pair<geometry_msgs::Vector3, geometry_msgs::Vector3> > _userDistanceMap;
 
@@ -111,10 +115,11 @@ float _rightElbowRoll = 0.0;
 
 // Torso rotation used to turn the robot
 double _initTorsoRotation, _torsoRotation = 0.0;
-#define ROTATION_BOUNDARY 0.1
+#define ROTATION_BOUNDARY 0.5
 
 /**
  * Initialises torso rotation, leg movement and a ControlBox around the user.
+ * Requires that initTransform is the transform of the torso.
  */
 void init(geometry_msgs::TransformStamped initTransform, bool shouldReverse = false) {
 	// Initialise torso rotation
@@ -126,9 +131,10 @@ void init(geometry_msgs::TransformStamped initTransform, bool shouldReverse = fa
 	tf::Matrix3x3 mat(quat);
 	double roll, pitch, yaw;
 	mat.getRPY(roll, pitch, yaw);
-	_initTorsoRotation = _torsoRotation = pitch;
+	_initTorsoRotation = _torsoRotation = yaw;
 
 	geometry_msgs::Vector3 userPosition = initTransform.transform.translation;
+	_pose.initTorso = new tf::Vector3(userPosition.x, userPosition.y, userPosition.z);
 	_controlBox = new ControlBox(userPosition);
 
 	// Initialise leg movement to stop
@@ -138,7 +144,7 @@ void init(geometry_msgs::TransformStamped initTransform, bool shouldReverse = fa
 	_rightYMotionControl = STOPY;
 
 	_nao_control = new nao_control::NaoControl(false); // Don't load speech
-	_nao_control->perform("stand_up");
+	_nao_control->perform("init");
 	_naoPose = STANDING;
 
 	_reverse = shouldReverse;
@@ -332,7 +338,9 @@ void moveLegs(geometry_msgs::TransformStamped& transform,
 		} else {
 			_rightYMotionControl = STOPY;
 		}
-		constructAndPublishMovement();
+
+		if (_naoPose != SITTING)
+			constructAndPublishMovement();
 	}
 
 	if (child == "/torso" + _userNumber) {
@@ -345,7 +353,7 @@ void moveLegs(geometry_msgs::TransformStamped& transform,
 		double roll, pitch, yaw;
 		mat.getRPY(roll, pitch, yaw);
 
-		_torsoRotation = pitch;
+		_torsoRotation = yaw;
 	}
 }
 
@@ -355,6 +363,7 @@ void moveLegs(geometry_msgs::TransformStamped& transform,
 void moveArms(geometry_msgs::TransformStamped& transform,
 		geometry_msgs::Vector3& translation)
 {
+	std::string child = transform.child_frame_id;
 	bool toPublish = false;
 
 	tf::Vector3 origin(translation.x, translation.y, translation.z);
@@ -364,7 +373,7 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 	std::vector < std::string > joints;
 	std::vector<float> angles;
 
-	if (transform.child_frame_id.find("left_shoulder" + _userNumber) != std::string::npos) {
+	if (child.find("left_shoulder" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.leftShoulder = new tf::Vector3(origin);
 		else
@@ -385,7 +394,7 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 		}
 	}
 
-	if (transform.child_frame_id.find("right_shoulder" + _userNumber)
+	if (child.find("right_shoulder" + _userNumber)
 			!= std::string::npos) {
 		if (!_reverse)
 			_pose.rightShoulder = new tf::Vector3(origin);
@@ -407,7 +416,7 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 		}
 	}
 
-	if (transform.child_frame_id.find("left_elbow" + _userNumber) != std::string::npos) {
+	if (child.find("left_elbow" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.leftElbow = new tf::Vector3(origin);
 		else
@@ -428,7 +437,7 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 		}
 	}
 
-	if (transform.child_frame_id.find("right_elbow" + _userNumber) != std::string::npos) {
+	if (child.find("right_elbow" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.rightElbow = new tf::Vector3(origin);
 		else
@@ -449,41 +458,44 @@ void moveArms(geometry_msgs::TransformStamped& transform,
 		}
 	}
 
-	if (transform.child_frame_id.find("left_hand" + _userNumber) != std::string::npos) {
+	if (child.find("left_hand" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.leftHand = new tf::Vector3(origin);
 		else
 			_pose.rightHand = new tf::Vector3(origin);
 	}
-	if (transform.child_frame_id.find("right_hand" + _userNumber) != std::string::npos) {
+	if (child.find("right_hand" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.rightHand = new tf::Vector3(origin);
 		else
 			_pose.leftHand = new tf::Vector3(origin);
 	}
-	if (transform.child_frame_id.find("left_hip" + _userNumber) != std::string::npos) {
+	if (child.find("left_hip" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.leftHip = new tf::Vector3(origin);
 		else
 			_pose.rightHip = new tf::Vector3(origin);
 	}
-	if (transform.child_frame_id.find("right_hip" + _userNumber) != std::string::npos) {
+	if (child.find("right_hip" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.rightHip = new tf::Vector3(origin);
 		else
 			_pose.leftHip = new tf::Vector3(origin);
 	}
-	if (transform.child_frame_id.find("left_foot" + _userNumber) != std::string::npos) {
+	if (child.find("left_foot" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.leftFoot = new tf::Vector3(origin);
 		else
 			_pose.rightFoot = new tf::Vector3(origin);
 	}
-	if (transform.child_frame_id.find("right_foot" + _userNumber) != std::string::npos) {
+	if (child.find("right_foot" + _userNumber) != std::string::npos) {
 		if (!_reverse)
 			_pose.rightFoot = new tf::Vector3(origin);
 		else
 			_pose.leftFoot = new tf::Vector3(origin);
+	}
+	if (child.find("torso" + _userNumber) != std::string::npos) {
+		_pose.torso = new tf::Vector3(origin);
 	}
 
 	if (toPublish && _naoPose == STANDING) { // Only move arms when standing still
@@ -526,46 +538,34 @@ void lookForStartGesture(const geometry_msgs::TransformStamped& transform,
 			if (dist <= MIN_DISTANCE) {
 				_userNumber = userNum;
 
-				// Signal to TfRemap node which user to track
-				std_msgs::String msg;
-				msg.data = _userNumber;
-				_user_pub.publish(msg);
-
 				printf("User set: %s           \n", userNum.c_str());
-				init(transform, true);
+				init(transform, false);
 				ready = true;
 			}
 		}
 	} catch (std::out_of_range& ex) { }
 }
 
-#define SITTING_DISTANCE 0.2
+#define SITTING_SCALE 0.8
 
-/*
- * TODO: check torso distance instead of hip distance?
+/**
+ * Check if the user is crouching. If so, make the nao sit up.
+ * If the nao is sitting and the user is standing, make the nao
+ * stand up.
  */
 void checkSitting(void)
 {
-	if (_pose.leftHip && _pose.leftFoot && _pose.rightHip && _pose.rightFoot) {
-		float lDist = _pose.leftHip->distance(*_pose.leftFoot);
-		float rDist = _pose.rightHip->distance(*_pose.rightFoot);
+	if (_pose.torso) {
+		float sitting_distance = fabs(_pose.initTorso->z() * SITTING_SCALE);
 
-		if (_naoPose != SITTING && (lDist < SITTING_DISTANCE || rDist < SITTING_DISTANCE)) {
+		if (_naoPose != SITTING && _pose.torso->z() < _pose.initTorso->z() - sitting_distance) {
 			if (_nao_control->perform("sit_down"))
 				_naoPose = SITTING;
 		}
-		else if (_naoPose == SITTING && lDist >= SITTING_DISTANCE && rDist >= SITTING_DISTANCE) {
+		else if (_naoPose == SITTING && _pose.torso->z() >= _pose.initTorso->z() - sitting_distance) {
 			if (_nao_control->perform("stand_up"))
 				_naoPose = STANDING;
 		}
-
-		if (_naoPose == SITTING)
-			printf("%s        \r", "SITTING");
-		if (_naoPose == STANDING)
-			printf("%s        \r", "STANDING");
-		if (_naoPose == WALKING)
-			printf("%s        \r", "WALKING");
-		std::flush(std::cout);
 	}
 }
 
@@ -604,7 +604,6 @@ int main(int argc, char **argv) {
 	ros::NodeHandle nh;
 	_arms_pub = nh.advertise<nao_msgs::JointAnglesWithSpeed>("/joint_angles", 50);
 	_walk_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 2);
-	_user_pub = nh.advertise<std_msgs::String>("/user_number", 1);
 	ros::Subscriber sub = nh.subscribe("/tf", 50, tfCallback);
 
 	ros::Rate rate(60);
@@ -622,7 +621,13 @@ int main(int argc, char **argv) {
 	}
 
 	ROS_INFO("All set up, go!");
-	// Put Nao in start position (hand on head) here
+
+	// Put Nao in start position (hand on head)
+	nao_control::NaoControl *temp = new nao_control::NaoControl();
+	temp->perform("stand_up");
+	temp->say("Copy me.");
+	temp->perform("arms_up");
+
 	ros::spin();
 
 	geometry_msgs::Twist stopMsg;

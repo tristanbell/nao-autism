@@ -33,166 +33,168 @@ void GuessGame::startGame(void) {
 void GuessGame::perform(void) {
 	switch (_currentState){
 
-	case INTRODUCTION:{
-		introduction();
-		_currentState = PERFORM_EMOTION;
+		case INTRODUCTION:{
+			introduction();
+			_currentState = PERFORM_EMOTION;
 
-		break;
-	}
+			break;
+		}
 
-	case PERFORM_EMOTION:{
-		if (_emotionsPerformed < _settings.getNumberOfEmotionsBeforeQuestion()){
-			//Inform child that a new emotion is being performed
-			if (_performedEmotion){
-				std::vector<Phrase> phraseVector;
-				if (getGameSettings().getPhraseVector(GUESS_NEXT_KEY, phraseVector)){
-					const Phrase& phrase = sayAny(phraseVector);
+		case PERFORM_EMOTION:{
+			if (_emotionsPerformed < _settings.getNumberOfEmotionsBeforeQuestion()){
+				//Inform child that a new emotion is being performed
+				if (_performedEmotion){
+					std::vector<Phrase> phraseVector;
+					if (getGameSettings().getPhraseVector(GUESS_NEXT_KEY, phraseVector)){
+						const Phrase& phrase = sayAny(phraseVector);
 
-					if (phrase.getNumberOfBehaviors() != 0){
-						std::string behavior = phrase.getRandomBehaviorName();
+						if (phrase.getNumberOfBehaviors() != 0){
+							std::string behavior = phrase.getRandomBehaviorName();
 
-						_naoControl.perform(behavior);
+							_naoControl.perform(behavior);
+						}
 					}
-				}
-			}else{
-				_performedEmotion = true;
-			}
-
-			performEmotion();
-			_emotionsPerformed++;
-
-			_currentState = ASK_QUESTION;
-		}else{
-			_emotionsPerformed = 0;
-			_currentState = ASK_QUESTION_CONTINUE;
-		}
-
-		break;
-	}
-
-	case ASK_QUESTION:{
-		askQuestion();
-
-		//for testing...
-		//_recognizedWords.push_back(std::pair<std::string, float>(_performedBehavior->getActualName(), 0));
-
-		//Set the start time for waiting (used to calculate timeouts)
-		time(&_startWaitTime);
-
-		break;
-	}
-
-	case WAITING_ANSWER_QUESTION:{
-		//Check to see if the duration of time has exceeded the maximum wait
-		//if so, prompt the child and ask the question again.
-		time_t currentTime;
-		time(&currentTime);
-
-		if (currentTime - _startWaitTime >= _settings.getTimeout()){
-			_timesPrompted++;
-
-			//Check to see if the number of prompts exceeds the max number
-			//if so, assume incorrect and perform another emotion
-			if (_timesPrompted > _settings.getMaxPromptAmount()){
-				handleTimeout();
-
-				break;
-			}else{
-				promptChild();
-			}
-		}else{
-			std::list<std::string>::iterator it = _recognizedWords.begin();
-
-			//Wait until answer is given
-			while (it != _recognizedWords.end()){
-				std::string& word = *it;
-
-				//Check for correct answer
-				if (word == _performedBehavior->getActualName()){
-					handleCorrectAnswer();
-					return;
+				}else{
+					_performedEmotion = true;
 				}
 
-	//			}else if (checkIncorrectAnswer(word)){ //Check for incorrect answer, if found then break out of loop
-	//				handleIncorrectAnswer();
-	//
-	//				break;
-	//			}
+				performEmotion();
+				_emotionsPerformed++;
 
-				it++;
-			}
-		}
-
-		break;
-	}
-
-	case ASK_QUESTION_CONTINUE:{
-		askToContinue();
-
-		break;
-	}
-
-	case WAITING_ANSWER_CONTINUE:{
-		Response response = waitToContinue();
-
-		if (response == POSITIVE){
-			_currentState = STOP_SPEECH_RECOGNITION;
-			_stateBuffer = PERFORM_EMOTION;
-		}else if (response == NEGATIVE){
-			_currentState = STOP_SPEECH_RECOGNITION;
-			_stateBuffer = END_GAME;
-		}
-
-		break;
-	}
-
-	case START_SPEECH_RECOGNITION:{
-		bool val = startSpeechRecognition();
-
-		if (val){
-			std::cout << "Successfully started speech recognition.\n";
-
-			if (_stateBuffer != UNKNOWN){
-				_currentState = _stateBuffer;
-				_stateBuffer = UNKNOWN;
+				_currentState = ASK_QUESTION;
 			}else{
-				std::cout << "No state to go to from START_SPEECH_RECOGNITION.\n";
+				_emotionsPerformed = 0;
+				_currentState = ASK_QUESTION_CONTINUE;
 			}
-		}else{
-			std::cout << "Unable to start speech recognition, retrying.\n";
+
+			break;
 		}
 
-		break;
-	}
+		case ASK_QUESTION:{
+			askQuestion();
 
-	case STOP_SPEECH_RECOGNITION:{
-		bool val = stopSpeechRecognition();
+			//for testing...
+			//_recognizedWords.push_back(std::pair<std::string, float>(_performedBehavior->getActualName(), 0));
 
-		if (val){
-			std::cout << "Successfully stopped speech recognition.\n";
+			//Set the start time for waiting (used to calculate timeouts)
+			time(&_startWaitTime);
 
-			if (_stateBuffer != UNKNOWN){
-				_currentState = _stateBuffer;
-				_stateBuffer = UNKNOWN;
+			break;
+		}
+
+		case WAITING_ANSWER_QUESTION:{
+			//Check to see if the duration of time has exceeded the maximum wait
+			//if so, prompt the child and ask the question again.
+			time_t currentTime;
+			time(&currentTime);
+
+			if (currentTime - _startWaitTime >= _settings.getTimeout()){
+				_timesPrompted++;
+
+				//Check to see if the number of prompts exceeds the max number
+				//if so, assume incorrect and perform another emotion
+				if (_timesPrompted > _settings.getMaxPromptAmount()){
+					handleTimeout();
+
+					break;
+				}else{
+					promptChild();
+				}
 			}else{
-				std::cout << "No state to go to from STOP_SPEECH_RECOGNITION.\n";
+				std::list<std::string>::iterator it = _recognizedWords.begin();
+
+				//Wait until answer is given
+				while (it != _recognizedWords.end()){
+					std::string& word = *it;
+
+					//Check for correct answer
+					if (word == _performedBehavior->getActualName()){
+						handleCorrectAnswer();
+						return;
+					}
+
+		//			}else if (checkIncorrectAnswer(word)){ //Check for incorrect answer, if found then break out of loop
+		//				handleIncorrectAnswer();
+		//
+		//				break;
+		//			}
+
+					it++;
+				}
 			}
-		}else{
-			std::cout << "Unable to stop speech recognition, retrying.\n";
+
+			break;
 		}
 
-		break;
-	}
+		case ASK_QUESTION_CONTINUE:{
+			askToContinue();
 
-	case END_GAME:{
-		endGameSpeech();
+			break;
+		}
 
-		isDone = true;
-		break;
-	}
+		case WAITING_ANSWER_CONTINUE:{
+			Response response = waitToContinue();
 
-	default:
-		break;
+			if (response == POSITIVE){
+				_currentState = STOP_SPEECH_RECOGNITION;
+				_stateBuffer = PERFORM_EMOTION;
+			}else if (response == NEGATIVE){
+				_currentState = STOP_SPEECH_RECOGNITION;
+				_stateBuffer = END_GAME;
+			}
+
+			break;
+		}
+
+		case START_SPEECH_RECOGNITION:{
+			bool val = startSpeechRecognition();
+
+			if (val){
+				std::cout << "Successfully started speech recognition.\n";
+
+				if (_stateBuffer != UNKNOWN){
+					_currentState = _stateBuffer;
+					_stateBuffer = UNKNOWN;
+				}else{
+					std::cout << "No state to go to from START_SPEECH_RECOGNITION.\n";
+				}
+			}else{
+				std::cout << "Unable to start speech recognition, retrying.\n";
+			}
+
+			break;
+		}
+
+		case STOP_SPEECH_RECOGNITION:{
+			bool val = stopSpeechRecognition();
+
+			if (val){
+				std::cout << "Successfully stopped speech recognition.\n";
+
+				if (_stateBuffer != UNKNOWN){
+					_currentState = _stateBuffer;
+					_stateBuffer = UNKNOWN;
+				}else{
+					std::cout << "No state to go to from STOP_SPEECH_RECOGNITION.\n";
+				}
+			}else{
+				std::cout << "Unable to stop speech recognition, retrying.\n";
+			}
+
+			break;
+		}
+
+		case END_GAME:{
+			endGameSpeech();
+
+			isDone = true;
+			break;
+		}
+
+		default:{
+			std::cout << "Unimplemented state: " << _currentState << std::endl;
+			break;
+		}
 
 	}
 }

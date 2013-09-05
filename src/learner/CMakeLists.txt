@@ -7,16 +7,9 @@ project(learner)
 find_package(catkin REQUIRED COMPONENTS roscpp rospy rosbag tf std_msgs message_generation nao_autism_messages)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system filesystem date_time)
-#find_package(LibSVM REQUIRED)
+find_package(Qt4 4.6 REQUIRED COMPONENTS QtCore QtGui)
+include(${QT_USE_FILE})
 
-#add_message_files(
-#	FILES
-#	PoseClassification.msg
-#)
-
-#generate_messages(
-#	DEPENDENCIES
-#	std_msgs)
 
 catkin_package(
 	INCLUDE_DIRS include
@@ -72,6 +65,18 @@ set(svm_export_SRCS
 		src/classification/PlainDataStore.cpp
 		src/classification/SvmExport.cpp)
 		
+set(gui_HDRS
+		include/classification/accuracyTester/AccuracyTesterView.h
+		include/classification/accuracyTester/AccuracyTesterModel.h)
+		
+set(gui_SRCS
+		src/classification/accuracyTester/AccuracyTesterView.cpp
+		src/classification/accuracyTester/AccuracyTesterModel.cpp)
+		
+qt4_wrap_cpp(gui_MOCS ${gui_HDRS})
+
+add_executable(accuracy_checker ${gui_SRCS} ${gui_MOCS})
+target_link_libraries(accuracy_checker ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES})
 
 add_executable(dataLoader ${learner_SRCS} ${learner_HDRS})
 target_link_libraries(dataLoader ${catkin_LIBRARIES} ${Boost_LIBRARIES})

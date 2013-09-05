@@ -1,3 +1,0 @@
-<launch>
-	<node name="ftest" pkg="emotion_game" type="filetest" output="screen" />
-</launch>

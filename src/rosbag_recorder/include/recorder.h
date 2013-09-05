@@ -18,7 +18,7 @@ class Recorder {
 public:
 	static void recordCallback(const nao_autism_messages::Record::ConstPtr& msg);
 	static void record(void);
-	void stop(void);
+	void stop(void); // Unimplemented
 	static const float RECORDING_DURATION;
 	static const uint32_t RECORDING_SIZE;
 

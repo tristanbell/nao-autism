@@ -108,6 +108,7 @@ Simple type the behavior name (as it appears in the 'Choregraphe' application) a
 If nothing was entered or the action was cancelled then one of the following should appear:
 
 <img src="resources/Behaviors Nothing.png"/>
+
 <img src="resources/Behaviors Cancel.png"/>
 
 _Editing behaviors_
@@ -142,4 +143,15 @@ TODO
 
 ## Finishing up
 
-TODO
+Once all the data has been edited and you are happy with the changes made, it is time to save the new data to file. To do this, you first click the 'File' menu and then press 'Save-as'. This will open a save dialog like so:
+
+<img src="resources/Settings Editor Save.png"/>
+
+Simply find the locationy you wish to save it to, type the file name and press 'Save'. If successful you should see this message:
+
+<img src="resources/Settings Editor Save Success.png"/>
+
+If unsucessful a different message box will be display, explaining what went wrong. The following is an example:
+
+<img src="resources/Settings Editor SaveFail.png"/>
+

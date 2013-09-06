@@ -1,5 +1,5 @@
 <launch>
-   <node pkg="openni_tracker" name="tracker" type="openni_tracker" output="screen" />
+   <node pkg="openni_tracker" name="openni_tracker" type="openni_tracker" output="screen" />
    <node pkg="rosbag_recorder" name="recorder" type="run_rosbag_recorder" output="screen" />
-   <node pkg="nao_autism_gui" name="gui" type="nao-autism-gui" output="screen" />
+   <node pkg="nao_autism_gui" name="run_autism_gui" type="run_autism_gui" args="$(find nao_autism_gui)/resources/speech.data" output="screen" />
 </launch>

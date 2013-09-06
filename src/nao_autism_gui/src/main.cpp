@@ -17,6 +17,7 @@
 #include <vector>
 
 #define NO_RECORD_FLAG "--no-record"
+#define HELP_FLAG "--help"
 
 using namespace std;
 
@@ -48,66 +49,77 @@ int main(int argc, char** argv)
 	//Init ros
 	ros::init(argc, argv, "nao_cntrl");
 
-	//Check for no-record flag
-	bool record = true;
+	if (argc > 0){
+		//Get filename from arguments
+		char* fileName = argv[argc - 1];
+		ROS_INFO("File name found: %s", fileName);
 
-	if (argc != 1){
+		//Check for no-record flag or help flag
+		bool record = true;
+
 		for (int i=0;i<argc;i++){
-			std::string str(argv[i]); //hacky
+			std::string str(argv[i]);
 
 			if (str == NO_RECORD_FLAG){
 				ROS_INFO("--no-record flag found, not recording.");
 				record = false;
 
 				break;
+			}else if (str == HELP_FLAG){
+				std::cout << "To run nao_autism_gui you need to type the following:\n\trosrun nao_autism_gui run_autism_gui [flag] filename\n"
+						<< "Where [flag] can be one of the following:\n\t--help: Displays how to run the GUI and what arguments can be given"
+						<< " (when this flag is used, the GUI wont start).\n\t"
+						<< "--no-record: Doesn't start the recording node, thus, no data is recorded.\n";
+
+				return 0;
 			}
 		}
+
+		ROS_INFO("Loading speech data");
+		NaoSpeechData data = NaoSpeechData::load(fileName);
+
+		//Prompt child to strike certain pose to initialise openni_tracker
+		init(data);
+
+		QApplication app(argc, argv);
+		app.setStyle(new QPlastiqueStyle);
+
+		vector<NaoBehavior> behaviors;
+
+		NaoBehavior happy("Happy", HAPPY_BEHAVIOR);
+		NaoBehavior sad("Sad", SAD_BEHAVIOR);
+		NaoBehavior scared("Scared", SCARED_BEHAVIOR);
+		NaoBehavior angry("Angry", ANGRY_BEHAVIOR);
+
+		behaviors.push_back(happy);
+		behaviors.push_back(sad);
+		behaviors.push_back(scared);
+		behaviors.push_back(angry);
+
+		//No --no-record flag set, we shall record
+	//	if (record){
+			ROS_INFO("Starting to record data.");
+			ros::NodeHandle nh;
+			ros::Publisher pub = nh.advertise<nao_autism_messages::Record>("record", 10);
+
+			ros::Rate rate(10);
+			while (pub.getNumSubscribers() == 0){
+				rate.sleep();
+			}
+
+			nao_autism_messages::Record msg;
+			msg.record = true;
+			pub.publish(msg);
+	//	}
+
+
+		//Init window and execute application
+		nao_gui::NaoAutismWindow window(behaviors, data);
+
+		return app.exec();
 	}
 
-	ROS_INFO("Loading speech data");
-	NaoSpeechData data = NaoSpeechData::load("speechFile.data");
-
-	//Prompt child to strike certain pose to initialise openni_tracker
-	init(data);
-
-	ROS_INFO("Let's go");
-
-	QApplication app(argc, argv);
-	app.setStyle(new QPlastiqueStyle);
-
-	vector<NaoBehavior> behaviors;
-
-	NaoBehavior happy("Happy", HAPPY_BEHAVIOR);
-	NaoBehavior sad("Sad", SAD_BEHAVIOR);
-	NaoBehavior scared("Scared", SCARED_BEHAVIOR);
-	NaoBehavior angry("Angry", ANGRY_BEHAVIOR);
-
-	behaviors.push_back(happy);
-	behaviors.push_back(sad);
-	behaviors.push_back(scared);
-	behaviors.push_back(angry);
-
-	//No --no-record flag set, we shall record
-//	if (record){
-		ROS_INFO("Starting to record data.");
-		ros::NodeHandle nh;
-		ros::Publisher pub = nh.advertise<nao_autism_messages::Record>("record", 10);
-
-		ros::Rate rate(10);
-		while (pub.getNumSubscribers() == 0){
-			rate.sleep();
-		}
-
-		nao_autism_messages::Record msg;
-		msg.record = true;
-		pub.publish(msg);
-//	}
-
-
-	//Init window and execute application
-	nao_gui::NaoAutismWindow window(behaviors, data);
-
-	return app.exec();
+	return 1;
 }
 
 void init(const NaoSpeechData& data)

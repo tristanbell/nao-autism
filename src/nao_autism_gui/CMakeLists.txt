@@ -29,8 +29,6 @@ set(nao-autism_HDRS
 
 qt4_wrap_cpp(nao-autism_MOCS ${nao-autism_HDRS})
 
-add_dependencies(rosbag_recorder rosbag_recorder_gencpp)
-
 catkin_package(
    INCLUDE_DIRS include
 )
@@ -39,5 +37,6 @@ include_directories(include
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(nao-autism-gui ${nao-autism_SRCS} ${nao-autism_MOCS})
-target_link_libraries(nao-autism-gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
+add_executable(run_autism_gui ${nao-autism_SRCS} ${nao-autism_MOCS})
+target_link_libraries(run_autism_gui ${QT_LIBRARIES} ${catkin_LIBRARIES})
+add_dependencies(run_autism_gui rosbag_recorder_gencpp)

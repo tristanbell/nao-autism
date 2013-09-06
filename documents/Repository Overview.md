@@ -102,7 +102,7 @@ This package contains all the code relating to Pose classification. There are al
 
 This package also contains a resources folder which contains the required files for the classifiers to run when the emotion game is launched.
 
-###### Nao\_autism\_gui
+###### Nao\_autism\_gui package
 
 This package contains the code for a 'Wizard of Oz' application for the emotion game. This application, when ran with the launch file, will record all skeleton data for the mimic game. This data can then be used to train the classifiers (after some amount of processing) in the learner package. There is, currently, only one node defined in this package:
 
@@ -110,19 +110,19 @@ This package contains the code for a 'Wizard of Oz' application for the emotion 
 
 Note: When the GUI is launched through the launch file then the timestamps and recordings will be saved to the '.ros' folder in the main user directory. This can simply be extraced and placed in the main nao-autism repository directory for processing.
 
-###### Nao\_autism\_messages
+###### Nao\_autism\_messages package
 
 This package simply contains the messgaes required for communication between the nodes defined in this project. No expaination for any of the messages will be given as the semantics of the messages should be clear when the code that utilises them is viewed. 
 
-###### Nao\_control
+###### Nao\_control package
 
 This package contains code that simply bundles speech and behavior execution together. It allows other packages to use a simple interface to perform behaviors and speech by simply creating an instance of the NaoControl class. There are no nodes present in this package, the code present simply defines a library for other pakcages to use.
 
-###### Nao\_msgs
+###### Nao\_msgs package
 
 This package was pulled directly from the following ROS package: http://wiki.ros.org/nao_driver. This enables the use of speech recognition, individual joint manipulation and much more.
 
-###### Rosbag\_recorder
+###### Rosbag\_recorder package
 
 This package contains code that records tf data that is being published on the /tf topic. This package contains the following node:
 

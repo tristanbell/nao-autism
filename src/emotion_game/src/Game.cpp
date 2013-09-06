@@ -55,6 +55,7 @@ void Game::performEmotion(void)
 
 	const Behavior& ref = behaviorVector[index];
 	_naoControl.perform(ref.getName());
+//	_naoControl.perform("init");
 
 	if (_performedBehavior != NULL)
 		delete _performedBehavior;
@@ -82,6 +83,8 @@ void Game::askToContinue(void)
 
 	_currentState = START_SPEECH_RECOGNITION;
 	_stateBuffer = WAITING_ANSWER_CONTINUE;
+
+	sleep(_settings.getWait());
 }
 
 /**

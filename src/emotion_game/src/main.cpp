@@ -300,7 +300,6 @@ void runGameLoop()
 	nao_control::NaoControl rewardBehaviorControl;
 
 	rewardBehaviorControl.perform("stand_up");
-	rewardBehaviorControl.perform("init");
 
 	printf("\nStarting game...\n");
 

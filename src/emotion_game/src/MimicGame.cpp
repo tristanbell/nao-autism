@@ -192,12 +192,12 @@ void MimicGame::perform(void) {
 		case WAITING_ANSWER_CONTINUE: {
 			Response response = waitToContinue();
 
-			_currentState = STOP_SPEECH_RECOGNITION;
-
 			if (response == POSITIVE) {
 				_userToTrack = 0;
+				_currentState = STOP_SPEECH_RECOGNITION;
 				_stateBuffer = START_WAITING_TRACK;
 			}else if (response == NEGATIVE){
+				_currentState = STOP_SPEECH_RECOGNITION;
 				_stateBuffer = END_GAME;
 			}
 

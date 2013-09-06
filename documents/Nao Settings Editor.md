@@ -151,7 +151,7 @@ Simply find the locationy you wish to save it to, type the file name and press '
 
 <img src="resources/Settings Editor Save Success.png"/>
 
-If unsucessful a different message box will be display, explaining what went wrong. The following is an example:
+If unsucessful a different message box will be displayed, explaining what went wrong. The following is an example:
 
 <img src="resources/Settings Editor SaveFail.png"/>
 

@@ -53,7 +53,7 @@ Below you will find a quick summary of each package and the nodes it contains.
 
 This package contains all the code relating to the emotion game that runs on the Nao. It contains the following nodes:
 
-- start\_game: This node simply starts the emotion game. It must be provided with the location of a settings file (this file should have the json format) as an argument.
+- start\_game: This node simply starts the emotion game.
 - gen\_json: This node generates the default settings file for the emotion game. This node requires only one argument, the location to save the file to.
 - mimicker: This node is an extension to the original game, it allows the children to control the robot using the Kinect skeleton tracking.
 
@@ -110,7 +110,7 @@ This package contains code that simply bundles speech and behavior execution tog
 
 ###### Nao\_msgs
 
-This package was pulled directly from the following ROS package: . This enables the use of speech recognition, individual joint manipulation and much more.
+This package was pulled directly from the following ROS package: http://wiki.ros.org/nao_driver. This enables the use of speech recognition, individual joint manipulation and much more.
 
 ###### Rosbag\_recorder
 

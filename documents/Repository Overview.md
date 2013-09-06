@@ -34,6 +34,16 @@ The src folder contains all the ROS packages that have been developed for this p
 
 The tools folder contains all the tools that have been developed for this project. These are independant from the packages because they are not dependant on any ROS packages/libraries. Currently there is only one tool developed, which is the settings editor (further information on the settings editor is given in a seperate document).
 
+Now, let's consider the use for the files.
+
+###### installscript.sh
+
+This script is used to install everything that can be automated, this is meant to be distributed as a standalone script that can be run from a computer where Ubuntu and ROS have just been freshly installed.
+
+###### run\_settings\_editor.sh
+
+This script will simply run the Settings Editor GUI.
+
 ## Packages
 
 The src folder contains the following packages:

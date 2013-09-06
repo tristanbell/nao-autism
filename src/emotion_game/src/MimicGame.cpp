@@ -197,7 +197,7 @@ void MimicGame::perform(void) {
 			if (response == POSITIVE) {
 				_userToTrack = 0;
 				_stateBuffer = START_WAITING_TRACK;
-			}else{
+			}else if (response == NEGATIVE){
 				_stateBuffer = END_GAME;
 			}
 

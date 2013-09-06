@@ -135,11 +135,11 @@ void GuessGame::perform(void) {
 		case WAITING_ANSWER_CONTINUE:{
 			Response response = waitToContinue();
 
+			_currentState = STOP_SPEECH_RECOGNITION;
+
 			if (response == POSITIVE){
-				_currentState = STOP_SPEECH_RECOGNITION;
 				_stateBuffer = PERFORM_EMOTION;
 			}else if (response == NEGATIVE){
-				_currentState = STOP_SPEECH_RECOGNITION;
 				_stateBuffer = END_GAME;
 			}
 

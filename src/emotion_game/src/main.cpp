@@ -304,7 +304,7 @@ void runGameLoop()
 	printf("\nStarting game...\n");
 
 	//Set current game and start it.
-	Game* currentGame = mimicGame;
+	Game* currentGame = guessGame;
 	currentGame->startGame();
 
 	printf("\nGO!\n\n");
@@ -332,7 +332,7 @@ void runGameLoop()
 			nao_autism_messages::ExecutionStatus msg;
 			msg.status = nao_autism_messages::ExecutionStatus::PAUSED;
 			executionStatusPublisher.publish(msg);
-
+			std::cout << "Paused state." << std::endl;
 			loopRate.sleep();
 		}else{
 			//Send running message

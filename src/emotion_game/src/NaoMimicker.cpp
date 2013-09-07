@@ -223,8 +223,8 @@ void constructAndPublishMovement(void) {
 	}
 
 	if (_reverse) {
-		if (msg.linear.y != 0)
-			msg.linear.y *= -1;
+//		if (msg.linear.y != 0)
+//			msg.linear.y *= -1;
 
 		if (msg.angular.z != 0)
 			msg.angular.z *= -1;

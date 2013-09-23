@@ -1,0 +1,5 @@
+<launch>
+	<node name="openni_tracker" pkg="openni_tracker" type="openni_tracker" output="screen" />
+	<node name="classifier" pkg="learner" type="rf_node" args="--file-location $(find learner)/resources/nao_autism3" output="screen" />
+	<node name="emotion_game" pkg="emotion_game" type="start_game" output="screen" />
+</launch>
